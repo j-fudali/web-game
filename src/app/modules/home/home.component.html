@@ -3,13 +3,10 @@
         <div class="fadein animation-duration-2000 animation-ease-out h-30rem w-5 relative">
             <img ngSrc="../assets/logo.png" alt="logo" fill priority />
         </div>
-        <p-buttonGroup>
-            <p-button rounded label="Zaloguj się"></p-button>
-            <p-button rounded label="Otwórz Rynek"></p-button>
-        </p-buttonGroup>
+        <p-button outlined (click)="scrollToAboutGame()" label="O grze"></p-button>
     </div>
     <p-divider></p-divider>
-    <div class="grid grid-nogutter px-4 w-full h-screen overflow-hidden">
+    <div #about class="grid grid-nogutter px-4 w-full h-screen overflow-hidden">
         <div pAnimateOnScroll enterClass="fadeinleft"
             class="col h-full relative animation-duration-1000 animation-ease-out">
             <img ngSrc="../assets/logo.png" alt="logo" fill priority />
@@ -65,5 +62,4 @@
             </p-card>
         </div>
     </div>
-    <jfudali-footer></jfudali-footer>
 </main>
