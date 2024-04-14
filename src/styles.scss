@@ -1,2 +1,11 @@
 /* You can add global styles to this file, and also import other style files */
 @import "primeicons/primeicons.css";
+html,
+body {
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: "Press Start 2P", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
