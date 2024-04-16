@@ -1,5 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  inject,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -13,6 +18,9 @@ import { passwordMatch } from '../../core/validators/passwordMatch.validator';
 import { MessageModule } from 'primeng/message';
 import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
+import { AuthService } from '../../core/services/auth.service';
+import { SignUpCredentials } from '../../core/interfaces/sign-up-credentials';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 @Component({
   selector: 'jfudali-sign-up',
   standalone: true,
@@ -29,7 +37,9 @@ import { TooltipModule } from 'primeng/tooltip';
   styleUrl: './sign-up.component.scss',
 })
 export class SignUpComponent {
+  private destroyRef = inject(DestroyRef);
   private fb = inject(FormBuilder);
+  private _auth = inject(AuthService);
   signUpForm = this.fb.group(
     {
       username: ['', Validators.required],
@@ -61,7 +71,10 @@ export class SignUpComponent {
 
   onSubmit() {
     if (this.signUpForm.valid) {
-      //TODO
+      this._auth
+        .signUp(this.signUpForm.value as SignUpCredentials)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(({ token }) => this._auth.setToken(token));
     }
   }
 }

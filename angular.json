@@ -69,7 +69,8 @@
               "buildTarget": "web-game:build:production"
             },
             "development": {
-              "buildTarget": "web-game:build:development"
+              "buildTarget": "web-game:build:development",
+              "proxyConfig": "src/proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

@@ -1,5 +1,5 @@
 <div class="h-screen w-full flex justify-content-center align-items-center px-4 md:px-0">
-    <p-card class="w-12 md:w-6" header="Stwórz konto">
+    <p-card class="w-full md:w-6" header="Stwórz konto">
         <form [formGroup]="signUpForm" (ngSubmit)="onSubmit()">
             <div class="field">
                 <label for="username">Nazwa użytkownika</label>
@@ -34,7 +34,7 @@
 
                 <small class="p-error flex align-items-center gap-1" severity="error">Hasło nie spełnia wymagań
                     <span tooltipPosition="right"
-                        pTooltip="Hasło musi posiadać min. 8 znaków w tym: 1 dużą i 1 małą literę, 1 cyfrę i 1 znak specjalny"
+                        pTooltip="Hasło musi posiadać między 8 a 20 znaków w tym: 1 dużą i 1 małą literę, 1 cyfrę i 1 znak specjalny"
                         class="pi pi-info-circle"></span></small>
                 }
                 }
