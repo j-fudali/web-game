@@ -4,7 +4,9 @@ export const routes: Routes = [
   {
     path: 'home',
     loadComponent: () =>
-      import('./modules/home/home.component').then((c) => c.HomeComponent),
+      import('./modules/home/feature/home.component').then(
+        (c) => c.HomeComponent
+      ),
   },
   {
     path: 'sign-up',
