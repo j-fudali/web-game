@@ -1,5 +1,10 @@
-<p-buttonGroup>
-    <p-button size="small" routerLink="/login" rounded label="Zaloguj się"></p-button>
-    <p-button size="small" routerLink="/sign-up" rounded label="Stwórz konto"></p-button>
-    <p-button size="small" routerLink="/" rounded label="Otwórz Rynek"></p-button>
+<p-buttonGroup class="hidden md:block">
+    @for(nav of navigationsList(); track nav){
+    <p-button size="small" [routerLink]="nav.routerLink" rounded [label]="nav.label"></p-button>
+    }
+    @if(isLoggedIn()){
+    <p-button (click)="signOut()" size="small" rounded label="Wyloguj się"></p-button>
+    }
 </p-buttonGroup>
+<p-button (click)="menu.toggle($event)" class="block md:hidden" rounded text="true" icon="pi pi-bars"></p-button>
+<p-menu #menu [model]="navigationsList()" [popup]="true"></p-menu>

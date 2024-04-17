@@ -1,5 +1,10 @@
 import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  output,
+} from '@angular/core';
 import { ToolbarModule } from 'primeng/toolbar';
 import { NavigationButtonsGroupComponent } from '../navigation-buttons-group/navigation-buttons-group.component';
 @Component({
@@ -15,4 +20,7 @@ import { NavigationButtonsGroupComponent } from '../navigation-buttons-group/nav
   styleUrl: './header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HeaderComponent {}
+export class HeaderComponent {
+  onSignOut = output<void>();
+  isLoggedIn = input.required<boolean>();
+}

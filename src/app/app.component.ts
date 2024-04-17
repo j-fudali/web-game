@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './shared/ui/header/header.component';
 import { FooterComponent } from './shared/ui/footer/footer.component';
 import { PrimeNGConfig } from 'primeng/api';
+import { AuthService } from './core/services/auth.service';
 @Component({
   selector: 'jfudali-root',
   standalone: true,
@@ -11,9 +12,14 @@ import { PrimeNGConfig } from 'primeng/api';
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {
-  primengConfig = inject(PrimeNGConfig);
-
+  private _auth = inject(AuthService);
+  private primengConfig = inject(PrimeNGConfig);
+  isLoggedIn = this._auth.isLoggedIn;
   ngOnInit(): void {
     this.primengConfig.ripple = true;
+    this._auth.verifyUserLoggedIn();
+  }
+  signOut() {
+    this._auth.signOut();
   }
 }
