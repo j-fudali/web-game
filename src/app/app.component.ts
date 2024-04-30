@@ -1,9 +1,9 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { HeaderComponent } from './core/ui/header/header.component';
-import { FooterComponent } from './core/ui/footer/footer.component';
 import { PrimeNGConfig } from 'primeng/api';
-import { AuthService } from './core/services/auth.service';
+import { AuthService } from './shared/services/auth.service';
+import { FooterComponent } from './shared/ui/footer/footer.component';
+import { HeaderComponent } from './shared/ui/header/header.component';
 @Component({
   selector: 'jfudali-root',
   standalone: true,

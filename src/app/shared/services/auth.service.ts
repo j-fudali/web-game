@@ -23,7 +23,7 @@ export class AuthService {
   }
 
   getToken() {
-    return this._cookies.get('token');
+    return this._cookies.get('token') || null;
   }
 
   setToken(token: string) {

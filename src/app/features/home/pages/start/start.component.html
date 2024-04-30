@@ -1,0 +1,65 @@
+<main class="flex flex-column">
+    <div class="w-full h-screen flex flex-column align-items-center">
+        <div class="fadein animation-duration-2000 animation-ease-out h-30rem w-5 relative">
+            <img ngSrc="../assets/logo.png" alt="logo" fill priority />
+        </div>
+        <p-button outlined (click)="scrollToAboutGame()" label="O grze"></p-button>
+    </div>
+    <p-divider></p-divider>
+    <div #about class="grid grid-nogutter px-4 w-full h-screen overflow-hidden">
+        <div pAnimateOnScroll enterClass="fadeinleft"
+            class="col h-full relative animation-duration-1000 animation-ease-out">
+            <img ngSrc="../assets/logo.png" alt="logo" fill priority />
+        </div>
+        <div pAnimateOnScroll enterClass="fadeinright"
+            class="col h-full flex flex-column justify-content-center animation-duration-1000 animation-ease-out">
+            <h2 class="text-right">O grze</h2>
+            <p class="text-right">
+                Lorem ipsum, dolor sit amet consectetur adipisicing elit. Consequatur,
+                deleniti omnis, praesentium similique rem maiores odio porro tenetur a
+                pariatur asperiores facilis alias perferendis magni optio eum?
+                Voluptates molestiae, reprehenderit sapiente consectetur deleniti
+                doloribus dolores totam molestias veniam, at fugiat quas ducimus alias
+                explicabo. Error similique voluptatibus impedit? Commodi, repellendus?
+            </p>
+        </div>
+    </div>
+    <p-divider></p-divider>
+    <div class="grid grid-nogutter px-4 w-full h-screen overflow-hidden">
+        <div pAnimateOnScroll enterClass="fadeinleft"
+            class="col h-full flex flex-column justify-content-center animation-duration-1000 animation-ease-out">
+            <h2 class="text-left">Wykonuj zadania</h2>
+            <p class="text-left">
+                Lorem ipsum, dolor sit amet consectetur adipisicing elit. Consequatur,
+                deleniti omnis, praesentium similique rem maiores odio porro tenetur a
+                pariatur asperiores facilis alias perferendis magni optio eum?
+                Voluptates molestiae, reprehenderit sapiente consectetur deleniti
+                doloribus dolores totam molestias veniam, at fugiat quas ducimus alias
+                explicabo. Error similique voluptatibus impedit? Commodi, repellendus?
+            </p>
+        </div>
+        <div pAnimateOnScroll enterClass="fadeinright"
+            class="col h-full w-full relative animation-duration-1000 animation-ease-out">
+            <img ngSrc="../assets/logo.png" alt="logo" fill priority />
+        </div>
+    </div>
+    <p-divider></p-divider>
+    <div pAnimateOnScroll enterClass="fadeindown" class="w-full h-screen animation-duration-1000 animation-ease-out">
+        <div class="mx-auto w-9 flex gap-4 justify-content-center h-full align-items-center">
+            <p-card header="Zaloguj się">
+                <ng-template pTemplate="header">
+                    <img src="../assets/logo.png" alt="image" [style]="{height: '30vh'}">
+                </ng-template>
+                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas, placeat. Modi vel quam aperiam non
+                    minus magni eligendi molestiae suscipit, itaque, quis, esse ea a.</p>
+            </p-card>
+            <p-card header="Rynek">
+                <ng-template pTemplate="header">
+                    <img src="../assets/logo.png" alt="image" [style]="{height: '30vh'}">
+                </ng-template>
+                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas, placeat. Modi vel quam aperiam non
+                    minus magni eligendi molestiae suscipit, itaque, quis, esse ea a.</p>
+            </p-card>
+        </div>
+    </div>
+</main>
