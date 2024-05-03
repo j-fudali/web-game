@@ -42,9 +42,17 @@ export class NavigationButtonsGroupComponent {
       label: 'Otwórz rynek',
       routerLink: '/',
     },
+    {
+      label: 'Wyloguj',
+      command: () => {
+        this.signOut();
+      },
+    },
   ];
   navigationsList = computed(() =>
-    this.isLoggedIn() ? this.navigations.slice(2) : this.navigations
+    this.isLoggedIn()
+      ? this.navigations.slice(2)
+      : this.navigations.slice(0, -1)
   );
   signOut() {
     this.onSignOut.emit();

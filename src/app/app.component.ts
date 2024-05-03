@@ -2,12 +2,13 @@ import { Component, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { PrimeNGConfig } from 'primeng/api';
 import { AuthService } from './shared/services/auth.service';
-import { FooterComponent } from './shared/ui/footer/footer.component';
-import { HeaderComponent } from './shared/ui/header/header.component';
+import { FooterComponent } from './core/layout/footer/footer.component';
+import { HeaderComponent } from './core/layout/header/header.component';
+import { ToastModule } from 'primeng/toast';
 @Component({
   selector: 'jfudali-root',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent, FooterComponent],
+  imports: [RouterOutlet, HeaderComponent, FooterComponent, ToastModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })

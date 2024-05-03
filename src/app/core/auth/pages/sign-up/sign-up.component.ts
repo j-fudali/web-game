@@ -22,6 +22,9 @@ import { PASSWORD_PATTERN } from '../../../../shared/constants/config.constants'
 import { SignUpCredentials } from '../../../../shared/interfaces/sign-up-credentials';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { passwordMatch } from '../../../../shared/validators/passwordMatch.validator';
+import { MessageService } from 'primeng/api';
+import { catchError, throwError } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 @Component({
   selector: 'jfudali-sign-up',
   standalone: true,
@@ -42,6 +45,7 @@ export class SignUpComponent {
   private fb = inject(FormBuilder);
   private _auth = inject(AuthService);
   private router = inject(Router);
+  private _messageService = inject(MessageService);
   signUpForm = this.fb.group(
     {
       username: ['', Validators.required],
@@ -75,7 +79,18 @@ export class SignUpComponent {
     if (this.signUpForm.valid) {
       this._auth
         .signUp(this.signUpForm.value as SignUpCredentials)
-        .pipe(takeUntilDestroyed(this.destroyRef))
+        .pipe(
+          takeUntilDestroyed(this.destroyRef),
+          catchError((err: HttpErrorResponse) => {
+            if (err.status == 409) {
+              this._messageService.add({
+                severity: 'error',
+                detail: 'E-mail w użyciu',
+              });
+            }
+            return throwError(() => err);
+          })
+        )
         .subscribe(({ token }) => {
           this._auth.setToken(token);
           this.router.navigate(['/game']);

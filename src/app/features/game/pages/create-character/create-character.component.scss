@@ -1,0 +1,14 @@
+:host {
+  display: block;
+}
+
+.avatar {
+  overflow: hidden;
+  img {
+    object-position: top;
+    object-fit: cover;
+  }
+  &:hover {
+    cursor: pointer;
+  }
+}

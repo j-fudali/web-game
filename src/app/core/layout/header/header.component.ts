@@ -6,7 +6,7 @@ import {
   output,
 } from '@angular/core';
 import { ToolbarModule } from 'primeng/toolbar';
-import { NavigationButtonsGroupComponent } from '../../../shared/ui/navigation-buttons-group/navigation-buttons-group.component';
+import { NavigationButtonsGroupComponent } from '../navigation-buttons-group/navigation-buttons-group.component';
 @Component({
   selector: 'jfudali-header',
   standalone: true,

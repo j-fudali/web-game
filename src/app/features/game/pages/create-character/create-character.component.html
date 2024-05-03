@@ -1,0 +1,33 @@
+<div class="py-8 md:py-5 px-3 md:px-0 flex flex-column align-items-center">
+    <p-card header="Utwórz postać">
+        <ng-template pTemplate="header">
+            <div (click)="imageUpload.click()"
+                class="avatar flex justify-content-center align-items-center h-20rem surface-100 hover:surface-200 transition-duration-200 transition-ease-out">
+                @if(previewImage){
+                <img [src]="previewImage" class="w-full h-full">
+                }
+                @else {
+                <h4 class="m-2">Dodaj awatar</h4>
+                }
+            </div>
+            <input (change)="upload($event)" #imageUpload type="file" class="hidden" accept="image/*">
+        </ng-template>
+        <form [formGroup]="characterCreationForm">
+            <div class="field">
+                <label for="name">Nazwa postaci</label>
+                <input class="w-full" placeholder="Podaj nazwę..." type="text" id="name" name="name" pInputText
+                    formControlName="name">
+            </div>
+            <div class="field">
+                <p-dropdown [options]="characterClasses | keyvalue" optionLabel="key" optionValue="value"
+                    formControlName="characterClass"></p-dropdown>
+            </div>
+        </form>
+        <ng-template pTemplate="footer">
+            <div class="flex justify-content-center">
+                <p-button [disabled]="characterCreationForm.invalid || !image" (onClick)="submit()" severity="success"
+                    label="Stwórz" type="button"></p-button>
+            </div>
+        </ng-template>
+    </p-card>
+</div>
