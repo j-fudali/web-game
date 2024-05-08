@@ -1,5 +1,5 @@
 <div class="py-8 md:py-5 px-3 md:px-0 flex flex-column align-items-center">
-    <p-card header="Utwórz postać">
+    <p-card>
         <ng-template pTemplate="header">
             <div (click)="imageUpload.click()"
                 class="avatar flex justify-content-center align-items-center h-20rem surface-100 hover:surface-200 transition-duration-200 transition-ease-out">
@@ -19,9 +19,10 @@
                     formControlName="name">
             </div>
             <div class="field">
-                <p-dropdown [options]="characterClasses | keyvalue" optionLabel="key" optionValue="value"
-                    formControlName="characterClass"></p-dropdown>
+                <p-dropdown placeholder="Wybierz klasę" [options]="characterClasses()" optionLabel="name"
+                    optionValue="id" formControlName="characterClass"></p-dropdown>
             </div>
+            <jfudali-statistics-panel [statistics]="statistics()" />
         </form>
         <ng-template pTemplate="footer">
             <div class="flex justify-content-center">

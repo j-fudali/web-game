@@ -5,6 +5,7 @@ import { AuthService } from './shared/services/auth.service';
 import { FooterComponent } from './core/layout/footer/footer.component';
 import { HeaderComponent } from './core/layout/header/header.component';
 import { ToastModule } from 'primeng/toast';
+import { PlayerService } from './shared/services/player.service';
 @Component({
   selector: 'jfudali-root',
   standalone: true,
@@ -13,14 +14,14 @@ import { ToastModule } from 'primeng/toast';
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {
-  private _auth = inject(AuthService);
+  private _authService = inject(AuthService);
   private primengConfig = inject(PrimeNGConfig);
-  isLoggedIn = this._auth.isLoggedIn;
+  isLoggedIn = this._authService.isLoggedIn;
   ngOnInit(): void {
     this.primengConfig.ripple = true;
-    this._auth.verifyUserLoggedIn();
+    this._authService.verifyUserLoggedIn();
   }
   signOut() {
-    this._auth.signOut();
+    this._authService.signOut();
   }
 }

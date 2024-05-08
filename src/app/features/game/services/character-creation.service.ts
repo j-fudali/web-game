@@ -12,11 +12,11 @@ export class CharacterCreationService {
   private baseUrl = environment.url + '/player-character';
 
   createCharacter(createCharacter: CreateCharacter) {
-    const { name, image, characterClass } = createCharacter;
+    const { name, image, characterClassId } = createCharacter;
     const formdata = new FormData();
     formdata.set('name', name);
     formdata.set('image', image);
-    formdata.set('characterClass', characterClass.toString());
+    formdata.set('characterClassId', characterClassId);
     return this.http.post<PlayerCharacter>(this.baseUrl, formdata);
   }
 }

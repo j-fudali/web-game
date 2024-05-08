@@ -1,11 +1,10 @@
-import { CharacterClass } from '../enums/character-class.enum';
+import { CharacterClass } from './character-class';
+import { Statistics } from './statistics';
 
 export interface PlayerCharacter {
   name: string;
   image: string;
   level: number;
-  energy: number;
-  health: number;
-  powerPoints: number;
+  statistics: Statistics;
   characterClass: CharacterClass;
 }

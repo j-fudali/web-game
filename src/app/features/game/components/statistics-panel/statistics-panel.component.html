@@ -1,0 +1,20 @@
+<div class="flex flex-column gap-2">
+    <div class="relative">
+        <div class="z-2 absolute top-0 left-0 flex justify-content-center align-items-center w-full h-full">
+            <span>{{healthLabel()}}</span>
+        </div>
+        <p-progressBar [showValue]="false" class=" shadow-3" color="rgb(120, 11, 11)" [value]="healthValue()" />
+    </div>
+    <div class="relative">
+        <div class="z-2 absolute top-0 left-0 flex justify-content-center align-items-center w-full h-full">
+            <span>{{energyLabel()}}</span>
+        </div>
+        <p-progressBar [showValue]="false" class="shadow-3" color="rgb(255, 115, 0)" [value]="energyValue()" />
+    </div>
+    <div class="relative">
+        <div class="z-2 absolute top-0 left-0 flex justify-content-center align-items-center w-full h-full">
+            <span>{{powerPointsLabel()}}</span>
+        </div>
+        <p-progressBar [showValue]="false" class="shadow-3" color="rgb(34, 117, 240)" [value]="powerPointsValue()" />
+    </div>
+</div>

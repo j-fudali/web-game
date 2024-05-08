@@ -21,7 +21,6 @@ export class AuthService {
   verifyUserLoggedIn() {
     this.getToken() ? this._isLoggedIn.set(true) : this._isLoggedIn.set(false);
   }
-
   getToken() {
     return this._cookies.get('token') || null;
   }
