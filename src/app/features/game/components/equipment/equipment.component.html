@@ -1,0 +1,11 @@
+<p-card header="Ekwipunek" pDroppable (onDrop)="drop()">
+    <p-carousel [value]="avaliableItems()" [numVisible]="3" [numScroll]="3" [circular]="false">
+        <ng-template let-item pTemplate="item">
+            <div class="w-full p-3" pDraggable (contextmenu)="onContextMenu($event, item)"
+                (onDragStart)="onDragStart(item)" (onDragEnd)="onDragEnd()">
+                <span>{{item.name}}</span>
+            </div>
+        </ng-template>
+    </p-carousel>
+</p-card>
+<p-contextMenu #cm [model]="actions" (onHide)="onHide()" />

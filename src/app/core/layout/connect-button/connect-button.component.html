@@ -1,0 +1,15 @@
+@if(walletData().status() == 'connected'){
+<p-chip>
+    <div class="p-2 flex align-items-center">
+        <p-avatar image="https://metamask.io/assets/icon.svg" />
+        <div class="flex flex-column text-right">
+            <span class="text-sm">{{label()}}</span>
+            <span class="font-light text-xs">{{balance()}}</span>
+        </div>
+    </div>
+</p-chip>
+}
+@else {
+<button pButton severity="secondary" size="small" [loading]="walletData().status() == 'loading'" icon="pi pi-link"
+    label="Połącz" (click)="onMetamaskConnect.emit()"></button>
+}

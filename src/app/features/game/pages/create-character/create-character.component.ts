@@ -24,6 +24,7 @@ import { CharacterService } from '../../../../shared/services/character.service'
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Statistics } from '../../../../shared/interfaces/statistics';
 import { CharacterClass } from '../../../../shared/interfaces/character-class';
+import { Router } from '@angular/router';
 @Component({
   selector: 'jfudali-create-character',
   standalone: true,
@@ -42,10 +43,12 @@ import { CharacterClass } from '../../../../shared/interfaces/character-class';
 })
 export class CreateCharacterComponent {
   private fb = inject(FormBuilder);
+  private router = inject(Router);
   private __characterCreation = inject(CharacterCreationService);
   private _messageService = inject(MessageService);
   private _playerService = inject(PlayerService);
   private _characterService = inject(CharacterService);
+
   characterClasses = this._characterService.characterClasses;
   characterCreationForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(80)]],
@@ -113,9 +116,10 @@ export class CreateCharacterComponent {
             return throwError(() => err);
           })
         )
-        .subscribe((character: PlayerCharacter) =>
-          this._playerService.setPlayerCharacter(character)
-        );
+        .subscribe((character: PlayerCharacter) => {
+          this._playerService.setPlayerCharacter(character);
+          this.router.navigate(['/game']);
+        });
     }
   }
 }

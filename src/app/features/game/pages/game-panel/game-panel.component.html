@@ -1,3 +1,7 @@
-<div class="h-screen">
-
+<div class="flex flex-column gap-2 p-3 align-items-center">
+    <jfudali-player-character class="w-12 lg:w-6" [playerCharacter]="playerCharacter()!" />
+    <jfudali-items-slots #slots class="w-12 lg:w-6" (onUnequip)="equipment.drop()" [(draggedItem)]="draggedItem"
+        [(avaliableItems)]="avaliableItems" [(equippedItems)]="equippedItems"></jfudali-items-slots>
+    <jfudali-equipment #equipment class="w-12 lg:w-6" (onCmEquipItem)="slots.drop()" [(draggedItem)]=" draggedItem"
+        [(avaliableItems)]="avaliableItems" [(equippedItems)]="equippedItems" />
 </div>

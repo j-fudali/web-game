@@ -3,6 +3,14 @@
     <div class="relative w-5rem h-5rem">
         <img ngSrc=" ../../assets/logo.png" fill priority />
     </div>
-    <jfudali-navigation-buttons-group [isLoggedIn]="isLoggedIn()"
-        (onSignOut)="onSignOut.emit()"></jfudali-navigation-buttons-group>
+    <div class="flex gap-2 align-items-center">
+        <jfudali-connect-button (onMetamaskConnect)="onConnectMetamask.emit()" [walletData]="walletData()" />
+        <p-buttonGroup class="hidden lg:block">
+            @for (item of navigationsList(); track item) {
+            <p-button size="small" [routerLink]="item.routerLink">{{item.label}}</p-button>
+            }
+        </p-buttonGroup>
+        <p-button class="block lg:hidden" rounded text size="small" (click)="sidebarVisible.set(true)"
+            icon="pi pi-bars" />
+    </div>
 </header>

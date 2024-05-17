@@ -3,10 +3,16 @@ import {
   ChangeDetectionStrategy,
   Component,
   input,
+  model,
   output,
 } from '@angular/core';
 import { ToolbarModule } from 'primeng/toolbar';
-import { NavigationButtonsGroupComponent } from '../navigation-buttons-group/navigation-buttons-group.component';
+import { ConnectButtonComponent } from '../connect-button/connect-button.component';
+import { WalletDataState } from '../../../shared/services/thirdweb.service';
+import { MenubarModule } from 'primeng/menubar';
+import { MenuItem } from 'primeng/api';
+import { ButtonModule } from 'primeng/button';
+import { ButtonGroupModule } from 'primeng/buttongroup';
 @Component({
   selector: 'jfudali-header',
   standalone: true,
@@ -14,7 +20,10 @@ import { NavigationButtonsGroupComponent } from '../navigation-buttons-group/nav
     CommonModule,
     ToolbarModule,
     NgOptimizedImage,
-    NavigationButtonsGroupComponent,
+    MenubarModule,
+    ConnectButtonComponent,
+    ButtonModule,
+    ButtonGroupModule,
   ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
@@ -22,5 +31,9 @@ import { NavigationButtonsGroupComponent } from '../navigation-buttons-group/nav
 })
 export class HeaderComponent {
   onSignOut = output<void>();
+  onConnectMetamask = output<void>();
   isLoggedIn = input.required<boolean>();
+  walletData = input.required<WalletDataState>();
+  navigationsList = input.required<MenuItem[]>();
+  sidebarVisible = model<boolean>();
 }
