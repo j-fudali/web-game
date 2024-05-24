@@ -1,13 +1,24 @@
-import { Component, OnInit, computed, inject } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  OnInit,
+  Signal,
+  WritableSignal,
+  computed,
+  effect,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MenuItem, PrimeNGConfig } from 'primeng/api';
 import { AuthService } from './shared/services/auth.service';
 import { FooterComponent } from './core/layout/footer/footer.component';
 import { HeaderComponent } from './core/layout/header/header.component';
 import { ToastModule } from 'primeng/toast';
-import { ThirdwebService } from './shared/services/thirdweb.service';
+import { WalletDataService } from './shared/services/wallet-data.service';
 import { SidebarModule } from 'primeng/sidebar';
-import { MenuModule } from 'primeng/menu';
+import { Menu, MenuModule } from 'primeng/menu';
 import { ButtonModule } from 'primeng/button';
 @Component({
   selector: 'jfudali-root',
@@ -25,21 +36,29 @@ import { ButtonModule } from 'primeng/button';
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {
+  @HostListener('window:resize', ['$event'])
+  onResize(event: Event) {
+    if (window.innerWidth > 992) {
+      this.sidebarVisible = false;
+    }
+  }
   private _authService = inject(AuthService);
   private primengConfig = inject(PrimeNGConfig);
-  private _thirdwebService = inject(ThirdwebService);
+  private _dataWalletService = inject(WalletDataService);
   isLoggedIn = this._authService.isLoggedIn;
-  walletDataState = this._thirdwebService.state;
-  connect$ = this._thirdwebService.connect$;
+  walletDataState = this._dataWalletService.state;
+  connect$ = this._dataWalletService.connect$;
   sidebarVisible = false;
-  navigations: MenuItem[] = [
+  navigationsList = computed(() => [
     {
       label: 'Zaloguj się',
       routerLink: '/login',
+      visible: !this.isLoggedIn(),
     },
     {
       label: 'Stwórz konto',
       routerLink: '/sign-up',
+      visible: !this.isLoggedIn(),
     },
     {
       label: 'Otwórz rynek',
@@ -50,18 +69,19 @@ export class AppComponent implements OnInit {
       command: () => {
         this.signOut();
       },
+      visible: this.isLoggedIn(),
     },
-  ];
-  navigationsList = computed(() =>
-    this.isLoggedIn()
-      ? this.navigations.slice(2)
-      : this.navigations.slice(0, -1)
-  );
+  ]);
+
   ngOnInit(): void {
     this.primengConfig.ripple = true;
     this._authService.verifyUserLoggedIn();
   }
   signOut() {
     this._authService.signOut();
+  }
+  disconnectWallet() {
+    this._dataWalletService.disconnect$.next();
+    this.signOut();
   }
 }

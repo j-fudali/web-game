@@ -1,0 +1,10 @@
+<div class="flex gap-2 align-items-stretch justify-content-center">
+    <div class="flex align-items-center">
+        <p-avatar size="xlarge" [image]="metamaskIcon"></p-avatar>
+    </div>
+    <p-divider layout="vertical"></p-divider>
+    <div class="flex flex-column align-items-end">
+        <h3>Połącz z Metamask</h3>
+        <button pButton severity="success" label="Połącz" (click)="ref.close(true)"></button>
+    </div>
+</div>

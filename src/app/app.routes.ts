@@ -1,5 +1,10 @@
 import { Routes } from '@angular/router';
-import { alreadyLoggedIn, authGuard } from './shared/guards/auth.guard';
+import {
+  alreadyLoggedIn,
+  authGuard,
+  forceWalletConnected,
+  walletConnected,
+} from './shared/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -9,6 +14,7 @@ export const routes: Routes = [
         (c) => c.StartComponent
       ),
     canActivate: [alreadyLoggedIn],
+    canDeactivate: [forceWalletConnected],
   },
   {
     path: 'sign-up',
@@ -16,7 +22,7 @@ export const routes: Routes = [
       import('./core/auth/pages/sign-up/sign-up.component').then(
         (c) => c.SignUpComponent
       ),
-    canActivate: [alreadyLoggedIn],
+    canActivate: [alreadyLoggedIn, walletConnected],
   },
   {
     path: 'login',
@@ -24,12 +30,12 @@ export const routes: Routes = [
       import('./core/auth/pages/login/login.component').then(
         (c) => c.LoginComponent
       ),
-    canActivate: [alreadyLoggedIn],
+    canActivate: [alreadyLoggedIn, walletConnected],
   },
   {
     path: 'game',
     loadChildren: () => import('./features/game/game-shell.routes'),
-    canActivate: [authGuard],
+    canActivate: [authGuard, walletConnected],
   },
   {
     path: '',

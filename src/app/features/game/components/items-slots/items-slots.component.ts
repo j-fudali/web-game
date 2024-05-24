@@ -4,6 +4,7 @@ import {
   Component,
   ViewChild,
   computed,
+  input,
   model,
   output,
 } from '@angular/core';
@@ -11,37 +12,40 @@ import { MenuItem } from 'primeng/api';
 import { CardModule } from 'primeng/card';
 import { ContextMenu, ContextMenuModule } from 'primeng/contextmenu';
 import { DragDropModule } from 'primeng/dragdrop';
-
+import { OwnedItem } from '../../../../shared/interfaces/owned-item';
+import { ItemComponent } from '../../../../shared/components/item/item.component';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 @Component({
   selector: 'jfudali-items-slots',
   standalone: true,
-  imports: [CommonModule, CardModule, DragDropModule, ContextMenuModule],
+  imports: [
+    CommonModule,
+    CardModule,
+    DragDropModule,
+    ContextMenuModule,
+    ItemComponent,
+    ProgressSpinnerModule,
+  ],
   templateUrl: './items-slots.component.html',
   styleUrl: './items-slots.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ItemsSlotsComponent {
   @ViewChild('cm') cm: ContextMenu | undefined;
-  onUnequip = output<void>();
-  avaliableItems =
-    model.required<
-      { name: string; type: 'weapon' | 'armor'; bodySlot?: string }[]
-    >();
-  draggedItem = model.required<{
-    name: string;
-    type: 'weapon' | 'armor';
-    bodySlot?: string;
-  } | null>();
-  equippedItems =
-    model.required<
-      { name: string; type: 'weapon' | 'armor'; bodySlot?: string }[]
-    >();
+  equipOnDrop = output<void>();
+  onCmUnequip = output<void>();
+  replaceOnDrop = output<OwnedItem>();
+  avaliableItems = input.required<OwnedItem[]>();
+  draggedItem = model.required<OwnedItem | null>();
+  equippedItems = input.required<OwnedItem[]>();
+  status = input.required<'completed' | 'loading'>();
+
   actions: MenuItem[] = [
     {
       label: 'Zdejmij',
       icon: 'pi pi-minus',
       command: () => {
-        this.onUnequip.emit();
+        this.onCmUnequip.emit();
       },
     },
   ];
@@ -65,11 +69,7 @@ export class ItemsSlotsComponent {
   onHide() {
     this.draggedItem.set(null);
   }
-  onDragStart(item: {
-    name: string;
-    type: 'weapon' | 'armor';
-    bodySlot?: string;
-  }) {
+  onDragStart(item: OwnedItem) {
     this.draggedItem.set(item);
   }
   onDragEnd() {
@@ -88,20 +88,10 @@ export class ItemsSlotsComponent {
     if (itemAlreadySet) {
       const replacedItem =
         this.equippedItems()[this.equippedItems().indexOf(itemAlreadySet)];
-      this.avaliableItems.update((items) => [replacedItem, ...items]);
-      this.equippedItems.update((items) => {
-        const newItems = [
-          ...items.filter((i) => i != replacedItem),
-          this.draggedItem()!,
-        ];
-        return newItems;
-      });
+      this.replaceOnDrop.emit(replacedItem);
     } else {
-      this.equippedItems.update((eq) => [...eq, this.draggedItem()!]);
+      this.equipOnDrop.emit();
     }
-    this.avaliableItems.update((eq) =>
-      eq.filter((e) => e != this.draggedItem())
-    );
     this.draggedItem.set(null);
   }
 }

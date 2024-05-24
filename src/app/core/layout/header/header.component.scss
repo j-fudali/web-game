@@ -1,3 +1,12 @@
 :host {
   display: block;
 }
+:host ::ng-deep {
+  .p-menubar {
+    padding: 0 !important;
+  }
+}
+img:hover {
+  transition: 150ms ease-out;
+  filter: drop-shadow(0 0 3px rgb(0, 0, 0));
+}

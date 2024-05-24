@@ -1,12 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
-import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { DropdownModule } from 'primeng/dropdown';
 import { FileUploadModule } from 'primeng/fileupload';
@@ -14,7 +8,7 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { CharacterCreationService } from '../../services/character-creation.service';
 import { CreateCharacter } from '../../interfaces/create-character';
-import { catchError, map, throwError } from 'rxjs';
+import { catchError, map, switchMap, tap, throwError } from 'rxjs';
 import { MessageService } from 'primeng/api';
 import { HttpErrorResponse } from '@angular/common/http';
 import { PlayerCharacter } from '../../../../shared/interfaces/player-character';
@@ -23,8 +17,10 @@ import { PlayerService } from '../../../../shared/services/player.service';
 import { CharacterService } from '../../../../shared/services/character.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Statistics } from '../../../../shared/interfaces/statistics';
-import { CharacterClass } from '../../../../shared/interfaces/character-class';
 import { Router } from '@angular/router';
+import { StartingItemsService } from '../../services/starting-items.service';
+import { ItemComponent } from '../../../../shared/components/item/item.component';
+import { CharacterClass } from '../../../../shared/interfaces/character-class';
 @Component({
   selector: 'jfudali-create-character',
   standalone: true,
@@ -37,6 +33,7 @@ import { Router } from '@angular/router';
     CardModule,
     ButtonModule,
     StatisticsPanelComponent,
+    ItemComponent,
   ],
   templateUrl: './create-character.component.html',
   styleUrl: './create-character.component.scss',
@@ -48,22 +45,30 @@ export class CreateCharacterComponent {
   private _messageService = inject(MessageService);
   private _playerService = inject(PlayerService);
   private _characterService = inject(CharacterService);
-
+  private _startingItemsService = inject(StartingItemsService);
+  startingItems = this._startingItemsService.state.items;
   characterClasses = this._characterService.characterClasses;
   characterCreationForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(80)]],
-    characterClass: ['', [Validators.required]],
+    characterClass: [this.characterClasses()[0], [Validators.required]],
   });
 
   image: File | undefined;
   previewImage: string | ArrayBuffer | null | undefined;
 
-  characterClassId = toSignal<string>(
+  characterClass = toSignal<CharacterClass>(
     this.characterCreationForm.valueChanges.pipe(map((v) => v.characterClass!)),
-    { initialValue: undefined }
+    {
+      initialValue: undefined,
+    }
+  );
+  startingItem = computed(() =>
+    this.startingItems().find(
+      (item) => item.classType == this.characterClass()?.name.toLowerCase()
+    )
   );
   statistics = computed(() => {
-    if (!this.characterClassId())
+    if (!this.characterClass()) {
       return {
         health: { actualValue: 0, maximumValue: 100 },
         energy: { actualValue: 0, maximumValue: 100 },
@@ -72,8 +77,9 @@ export class CreateCharacterComponent {
           maximumValue: 100,
         },
       } as Statistics;
+    }
     const { id, name, ...statistics } = this.characterClasses().find(
-      (c) => c.id == this.characterClassId()
+      (c) => c.id == this.characterClass()?.id
     )!;
     const { startingHealth, startingEnergy, startingPowerPoints } = statistics;
     return {
@@ -101,11 +107,15 @@ export class CreateCharacterComponent {
       const newCharacter: CreateCharacter = {
         name: this.characterCreationForm.value.name!,
         image: this.image,
-        characterClassId: this.characterCreationForm.value.characterClass!,
+        characterClassId: this.characterCreationForm.value.characterClass!.id,
       };
       this.__characterCreation
         .createCharacter(newCharacter)
         .pipe(
+          tap((character) => this._playerService.setOnSignUp$.next(character)),
+          switchMap(() =>
+            this._startingItemsService.claimItem(this.startingItem()!.tokenId)
+          ),
           catchError((err: HttpErrorResponse) => {
             if (err.status == 409) {
               this._messageService.add({
@@ -116,9 +126,8 @@ export class CreateCharacterComponent {
             return throwError(() => err);
           })
         )
-        .subscribe((character: PlayerCharacter) => {
-          this._playerService.setPlayerCharacter(character);
-          this.router.navigate(['/game']);
+        .subscribe(() => {
+          this.router.navigate(['/game/create-character']);
         });
     }
   }

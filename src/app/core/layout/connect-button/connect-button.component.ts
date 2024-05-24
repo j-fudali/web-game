@@ -2,24 +2,39 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  ViewChild,
   computed,
   input,
   output,
 } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { ChipModule } from 'primeng/chip';
-import { WalletDataState } from '../../../shared/services/thirdweb.service';
+import { WalletDataState } from '../../../shared/services/wallet-data.service';
 import { AvatarModule } from 'primeng/avatar';
+import { OverlayPanel, OverlayPanelModule } from 'primeng/overlaypanel';
+import { MenuModule } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
+import { metamaskIcon } from '../../../shared/constants/config.constants';
 @Component({
   selector: 'jfudali-connect-button',
   standalone: true,
-  imports: [CommonModule, ButtonModule, ChipModule, AvatarModule],
+  imports: [
+    CommonModule,
+    ButtonModule,
+    ChipModule,
+    AvatarModule,
+    OverlayPanelModule,
+    MenuModule,
+  ],
   templateUrl: './connect-button.component.html',
   styleUrl: './connect-button.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConnectButtonComponent {
+  @ViewChild('op') overlayPanel: OverlayPanel | undefined;
+  metamaskIcon = metamaskIcon;
   onMetamaskConnect = output<void>();
+  onDisconnectWallet = output<void>();
   walletData = input.required<WalletDataState>();
   label = computed(
     () =>
@@ -35,4 +50,16 @@ export class ConnectButtonComponent {
         this.walletData().data()?.balance.symbol
       }`
   );
+  walletActions: MenuItem[] = [
+    {
+      label: 'Rozłącz',
+      icon: 'pi pi-disconnect',
+      command: () => {
+        this.onDisconnectWallet.emit();
+        if (this.overlayPanel) {
+          this.overlayPanel.hide();
+        }
+      },
+    },
+  ];
 }

@@ -1,5 +1,5 @@
 export interface SignUpCredentials {
-  username: string;
+  cryptoWallet: string;
   email: string;
   password: string;
 }

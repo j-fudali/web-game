@@ -1,11 +1,25 @@
 <p-card header="Ekwipunek" pDroppable (onDrop)="drop()">
-    <p-carousel [value]="avaliableItems()" [numVisible]="3" [numScroll]="3" [circular]="false">
+    @if(status() == 'loading'){
+    <div class="flex justify-content-center">
+        <p-progressSpinner strokeWidth="8"></p-progressSpinner>
+    </div>
+    }
+    @else {
+    @if(avaliableItems().length > 0){
+    <p-carousel [orientation]="orientation()" [value]="avaliableItems()" verticalViewPortHeight="24rem" [numVisible]="2"
+        [numScroll]="1" [circular]="false">
         <ng-template let-item pTemplate="item">
-            <div class="w-full p-3" pDraggable (contextmenu)="onContextMenu($event, item)"
-                (onDragStart)="onDragStart(item)" (onDragEnd)="onDragEnd()">
-                <span>{{item.name}}</span>
-            </div>
+            <jfudali-item class="h-16rem lg:h-12rem m-2" [item]="item" pDraggable
+                (contextmenu)="onContextMenu($event, item)" (onDragStart)="onDragStart(item)"
+                (onDragEnd)="onDragEnd()" />
+
         </ng-template>
     </p-carousel>
+    }
+    @else{
+    <h3 class="text-center">Brak przedmiotów</h3>
+    }
+
+    }
 </p-card>
 <p-contextMenu #cm [model]="actions" (onHide)="onHide()" />

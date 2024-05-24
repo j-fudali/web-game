@@ -3,12 +3,12 @@ import { GamePanelComponent } from './pages/game-panel/game-panel.component';
 import { CreateCharacterComponent } from './pages/create-character/create-character.component';
 import { inject } from '@angular/core';
 import { PlayerService } from '../../shared/services/player.service';
-import { map } from 'rxjs';
+import { map, tap } from 'rxjs';
 
 const alreadyHasCharacter: CanActivateFn = (route, state) => {
   const playerService = inject(PlayerService);
   const router = inject(Router);
-  return playerService.combinedPlayerCharacter$.pipe(
+  return playerService.playerCharacter$.pipe(
     map((pc) =>
       pc != undefined ? true : router.parseUrl('/game/create-character')
     )
@@ -17,7 +17,8 @@ const alreadyHasCharacter: CanActivateFn = (route, state) => {
 const hasNotAnyCharacter: CanActivateFn = (route, state) => {
   const playerService = inject(PlayerService);
   const router = inject(Router);
-  return playerService.combinedPlayerCharacter$.pipe(
+  return playerService.playerCharacter$.pipe(
+    tap((v) => console.log(v)),
     map((pc) => (pc == undefined ? true : router.parseUrl('/')))
   );
 };

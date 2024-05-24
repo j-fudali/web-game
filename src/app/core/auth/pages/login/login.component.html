@@ -2,10 +2,17 @@
     <p-card class="w-full md:w-6" header="Zaloguj się">
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
             <div class="field">
-                <label for="username">Nazwa użytkownia</label>
-                <input pInputText type="text" id="username" name="username" class="w-full" formControlName="username">
-                @if(username.hasError('required') && (username.dirty || username.touched)){
-                <small class="p-error" severity="error">Pole jest wymagane</small>
+                <label for="email">E-mail</label>
+                <input pInputText type="text" id="email" name="email" class="w-full" formControlName="email">
+                @if(email.invalid && (email.dirty || email.touched)){
+                <small class="p-error" severity="error">
+                    @if(email.hasError('required')){
+                    Pole jest wymagane
+                    }
+                    @else {
+                    Pole musi być e-mailem
+                    }
+                </small>
                 }
             </div>
             <div class="field">

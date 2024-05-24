@@ -38,12 +38,12 @@ export class LoginComponent {
   private router = inject(Router);
   private _auth = inject(AuthService);
   loginForm = this.fb.group({
-    username: ['', Validators.required],
+    email: ['', Validators.required],
     password: ['', Validators.required],
   });
 
-  get username() {
-    return this.loginForm.get('username') as FormControl;
+  get email() {
+    return this.loginForm.get('email') as FormControl;
   }
 
   get password() {

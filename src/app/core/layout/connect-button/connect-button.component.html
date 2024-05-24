@@ -1,7 +1,8 @@
-@if(walletData().status() == 'connected'){
-<p-chip>
+@switch (walletData().status()) {
+@case('connected'){
+<p-chip (click)="op.toggle($event)">
     <div class="p-2 flex align-items-center">
-        <p-avatar image="https://metamask.io/assets/icon.svg" />
+        <p-avatar [image]="metamaskIcon" />
         <div class="flex flex-column text-right">
             <span class="text-sm">{{label()}}</span>
             <span class="font-light text-xs">{{balance()}}</span>
@@ -9,7 +10,14 @@
     </div>
 </p-chip>
 }
-@else {
-<button pButton severity="secondary" size="small" [loading]="walletData().status() == 'loading'" icon="pi pi-link"
-    label="Połącz" (click)="onMetamaskConnect.emit()"></button>
+@case('disconnected'){
+<button pButton severity="secondary" size="small" icon="pi pi-link" label="Połącz"
+    (click)="onMetamaskConnect.emit()"></button>
 }
+@default{
+<button pButton size="small" rounded [loading]="true" (click)="onMetamaskConnect.emit()"></button>
+}
+}
+<p-overlayPanel #op>
+    <p-menu [model]="walletActions"></p-menu>
+</p-overlayPanel>

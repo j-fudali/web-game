@@ -20,10 +20,13 @@
             </div>
             <div class="field">
                 <p-dropdown placeholder="Wybierz klasę" [options]="characterClasses()" optionLabel="name"
-                    optionValue="id" formControlName="characterClass"></p-dropdown>
+                    formControlName="characterClass"></p-dropdown>
             </div>
             <jfudali-statistics-panel [statistics]="statistics()" />
         </form>
+        @if(startingItem()){
+        <jfudali-item class="mt-2" [item]="startingItem()!"></jfudali-item>
+        }
         <ng-template pTemplate="footer">
             <div class="flex justify-content-center">
                 <p-button [disabled]="characterCreationForm.invalid || !image" (onClick)="submit()" severity="success"

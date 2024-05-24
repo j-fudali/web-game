@@ -7,4 +7,5 @@ export interface PlayerCharacter {
   level: number;
   statistics: Statistics;
   characterClass: CharacterClass;
+  equippedItems: bigint[];
 }
