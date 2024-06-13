@@ -2,17 +2,6 @@
     <p-card class="w-full md:w-6" header="Stwórz konto">
         <form [formGroup]="signUpForm" (ngSubmit)="onSubmit()">
             <div class="field">
-                <label for="username">Nazwa użytkownika</label>
-                <input pInputText id="username" type="text" class="w-full" formControlName="username">
-                @if(username.invalid && (username.dirty || username.touched )){
-                @if(username.hasError('required')){
-                <small class="p-error" severity="error">Pole jest wymagane</small>
-                }@else {
-                <small class="p-error" severity="error">Nazwa użytkownika jest juz użyta</small>
-                }
-                }
-            </div>
-            <div class="field">
                 <label for="email">E-mail</label>
                 <input pInputText id="email" type="email" class="w-full " formControlName="email">
                 @if(email.invalid && (email.dirty && email.touched)){

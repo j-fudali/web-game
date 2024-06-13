@@ -33,7 +33,6 @@ export class HeaderComponent {
   onSignOut = output<void>();
   onConnectMetamask = output<void>();
   onDisconnectWallet = output<void>();
-  isLoggedIn = input.required<boolean>();
   walletData = input.required<WalletDataState>();
   navigationsList = input.required<MenuItem[]>();
   sidebarVisible = model<boolean>();

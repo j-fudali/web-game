@@ -18,7 +18,6 @@ const hasNotAnyCharacter: CanActivateFn = (route, state) => {
   const playerService = inject(PlayerService);
   const router = inject(Router);
   return playerService.playerCharacter$.pipe(
-    tap((v) => console.log(v)),
     map((pc) => (pc == undefined ? true : router.parseUrl('/')))
   );
 };

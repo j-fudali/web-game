@@ -23,7 +23,8 @@
                 <small class="p-error" severity="error">Pole jest wymagane</small>
                 }
             </div>
-            <p-button type="submit" severity="success" label="Zaloguj"></p-button>
+            <p-button type="submit" severity="success" label="Zaloguj" [loading]="status() === 'loading'"></p-button>
+            {{status()}}
         </form>
     </p-card>
 </div>

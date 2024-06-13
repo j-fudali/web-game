@@ -1,4 +1,4 @@
-import { Injectable, Signal, inject, signal } from '@angular/core';
+import { Injectable, Signal, inject } from '@angular/core';
 import { getWalletBalance, injectedProvider } from 'thirdweb/wallets';
 import {
   BehaviorSubject,
@@ -11,6 +11,7 @@ import {
   shareReplay,
   switchMap,
   tap,
+  throwError,
 } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { WalletData } from '../interfaces/wallet-data';
@@ -22,7 +23,6 @@ import {
 } from '../constants/thirdweb.constants';
 import { RPCError } from '../interfaces/rpc-error';
 import { MessageService } from 'primeng/api';
-import { getInstalledWalletProviders } from 'thirdweb/dist/types/wallets/injected/mipdStore';
 
 export interface WalletDataState {
   data: Signal<WalletData | undefined>;
@@ -38,7 +38,7 @@ export class WalletDataService {
 
   disconnect$ = new Subject<void>();
   connect$ = new Subject<void>();
-  error$ = new Subject<Error>();
+  error$ = new Subject<RPCError>();
 
   private isDiconnected$ = new BehaviorSubject<string | null>(
     localStorage.getItem('isDisconnected')
@@ -48,30 +48,23 @@ export class WalletDataService {
     tap(() => localStorage.setItem('isDisconnected', 'true'))
   );
   private onConnect$ = this.connect$.pipe(
-    switchMap(() =>
-      (injectedProvider('io.metamask')
-        ? from(metamask.connect({ client }))
-        : from(
-            metamask.connect({
-              client,
-              walletConnect: { showQrModal: true },
-            })
-          )
-      ).pipe(
-        catchError((err: RPCError) => {
-          console.log(err.code);
-          if (err.code == 4001) {
-            this._messageService.add({
-              severity: 'error',
-              summary: 'Błąd',
-              detail: 'Połączenie zostało odrzucone',
-            });
-          }
-          return of(undefined);
-        })
-      )
-    ),
+    switchMap(() => from(metamask.connect({ client }))),
     tap(() => localStorage.setItem('isDisconnected', 'false')),
+    catchError((err: RPCError) => {
+      let message;
+      if (err.code == 4001) {
+        message = 'Połączenie zostało odrzucone';
+      } else {
+        message = 'Nie można nawiązać połączenia';
+      }
+      this._messageService.add({
+        severity: 'error',
+        summary: 'Błąd',
+        detail: message,
+      });
+      this.error$.next(err);
+      return of(undefined);
+    }),
     shareReplay(1)
   );
   private autoConnect$ = this.isDiconnected$.pipe(
@@ -108,14 +101,16 @@ export class WalletDataService {
         );
       }
       return of(undefined);
+    }),
+    catchError((err) => {
+      this.error$.next(err);
+      return throwError(() => err);
     })
   );
   private status$ = merge(
     this.connection$.pipe(
       map((data) => (data ? 'connected' : 'disconnected')),
-      catchError((err: Error) => {
-        return of('disconnected' as const);
-      })
+      catchError(() => of('disconnected' as const))
     ),
     this.disconnectWallet$.pipe(map(() => 'disconnected' as const)),
     this.connect$.pipe(map(() => 'loading' as const)),

@@ -1,10 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  inject,
-} from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -14,8 +9,6 @@ import {
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Router } from '@angular/router';
 import { LoginCredentials } from '../../../../shared/interfaces/login-credentials';
 import { AuthService } from '../../../../shared/services/auth.service';
 
@@ -34,9 +27,8 @@ import { AuthService } from '../../../../shared/services/auth.service';
 })
 export class LoginComponent {
   private fb = inject(FormBuilder);
-  private destroyRef = inject(DestroyRef);
-  private router = inject(Router);
   private _auth = inject(AuthService);
+  status = this._auth.state.status;
   loginForm = this.fb.group({
     email: ['', Validators.required],
     password: ['', Validators.required],
@@ -52,13 +44,7 @@ export class LoginComponent {
 
   onSubmit() {
     if (this.loginForm.valid) {
-      this._auth
-        .login(this.loginForm.value as LoginCredentials)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe(({ token }) => {
-          this._auth.setToken(token);
-          this.router.navigate(['/game']);
-        });
+      this._auth.login$.next(this.loginForm.value as LoginCredentials);
     }
   }
 }

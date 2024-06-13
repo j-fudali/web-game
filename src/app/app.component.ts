@@ -45,7 +45,9 @@ export class AppComponent implements OnInit {
   private _authService = inject(AuthService);
   private primengConfig = inject(PrimeNGConfig);
   private _dataWalletService = inject(WalletDataService);
-  isLoggedIn = this._authService.isLoggedIn;
+  isLoggedIn = this._authService.state.isLogged;
+  error = this._authService.state.error;
+  status = this._authService.state.status;
   walletDataState = this._dataWalletService.state;
   connect$ = this._dataWalletService.connect$;
   sidebarVisible = false;
@@ -75,10 +77,9 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.primengConfig.ripple = true;
-    this._authService.verifyUserLoggedIn();
   }
   signOut() {
-    this._authService.signOut();
+    this._authService.signOut$.next();
   }
   disconnectWallet() {
     this._dataWalletService.disconnect$.next();

@@ -1,10 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  inject,
-} from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -16,15 +11,11 @@ import { CardModule } from 'primeng/card';
 import { MessageModule } from 'primeng/message';
 import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Router } from '@angular/router';
 import { PASSWORD_PATTERN } from '../../../../shared/constants/config.constants';
 import { SignUpCredentials } from '../../../../shared/interfaces/sign-up-credentials';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { passwordMatch } from '../../../../shared/validators/passwordMatch.validator';
-import { MessageService } from 'primeng/api';
-import { catchError, throwError } from 'rxjs';
-import { HttpErrorResponse } from '@angular/common/http';
+import { WalletDataService } from '../../../../shared/services/wallet-data.service';
 @Component({
   selector: 'jfudali-sign-up',
   standalone: true,
@@ -41,14 +32,11 @@ import { HttpErrorResponse } from '@angular/common/http';
   styleUrl: './sign-up.component.scss',
 })
 export class SignUpComponent {
-  private destroyRef = inject(DestroyRef);
   private fb = inject(FormBuilder);
   private _auth = inject(AuthService);
-  private router = inject(Router);
-  private _messageService = inject(MessageService);
+  private _walletDataService = inject(WalletDataService);
   signUpForm = this.fb.group(
     {
-      username: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: [
         '',
@@ -58,10 +46,6 @@ export class SignUpComponent {
     },
     { validators: passwordMatch }
   );
-
-  get username() {
-    return this.signUpForm.get('username') as FormControl;
-  }
 
   get email() {
     return this.signUpForm.get('email') as FormControl;
@@ -77,24 +61,10 @@ export class SignUpComponent {
 
   onSubmit() {
     if (this.signUpForm.valid) {
-      this._auth
-        .signUp(this.signUpForm.value as SignUpCredentials)
-        .pipe(
-          takeUntilDestroyed(this.destroyRef),
-          catchError((err: HttpErrorResponse) => {
-            if (err.status == 409) {
-              this._messageService.add({
-                severity: 'error',
-                detail: 'E-mail w użyciu',
-              });
-            }
-            return throwError(() => err);
-          })
-        )
-        .subscribe(({ token }) => {
-          this._auth.setToken(token);
-          this.router.navigate(['/game']);
-        });
+      this._auth.signUp$.next({
+        ...this.signUpForm.value,
+        cryptoWallet: this._walletDataService.state.data()?.account.address,
+      } as SignUpCredentials);
     }
   }
 }

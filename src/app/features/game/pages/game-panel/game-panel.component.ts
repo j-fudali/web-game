@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, effect, inject } from '@angular/core';
+import { Component, HostListener, OnInit, effect, inject } from '@angular/core';
 import { PlayerService } from '../../../../shared/services/player.service';
 import { PlayerCharacterComponent } from '../../components/player-character/player-character.component';
 import { EquipmentComponent } from '../../components/equipment/equipment.component';
@@ -41,6 +41,7 @@ export class GamePanelComponent {
   equippedItems = this._itemsService.state.equippedItems;
   status = this._itemsService.state.status;
   draggedItem: OwnedItem | null = null;
+
   constructor() {
     effect(() => {
       if (this.equipmentSaveStatus()) {

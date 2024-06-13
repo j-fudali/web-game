@@ -4,24 +4,16 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
-  BehaviorSubject,
   Observable,
   Subject,
   catchError,
-  combineLatest,
-  debounce,
-  debounceTime,
   map,
   merge,
   of,
   shareReplay,
-  switchMap,
-  tap,
   throwError,
-  withLatestFrom,
 } from 'rxjs';
 import { OwnedItem } from '../interfaces/owned-item';
-import { ItemsService } from './items.service';
 
 export interface PlayerCharacterState {
   playerCharacter: Signal<PlayerCharacter | undefined>;
