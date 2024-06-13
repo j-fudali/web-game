@@ -2,18 +2,9 @@ import { inject } from '@angular/core';
 import { CanDeactivateFn, Router, type CanActivateFn } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { WalletDataService } from '../services/wallet-data.service';
-import { DialogService, DynamicDialogModule } from 'primeng/dynamicdialog';
+import { DialogService } from 'primeng/dynamicdialog';
 import { ConnectWalletDialogComponent } from '../components/connect-wallet-dialog/connect-wallet-dialog.component';
-import {
-  defaultIfEmpty,
-  filter,
-  map,
-  of,
-  skipWhile,
-  switchMap,
-  take,
-  tap,
-} from 'rxjs';
+import { defaultIfEmpty, filter, map, of, switchMap, take, tap } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { StartComponent } from '../../features/home/pages/start/start.component';
 export const authGuard: CanActivateFn = (route, state) => {
@@ -32,6 +23,7 @@ export const walletConnected: CanActivateFn = (route, state) => {
   const status$ = toObservable(walletDataService.state.status);
   const router = inject(Router);
   return status$.pipe(
+    filter((s) => s !== 'loading'),
     switchMap((status) =>
       of(status === 'connected' ? true : router.parseUrl('/'))
     )
