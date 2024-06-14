@@ -22,10 +22,10 @@ import {
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { convertNftToItem } from '../utils/functions';
 import { OwnedItem } from '../interfaces/owned-item';
-import { PlayerService } from './player.service';
 import { PlayerCharacter } from '../interfaces/player-character';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { PlayerCharacterService } from './player-character.service';
 
 export interface ItemsState {
   avaliableItems: Signal<OwnedItem[]>;
@@ -40,7 +40,7 @@ export interface ItemsState {
 export class ItemsService {
   private http = inject(HttpClient);
   private _walletDataService = inject(WalletDataService);
-  private _playerService = inject(PlayerService);
+  private _playerService = inject(PlayerCharacterService);
   private fetchOwnedItems$ = toObservable(
     this._walletDataService.state.data
   ).pipe(

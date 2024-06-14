@@ -24,9 +24,7 @@ export const walletConnected: CanActivateFn = (route, state) => {
   const router = inject(Router);
   return status$.pipe(
     filter((s) => s !== 'loading'),
-    switchMap((status) =>
-      of(status === 'connected' ? true : router.parseUrl('/'))
-    )
+    map((status) => (status === 'connected' ? true : router.parseUrl('/home')))
   );
 };
 export const forceWalletConnected: CanDeactivateFn<StartComponent> = () => {

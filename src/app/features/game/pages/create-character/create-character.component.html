@@ -25,12 +25,12 @@
             <jfudali-statistics-panel [statistics]="statistics()" />
         </form>
         @if(startingItem()){
-        <jfudali-item class="mt-2" [item]="startingItem()!"></jfudali-item>
+        <jfudali-item class="mt-2 h-15rem" [item]="startingItem()!"></jfudali-item>
         }
         <ng-template pTemplate="footer">
             <div class="flex justify-content-center">
-                <p-button [disabled]="characterCreationForm.invalid || !image" (onClick)="submit()" severity="success"
-                    label="Stwórz" type="button"></p-button>
+                <button pButton [disabled]="characterCreationForm.invalid || !image" (click)="submit()"
+                    severity="success" label="Stwórz" type="button" [loading]="status() === 'loading'"></button>
             </div>
         </ng-template>
     </p-card>

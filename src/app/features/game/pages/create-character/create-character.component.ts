@@ -6,21 +6,16 @@ import { DropdownModule } from 'primeng/dropdown';
 import { FileUploadModule } from 'primeng/fileupload';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
-import { CharacterCreationService } from '../../services/character-creation.service';
 import { CreateCharacter } from '../../interfaces/create-character';
-import { catchError, map, switchMap, tap, throwError } from 'rxjs';
-import { MessageService } from 'primeng/api';
-import { HttpErrorResponse } from '@angular/common/http';
-import { PlayerCharacter } from '../../../../shared/interfaces/player-character';
+import { map } from 'rxjs';
 import { StatisticsPanelComponent } from '../../components/statistics-panel/statistics-panel.component';
-import { PlayerService } from '../../../../shared/services/player.service';
-import { CharacterService } from '../../../../shared/services/character.service';
+import { CharacterClassesService } from '../../../../shared/services/character-classes.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Statistics } from '../../../../shared/interfaces/statistics';
-import { Router } from '@angular/router';
 import { StartingItemsService } from '../../services/starting-items.service';
 import { ItemComponent } from '../../../../shared/components/item/item.component';
 import { CharacterClass } from '../../../../shared/interfaces/character-class';
+import { PlayerCharacterService } from '../../../../shared/services/player-character.service';
 @Component({
   selector: 'jfudali-create-character',
   standalone: true,
@@ -40,12 +35,10 @@ import { CharacterClass } from '../../../../shared/interfaces/character-class';
 })
 export class CreateCharacterComponent {
   private fb = inject(FormBuilder);
-  private router = inject(Router);
-  private __characterCreation = inject(CharacterCreationService);
-  private _messageService = inject(MessageService);
-  private _playerService = inject(PlayerService);
-  private _characterService = inject(CharacterService);
+  private _playerCharacterService = inject(PlayerCharacterService);
+  private _characterService = inject(CharacterClassesService);
   private _startingItemsService = inject(StartingItemsService);
+  status = this._playerCharacterService.state.status;
   startingItems = this._startingItemsService.state.items;
   characterClasses = this._characterService.characterClasses;
   characterCreationForm = this.fb.nonNullable.group({
@@ -108,27 +101,9 @@ export class CreateCharacterComponent {
         name: this.characterCreationForm.value.name!,
         image: this.image,
         characterClassId: this.characterCreationForm.value.characterClass!.id,
+        equippedItems: [this.startingItem()!.tokenId.toString()],
       };
-      this.__characterCreation
-        .createCharacter(newCharacter)
-        .pipe(
-          tap((character) => this._playerService.setOnSignUp$.next(character)),
-          switchMap(() =>
-            this._startingItemsService.claimItem(this.startingItem()!.tokenId)
-          ),
-          catchError((err: HttpErrorResponse) => {
-            if (err.status == 409) {
-              this._messageService.add({
-                severity: 'error',
-                detail: 'Posiadasz już postać',
-              });
-            }
-            return throwError(() => err);
-          })
-        )
-        .subscribe(() => {
-          this.router.navigate(['/game/create-character']);
-        });
+      this._playerCharacterService.createCharacter$.next(newCharacter);
     }
   }
 }

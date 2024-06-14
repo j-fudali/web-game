@@ -44,38 +44,55 @@ export class WalletDataService {
     localStorage.getItem('isDisconnected')
   );
   private disconnectWallet$ = this.disconnect$.pipe(
-    switchMap(() => from(metamask.disconnect())),
+    switchMap(() =>
+      from(metamask.disconnect()).pipe(
+        catchError((err) => {
+          this.error$.next(err);
+          return of(undefined);
+        })
+      )
+    ),
     tap(() => localStorage.setItem('isDisconnected', 'true'))
   );
   private onConnect$ = this.connect$.pipe(
-    switchMap(() => from(metamask.connect({ client }))),
+    switchMap(() =>
+      from(metamask.connect({ client })).pipe(
+        catchError((err: RPCError) => {
+          let message;
+          switch (err.code) {
+            case 4001:
+              message = 'Połączenie zostało odrzucone';
+              break;
+            case -32002:
+              message = 'Zajrzyj do swojego portfela i zaakceptuj połączenie';
+              break;
+            default:
+              message = 'Nie można nawiązać połączenia';
+          }
+          this._messageService.add({
+            severity: 'error',
+            summary: 'Błąd',
+            detail: message,
+          });
+          this.error$.next(err);
+          return of(undefined);
+        })
+      )
+    ),
     tap(() => localStorage.setItem('isDisconnected', 'false')),
-    catchError((err: RPCError) => {
-      let message;
-      if (err.code == 4001) {
-        message = 'Połączenie zostało odrzucone';
-      } else {
-        message = 'Nie można nawiązać połączenia';
-      }
-      this._messageService.add({
-        severity: 'error',
-        summary: 'Błąd',
-        detail: message,
-      });
-      this.error$.next(err);
-      return of(undefined);
-    }),
     shareReplay(1)
   );
   private autoConnect$ = this.isDiconnected$.pipe(
-    switchMap((val) => {
-      if (!val || val == 'false') {
-        return from(metamask.autoConnect({ client })).pipe(
-          catchError(() => of(undefined))
-        );
-      }
-      return of(undefined);
-    }),
+    switchMap((val) =>
+      !val || val == 'false'
+        ? from(metamask.autoConnect({ client })).pipe(
+            catchError((err) => {
+              this.error$.next(err);
+              return of(undefined);
+            })
+          )
+        : of(undefined)
+    ),
     shareReplay(1)
   );
 
@@ -85,33 +102,24 @@ export class WalletDataService {
     this.disconnectWallet$
   ).pipe(
     switchMap((account) => {
-      if (account) {
-        return from(
-          getWalletBalance({
-            client,
-            chain,
-            address: account.address,
-            tokenAddress: gearcoin,
-          })
-        ).pipe(
-          map((balance) => ({
-            account,
-            balance,
-          }))
-        );
-      }
-      return of(undefined);
-    }),
-    catchError((err) => {
-      this.error$.next(err);
-      return throwError(() => err);
+      if (!account) return of(undefined);
+      return from(
+        getWalletBalance({
+          client,
+          chain,
+          address: account.address,
+          tokenAddress: gearcoin,
+        })
+      ).pipe(
+        map((balance) => ({
+          account,
+          balance,
+        }))
+      );
     })
   );
   private status$ = merge(
-    this.connection$.pipe(
-      map((data) => (data ? 'connected' : 'disconnected')),
-      catchError(() => of('disconnected' as const))
-    ),
+    this.connection$.pipe(map((data) => (data ? 'connected' : 'disconnected'))),
     this.disconnectWallet$.pipe(map(() => 'disconnected' as const)),
     this.connect$.pipe(map(() => 'loading' as const)),
     this.disconnect$.pipe(map(() => 'loading' as const)),

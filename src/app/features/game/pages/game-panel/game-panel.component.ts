@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnInit, effect, inject } from '@angular/core';
-import { PlayerService } from '../../../../shared/services/player.service';
 import { PlayerCharacterComponent } from '../../components/player-character/player-character.component';
 import { EquipmentComponent } from '../../components/equipment/equipment.component';
 import { ItemsSlotsComponent } from '../../components/items-slots/items-slots.component';
@@ -8,6 +7,7 @@ import { ItemsService } from '../../../../shared/services/items.service';
 import { OwnedItem } from '../../../../shared/interfaces/owned-item';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { PlayerCharacterService } from '../../../../shared/services/player-character.service';
 @Component({
   selector: 'jfudali-game-panel',
   standalone: true,
@@ -33,7 +33,7 @@ export class GamePanelComponent {
   equipmentOrientation: 'vertical' | 'horizontal' =
     window.innerWidth > 922 ? 'vertical' : 'horizontal';
   private _itemsService = inject(ItemsService);
-  private _playerService = inject(PlayerService);
+  private _playerService = inject(PlayerCharacterService);
   private _messageService = inject(MessageService);
   playerCharacter = this._playerService.state.playerCharacter;
   equipmentSaveStatus = this._itemsService.state.equipmentSaveStatus;

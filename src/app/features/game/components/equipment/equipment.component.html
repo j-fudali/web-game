@@ -6,10 +6,10 @@
     }
     @else {
     @if(avaliableItems().length > 0){
-    <p-carousel [orientation]="orientation()" [value]="avaliableItems()" verticalViewPortHeight="24rem" [numVisible]="2"
-        [numScroll]="1" [circular]="false">
+    <p-carousel [orientation]="orientation()" [value]="avaliableItems()" verticalViewPortHeight="16rem"
+        [numVisible]="orientation() === 'vertical' ? 1 : 2" [numScroll]="1" [circular]="false">
         <ng-template let-item pTemplate="item">
-            <jfudali-item class="h-16rem lg:h-12rem m-2" [item]="item" pDraggable
+            <jfudali-item class="h-16rem lg:h-full m-2" [item]="item" pDraggable
                 (contextmenu)="onContextMenu($event, item)" (onDragStart)="onDragStart(item)"
                 (onDragEnd)="onDragEnd()" />
 

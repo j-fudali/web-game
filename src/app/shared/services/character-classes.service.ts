@@ -8,7 +8,7 @@ import { take, tap } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
-export class CharacterService {
+export class CharacterClassesService {
   private http = inject(HttpClient);
   private baseUrl = environment.url + '/character-classes';
 

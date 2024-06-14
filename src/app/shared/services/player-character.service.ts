@@ -7,13 +7,21 @@ import {
   Observable,
   Subject,
   catchError,
+  forkJoin,
   map,
   merge,
   of,
   shareReplay,
+  switchMap,
+  take,
+  tap,
   throwError,
 } from 'rxjs';
 import { OwnedItem } from '../interfaces/owned-item';
+import { CreateCharacter } from '../../features/game/interfaces/create-character';
+import { MessageService } from 'primeng/api';
+import { StartingItemsService } from '../../features/game/services/starting-items.service';
+import { Router } from '@angular/router';
 
 export interface PlayerCharacterState {
   playerCharacter: Signal<PlayerCharacter | undefined>;
@@ -23,9 +31,12 @@ export interface PlayerCharacterState {
 @Injectable({
   providedIn: 'root',
 })
-export class PlayerService {
+export class PlayerCharacterService {
   private http = inject(HttpClient);
   private baseUrl = environment.url + '/player-character';
+  private _messageService = inject(MessageService);
+  private _startingItems = inject(StartingItemsService);
+  private router = inject(Router);
   private fetchedPlayerCharacter$ = this.http
     .get<PlayerCharacter>(this.baseUrl)
     .pipe(
@@ -38,13 +49,59 @@ export class PlayerService {
           return of(undefined);
         }
         return throwError(() => err);
-      })
+      }),
+      shareReplay(1)
     );
 
-  setOnSignUp$ = new Subject<PlayerCharacter>();
+  createCharacter$ = new Subject<CreateCharacter>();
   equipItem$ = new Subject<OwnedItem>();
   unequipItem$ = new Subject<OwnedItem>();
 
+  private onCreateCharacter$ = this.createCharacter$.pipe(
+    switchMap(({ name, image, characterClassId, equippedItems }) => {
+      const formdata = new FormData();
+      formdata.set('name', name);
+      formdata.set('image', image);
+      formdata.set('characterClassId', characterClassId);
+      formdata.set('equippedItems[]', equippedItems[0]);
+      return forkJoin([
+        this.http.post<PlayerCharacter>(this.baseUrl, formdata).pipe(
+          catchError((err) => {
+            if (err.status == 409) {
+              this._messageService.add({
+                summary: 'Błąd',
+                severity: 'error',
+                detail: 'Posiadasz już postać',
+              });
+            } else {
+              this._messageService.add({
+                summary: 'Błąd',
+                detail: 'Nie można utworzyć postaci',
+                severity: 'error',
+              });
+            }
+            return of(undefined);
+          })
+        ),
+        this._startingItems.claimItem(BigInt(equippedItems[0])).pipe(
+          catchError(() => {
+            return of(null);
+          })
+        ),
+      ]).pipe(
+        tap(() => {
+          this.router.navigate(['/game']);
+          this._messageService.add({
+            summary: 'Utworzono!',
+            detail: 'Postać została utworzona',
+            severity: 'success',
+          });
+        })
+      );
+    }),
+    map(([character, transaction]) => character),
+    shareReplay(1)
+  );
   private onEquip$: Observable<PlayerCharacter> = this.equipItem$.pipe(
     map((item) => ({
       ...this.state.playerCharacter()!,
@@ -60,13 +117,15 @@ export class PlayerService {
     }))
   );
   playerCharacter$ = merge(
-    this.setOnSignUp$,
+    this.onCreateCharacter$,
     this.fetchedPlayerCharacter$,
     this.onEquip$,
     this.onUnequip$
-  ).pipe(shareReplay(1));
+  );
   private status$ = merge(
-    this.equipItem$.pipe(map(() => 'loading' as const)),
+    merge(this.equipItem$, this.createCharacter$).pipe(
+      map(() => 'loading' as const)
+    ),
     this.playerCharacter$.pipe(map((pc) => (pc ? 'completed' : 'empty')))
   );
 

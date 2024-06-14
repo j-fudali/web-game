@@ -10,12 +10,12 @@
     </div>
 </p-chip>
 }
-@case('disconnected'){
-<button pButton severity="secondary" size="small" icon="pi pi-link" label="Połącz"
-    (click)="onMetamaskConnect.emit()"></button>
+@case('loading'){
+<button pButton size="small" rounded [loading]="true" (click)="onMetamaskConnect.emit()"></button>
 }
 @default{
-<button pButton size="small" rounded [loading]="true" (click)="onMetamaskConnect.emit()"></button>
+<button pButton severity="secondary" size="small" icon="pi pi-link" label="Połącz"
+    (click)="onMetamaskConnect.emit()"></button>
 }
 }
 <p-overlayPanel #op>

@@ -27,6 +27,9 @@ export class StartingItemsService {
   private _walletDataService = inject(WalletDataService);
   private error$ = new Subject<string>();
   private startingItems$ = from(getNFTs({ contract: startingWeapons })).pipe(
+    map((nfts) =>
+      nfts.filter((nft) => [BigInt(0), BigInt(1), BigInt(2)].includes(nft.id))
+    ),
     map((nfts) => nfts.map((nft) => ({ tokenId: nft.id, ...nft.metadata }))),
     map((nfts) => nfts.map((nft) => convertNftToItem(nft))),
     shareReplay(1)
