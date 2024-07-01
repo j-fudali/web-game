@@ -4,6 +4,7 @@ import { CreateCharacterComponent } from './pages/create-character/create-charac
 import { inject } from '@angular/core';
 import { map, tap } from 'rxjs';
 import { PlayerCharacterService } from '../../shared/services/player-character.service';
+import { EncounterComponent } from './pages/encounter/encounter.component';
 
 const alreadyHasCharacter: CanActivateFn = (route, state) => {
   const playerService = inject(PlayerCharacterService);
@@ -32,5 +33,9 @@ export default [
     path: 'create-character',
     component: CreateCharacterComponent,
     canActivate: [hasNotAnyCharacter],
+  },
+  {
+    path: 'play',
+    component: EncounterComponent,
   },
 ] as Route[];

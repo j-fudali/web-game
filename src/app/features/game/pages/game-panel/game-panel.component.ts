@@ -8,6 +8,8 @@ import { OwnedItem } from '../../../../shared/interfaces/owned-item';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { PlayerCharacterService } from '../../../../shared/services/player-character.service';
+import { ButtonModule } from 'primeng/button';
+import { RouterModule } from '@angular/router';
 @Component({
   selector: 'jfudali-game-panel',
   standalone: true,
@@ -17,6 +19,8 @@ import { PlayerCharacterService } from '../../../../shared/services/player-chara
     EquipmentComponent,
     ItemsSlotsComponent,
     ToastModule,
+    ButtonModule,
+    RouterModule,
   ],
   templateUrl: './game-panel.component.html',
   styleUrl: './game-panel.component.scss',
