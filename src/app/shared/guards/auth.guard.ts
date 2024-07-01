@@ -20,11 +20,18 @@ export const alreadyLoggedIn: CanActivateFn = (route, state) => {
 };
 export const walletConnected: CanActivateFn = (route, state) => {
   const walletDataService = inject(WalletDataService);
+  const authServuce = inject(AuthService);
   const status$ = toObservable(walletDataService.state.status);
   const router = inject(Router);
   return status$.pipe(
     filter((s) => s !== 'loading'),
-    map((status) => (status === 'connected' ? true : router.parseUrl('/home')))
+    map((status) => {
+      if (status === 'connected') {
+        return true;
+      }
+      authServuce.signOut$.next();
+      return router.parseUrl('/home');
+    })
   );
 };
 export const forceWalletConnected: CanDeactivateFn<StartComponent> = () => {
