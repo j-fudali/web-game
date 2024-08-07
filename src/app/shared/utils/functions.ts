@@ -4,6 +4,8 @@ import {
   Attributes,
 } from '../../features/game/services/starting-items.service';
 import { Item } from '../interfaces/item';
+import { PlayerCharacter } from '../interfaces/player-character';
+import { Enemy } from '../interfaces/enemy';
 
 export const convertIpfs = (image: string) =>
   `http://ipfs.io/ipfs/${image.substring(7)}`;
@@ -45,4 +47,23 @@ export const convertNftToItem = ({
     tokenId,
     image: image ? convertIpfs(image) : undefined,
   } as Item;
+};
+
+export const dealDamage = (
+  character: PlayerCharacter | Enemy,
+  damage: number
+) => {
+  return {
+    ...character,
+    statistics: {
+      ...character.statistics,
+      health: {
+        ...character.statistics.health,
+        actualValue:
+          character.statistics.health.actualValue - damage > 0
+            ? character.statistics.health.actualValue - damage
+            : 0,
+      },
+    },
+  };
 };

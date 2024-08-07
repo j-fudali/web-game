@@ -5,3 +5,4 @@ export interface Statistics {
   health: StatisticValues;
   powerPoints: StatisticValues;
 }
+export type EnemyStatistics = Omit<Statistics, 'energy'>;

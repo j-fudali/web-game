@@ -22,7 +22,7 @@
                 <p-dropdown placeholder="Wybierz klasę" [options]="characterClasses()" optionLabel="name"
                     formControlName="characterClass"></p-dropdown>
             </div>
-            <jfudali-statistics-panel [statistics]="statistics()" />
+            <jfudali-statistics-panel [statistics]="statistics()" [showEnergy]="true" />
         </form>
         @if(startingItem()){
         <jfudali-item class="mt-2 h-15rem" [item]="startingItem()!"></jfudali-item>

@@ -3,7 +3,7 @@
         [walletData]="walletDataState" (onDisconnectWallet)="disconnectWallet()" (onConnectMetamask)="connect$.next()"
         (onSignOut)="signOut()" class="z-5 sticky top-0"></jfudali-header>
     <router-outlet></router-outlet>
-    <jfudali-footer class="z-5"></jfudali-footer>
+    <jfudali-footer class=""></jfudali-footer>
 </div>
 <p-sidebar #sidebar [(visible)]="sidebarVisible" position="right">
     <p-menu [model]="navigationsList()" styleClass="w-full" (click)="sidebar.close($event)" />

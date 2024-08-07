@@ -22,6 +22,7 @@ import { CreateCharacter } from '../../features/game/interfaces/create-character
 import { MessageService } from 'primeng/api';
 import { StartingItemsService } from '../../features/game/services/starting-items.service';
 import { Router } from '@angular/router';
+import { dealDamage } from '../utils/functions';
 
 export interface PlayerCharacterState {
   playerCharacter: Signal<PlayerCharacter | undefined>;
@@ -56,7 +57,7 @@ export class PlayerCharacterService {
   createCharacter$ = new Subject<CreateCharacter>();
   equipItem$ = new Subject<OwnedItem>();
   unequipItem$ = new Subject<OwnedItem>();
-
+  dealDamageToPlayerCharacter$ = new Subject<number>();
   private onCreateCharacter$ = this.createCharacter$.pipe(
     switchMap(({ name, image, characterClassId, equippedItems }) => {
       const formdata = new FormData();
@@ -116,11 +117,19 @@ export class PlayerCharacterService {
         .equippedItems.filter((i) => i != item.tokenId),
     }))
   );
+  private onDealDamage$: Observable<PlayerCharacter> =
+    this.dealDamageToPlayerCharacter$.pipe(
+      map((damage) => {
+        const pc = this.playerCharacter()!;
+        return { ...pc, ...dealDamage(pc, damage) };
+      })
+    );
   playerCharacter$ = merge(
     this.onCreateCharacter$,
     this.fetchedPlayerCharacter$,
     this.onEquip$,
-    this.onUnequip$
+    this.onUnequip$,
+    this.onDealDamage$
   );
   private status$ = merge(
     merge(this.equipItem$, this.createCharacter$).pipe(

@@ -9,7 +9,10 @@ import {
 } from '@angular/core';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ToastModule } from 'primeng/toast';
-import { Statistics } from '../../../../shared/interfaces/statistics';
+import {
+  EnemyStatistics,
+  Statistics,
+} from '../../../../shared/interfaces/statistics';
 
 @Component({
   selector: 'jfudali-statistics-panel',
@@ -20,15 +23,17 @@ import { Statistics } from '../../../../shared/interfaces/statistics';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StatisticsPanelComponent {
-  statistics = model.required<Statistics>();
-
-  energyLabel = computed(
-    () =>
-      'Energia: ' +
-      this.statistics().energy.actualValue +
-      '/' +
-      this.statistics().energy.maximumValue
-  );
+  statistics = model.required<Statistics | EnemyStatistics>();
+  showEnergy = input.required<boolean>();
+  energyLabel = computed(() => {
+    const statistics = this.statistics();
+    return this.isStatistics(statistics)
+      ? 'Energia: ' +
+          statistics.energy.actualValue +
+          '/' +
+          statistics.energy.maximumValue
+      : undefined;
+  });
   healthLabel = computed(
     () =>
       'Zdrowie: ' +
@@ -43,12 +48,12 @@ export class StatisticsPanelComponent {
       '/' +
       this.statistics().powerPoints.maximumValue
   );
-  energyValue = computed(
-    () =>
-      (this.statistics().energy.actualValue /
-        this.statistics().energy.maximumValue) *
-      100
-  );
+  energyValue = computed(() => {
+    const statistics = this.statistics();
+    return this.isStatistics(statistics)
+      ? (statistics.energy.actualValue / statistics.energy.maximumValue) * 100
+      : undefined;
+  });
   healthValue = computed(
     () =>
       (this.statistics().health.actualValue /
@@ -61,4 +66,7 @@ export class StatisticsPanelComponent {
         this.statistics().powerPoints.maximumValue) *
       100
   );
+  private isStatistics(val: Statistics | EnemyStatistics): val is Statistics {
+    return 'energy' in val;
+  }
 }
