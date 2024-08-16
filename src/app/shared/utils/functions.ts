@@ -67,3 +67,21 @@ export const dealDamage = (
     },
   };
 };
+
+export const restoreHealth = (character: PlayerCharacter 
+  | Enemy, health: number
+) => {
+  return {
+    ...character,
+    statistics: {
+      ...character.statistics,
+      health: {
+        ...character.statistics.health,
+        actualValue:
+          character.statistics.health.actualValue + health < character.statistics.health.maximumValue
+            ? character.statistics.health.actualValue + health
+            : character.statistics.health.maximumValue,
+      },
+    },
+  };
+}

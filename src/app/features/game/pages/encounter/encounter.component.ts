@@ -20,6 +20,7 @@ import {
   DecisionEncounter,
   EnemyEncounter,
 } from '../../../../shared/interfaces/encounter';
+import { tap } from 'rxjs';
 @Component({
   selector: 'jfudali-encounter',
   standalone: true,
@@ -65,6 +66,8 @@ export class EncounterComponent implements OnInit {
   decisions = computed(
     () => (this.randomEncounter() as DecisionEncounter).decisions
   );
+  effect = this._randomEncounterService.state.effect
+
   enemy = computed(() => (this.randomEncounter() as EnemyEncounter).enemy);
   encounterStatus = this._randomEncounterService.state.status;
   encounterError = this._randomEncounterService.state.error;
@@ -100,5 +103,11 @@ export class EncounterComponent implements OnInit {
     this._randomEncounterService.dealDamageToEnemy$.next(
       fightResult.enemyDamage
     );
+  }
+
+  selectDecision(decision: Decision){
+    this.selectedDecision = decision;
+    this._randomEncounterService.selectDecision$.next({encounterId: this.randomEncounter()!.id, decision: decision.text})
+    this.selectedDecision = undefined
   }
 }

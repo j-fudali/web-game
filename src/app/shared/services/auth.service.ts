@@ -45,7 +45,6 @@ export class AuthService {
     switchMap((loginCredentials) =>
       this.http.post<TokenResponse>(this.url + '/login', loginCredentials).pipe(
         catchError((err: HttpErrorResponse) => {
-          console.log(err);
           let message;
           switch (err.status) {
             case 401:

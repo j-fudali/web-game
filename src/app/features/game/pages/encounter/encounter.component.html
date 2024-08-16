@@ -3,7 +3,7 @@
     <jfudali-player-character class="flex-order-2 lg:flex-order-1 md:w-9 lg:w-3 " orientation="vertical"
         [playerCharacter]="pc" />
     }
-    <div class="flex flex-column gap-2 flex-order-1 lg:flex-order-2  lg:flex-1 md:w-9 lg:w-auto">
+    <div class="relative flex flex-column gap-2 flex-order-1 lg:flex-order-2  lg:flex-1 md:w-9 lg:w-auto">
 
         @if(encounterStatus() === 'error' || fightStatus() === 'error' ){
         <div class="flex flex-column justify-content-center align-items-stretch">
@@ -19,33 +19,29 @@
         }
         @else {
         @if (encounterStatus() === 'loading') {
-        <div class="flex-1 flex justify-content-center align-items-center">
+        <div class="absolute h-full w-full flex justify-content-center align-items-center">
             <p-progressSpinner />
         </div>
         }
-        @else {
-        @if(decisions()){
-        <div class="flex-1 flex gap-4 flex-column align-items-stretch">
-            <jfudali-encounter-details [title]=" randomEncounter()!.title"
-                [description]="randomEncounter()!.description" />
-            <jfudali-encounter-decisions class="flex-1" (selectedDecision)=" selectedDecision=$event"
-                [decisions]="decisions()" />
-            @if(selectedDecision){
-            <button pButton label="Następne" severity="info" (click)="loadEncounter()"></button>
+        @else if (encounterStatus() === 'completed') {
+            @if(decisions()){
+                <div class="flex-1 flex gap-4 flex-column align-items-stretch">
+                    <jfudali-encounter-details [title]=" randomEncounter()!.title"
+                    [description]="randomEncounter()!.description" />
+                    <jfudali-encounter-decisions class="flex-1" [disabled]="selectedDecision ? true : false" (selectedDecision)="selectDecision($event)"
+                    [decisions]="decisions()" />
+                </div>
             }
-
-        </div>
+    
+            @else {
+            <jfudali-fight class="h-full" (skip)="skip($event)" (dealDamageEnemy)="dealDamage($event, 'enemy')"
+                (dealDamagePlayerCharacter)="dealDamage($event, 'player-character')" (loadEncounter)="loadEncounter()"
+                (simulateFight)="simulateFight()" [title]="randomEncounter()!.title"
+                [description]="randomEncounter()!.description" [fight]="fight()!" [enemy]="enemy()" [status]="fightStatus()"
+                [playerCharacterName]="playerCharacter()!.name" [playerCharacterEquippedWeapon]="equippedWeapon()!" />
+            }
         }
 
-        @else {
-        <jfudali-fight class="h-full" (skip)="skip($event)" (dealDamageEnemy)="dealDamage($event, 'enemy')"
-            (dealDamagePlayerCharacter)="dealDamage($event, 'player-character')" (loadEncounter)="loadEncounter()"
-            (simulateFight)="simulateFight()" [title]="randomEncounter()!.title"
-            [description]="randomEncounter()!.description" [fight]="fight()!" [enemy]="enemy()" [status]="fightStatus()"
-            [playerCharacterName]="playerCharacter()!.name" [playerCharacterEquippedWeapon]="equippedWeapon()!" />
-        }
-
-        }
         }
 
     </div>

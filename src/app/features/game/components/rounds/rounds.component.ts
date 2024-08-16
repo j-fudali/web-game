@@ -101,7 +101,6 @@ export class RoundsComponent {
     effect(() => {
       if (this.currentIndex() < this.rounds().length) {
         const round = this.rounds()[this.currentIndex()];
-        console.log(round);
         if (round.enemyHitPointsValue > round.playerHitPointsValue) {
           this.dealDamagePlayerCharacter.emit(round.dealtDamage);
         } else if (round.playerHitPointsValue > round.enemyHitPointsValue) {
@@ -113,8 +112,6 @@ export class RoundsComponent {
   skip() {
     const pcDamage = this.calculateRestOfDamage('player-character');
     const enemyDamage = this.calculateRestOfDamage('enemy');
-    console.log(pcDamage);
-    console.log(enemyDamage);
     this.skipToLast$.next();
     this.onSkip.emit({ pcDamage, enemyDamage });
   }

@@ -16,6 +16,7 @@ import { Decision } from '../../../../shared/interfaces/decision';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EncounterDecisionsComponent {
+  disabled = input.required<boolean>()
   decisions = input.required<Decision[]>();
   selectedDecision = output<Decision>();
 }

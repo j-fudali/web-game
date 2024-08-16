@@ -1,1 +1,1 @@
-<p-listbox [options]="decisions()" optionLabel="text" (onChange)="selectedDecision.emit($event.value)" />
+<p-listbox [options]="decisions()" [disabled]="disabled()" optionLabel="text" (onChange)="selectedDecision.emit($event.value)" />

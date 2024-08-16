@@ -14,7 +14,6 @@ import {
   catchError,
   combineLatest,
   filter,
-  lastValueFrom,
   map,
   merge,
   of,
@@ -22,7 +21,6 @@ import {
   switchMap,
   take,
   tap,
-  withLatestFrom,
 } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
@@ -30,10 +28,18 @@ import { PlayerCharacterService } from '../../../shared/services/player-characte
 import { Statistics } from '../../../shared/interfaces/statistics';
 import { Enemy } from '../../../shared/interfaces/enemy';
 import { dealDamage } from '../../../shared/utils/functions';
+import { Effect } from '../../../shared/interfaces/effect';
+import { SelectDecision } from '../interfaces/select-decision';
+import { DialogService } from 'primeng/dynamicdialog';
+import { EffectDisplayDialogComponent } from '../components/effect-display-dialog/effect-display-dialog.component';
+import { gearcoin } from '../../../shared/constants/thirdweb.constants';
+import { prepareContractCall, sendTransaction } from 'thirdweb';
+import { claimTo } from 'thirdweb/extensions/erc1155';
 
 export interface EncountersState {
   randomEncounter: Signal<EncounterOnDraw | undefined>;
-  status: Signal<'completed' | 'loading' | 'error'>;
+  effect: Signal<Effect | undefined>;
+  status: Signal<'completed' | 'loading' | 'effect-loaded' | 'error'>;
   error: Signal<string | undefined>;
 }
 
@@ -43,10 +49,32 @@ export interface EncountersState {
 export class RandomEncounterService {
   private _playerCharacterService = inject(PlayerCharacterService);
   private http = inject(HttpClient);
-  private readonly baseUrl = environment.url + '/encounters/random';
+  private dialog = inject(DialogService)
+  private readonly baseUrl = environment.url + '/encounters';
   dealDamageToEnemy$ = new Subject<number>();
   loadRandomEncounter$ = new Subject<void>();
+  selectDecision$ = new Subject<SelectDecision>()
   private error$ = new Subject<Error>();
+
+  private onDecisionSelect$ = this.selectDecision$.pipe(
+    switchMap(({encounterId, decision}) => this.selectDecision(encounterId, decision)),
+    filter((effect) => effect !== undefined),
+    tap((effect) => this.resolveEffect(effect as Effect)),
+    tap((effect) => {
+      const ref = this.dialog.open(EffectDisplayDialogComponent, {
+        data: {
+          effect
+        },
+        closable: false,
+        header: 'Efekt'
+      })
+      if(ref)
+        ref.onClose.subscribe((nextEncounter: boolean) => {
+          if(nextEncounter) this.loadRandomEncounter$.next()
+        })
+    }), 
+    shareReplay(1)
+  )
   private onLoadRandomEncounter$ = combineLatest([
     this.loadRandomEncounter$,
     toObservable(this._playerCharacterService.state.playerCharacter).pipe(
@@ -72,8 +100,8 @@ export class RandomEncounterService {
   );
   private status$ = merge(
     this.loadRandomEncounter$.pipe(map(() => 'loading' as const)),
-    this.onLoadRandomEncounter$.pipe(
-      filter((encounter) => encounter !== undefined),
+    merge(this.onLoadRandomEncounter$, this.onDecisionSelect$).pipe(
+      filter((res) => res !== undefined),
       map(() => 'completed' as const)
     ),
     this.error$.pipe(map(() => 'error' as const))
@@ -85,14 +113,16 @@ export class RandomEncounterService {
   private error = toSignal(this.error$.pipe(map((err) => err.message)), {
     initialValue: undefined,
   });
+  private effect = toSignal(this.onDecisionSelect$, { initialValue: undefined})
   state: EncountersState = {
     randomEncounter: this.randomEncounter,
+    effect: this.effect,
     status: this.status,
     error: this.error,
   };
   private loadRandomEncounter(level: number) {
     return this.http
-      .get<EncounterOnDraw>(this.baseUrl, {
+      .get<EncounterOnDraw>(this.baseUrl + '/random', {
         params: new HttpParams().set('difficulty', level),
       })
       .pipe(
@@ -121,5 +151,32 @@ export class RandomEncounterService {
           return of(undefined);
         })
       );
+  }
+  private selectDecision(encounterId: string, decision: string) {
+    return this.http.post<Effect>(
+      `${this.baseUrl}/${encounterId}/select-decision`,
+      {
+        decisionText: decision,
+      }
+    ).pipe(
+        catchError((err: HttpErrorResponse) => {
+          this.error$.next(err);
+          return of(undefined)
+        })
+    )
+  }
+  private resolveEffect(effect: Effect){
+    if(effect.goldAmount){
+      //Thirdweb
+      //Claim Gearcoin
+    }
+    if(effect.healthAmount){
+      if(effect.healthAmount >= 0){
+        this._playerCharacterService.restoreHealth$.next(effect.healthAmount)
+      }
+      else{
+        this._playerCharacterService.dealDamageToPlayerCharacter$.next(effect.healthAmount * (-1))
+      }
+    }
   }
 }
