@@ -1,15 +1,11 @@
 import { Injectable, Signal, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Subject, from, map, merge, shareReplay, tap } from 'rxjs';
-import { claimTo, getNFT, getNFTs } from 'thirdweb/extensions/erc1155';
-import {
-  metamask,
-  startingWeapons,
-} from '../../../shared/constants/thirdweb.constants';
+import { Subject, from, map, merge, shareReplay } from 'rxjs';
+import { claimTo, getNFTs } from 'thirdweb/extensions/erc1155';
 import { Item } from '../../../shared/interfaces/item';
-import { convertIpfs, convertNftToItem } from '../../../shared/utils/functions';
-import { WalletDataService } from '../../../shared/services/wallet-data.service';
+import { convertNftToItem } from '../../../shared/utils/functions';
 import { sendTransaction } from 'thirdweb';
+import { ThirdwebService } from '../../../shared/services/thirdweb.service';
 
 export interface StartingItemsState {
   items: Signal<Item[]>;
@@ -24,9 +20,9 @@ export type Attributes = Omit<Item, 'name' | 'image'>;
   providedIn: 'root',
 })
 export class StartingItemsService {
-  private _walletDataService = inject(WalletDataService);
+  private _thirdwebService = inject(ThirdwebService)
   private error$ = new Subject<string>();
-  private startingItems$ = from(getNFTs({ contract: startingWeapons })).pipe(
+  private startingItems$ = this._thirdwebService.getStartingItems().pipe(
     map((nfts) =>
       nfts.filter((nft) => [BigInt(0), BigInt(1), BigInt(2)].includes(nft.id))
     ),
@@ -44,19 +40,4 @@ export class StartingItemsService {
     items: this.startingItems,
     status: this.status,
   };
-
-  claimItem(tokenId: bigint) {
-    const account = this._walletDataService.state.data()!.account;
-    return from(
-      sendTransaction({
-        transaction: claimTo({
-          contract: startingWeapons,
-          to: account?.address,
-          tokenId,
-          quantity: 1n,
-        }),
-        account,
-      })
-    );
-  }
 }

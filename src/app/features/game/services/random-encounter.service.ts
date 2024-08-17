@@ -32,10 +32,6 @@ import { Effect } from '../../../shared/interfaces/effect';
 import { SelectDecision } from '../interfaces/select-decision';
 import { DialogService } from 'primeng/dynamicdialog';
 import { EffectDisplayDialogComponent } from '../components/effect-display-dialog/effect-display-dialog.component';
-import { gearcoin } from '../../../shared/constants/thirdweb.constants';
-import { prepareContractCall, sendTransaction } from 'thirdweb';
-import { claimTo } from 'thirdweb/extensions/erc1155';
-
 export interface EncountersState {
   randomEncounter: Signal<EncounterOnDraw | undefined>;
   effect: Signal<Effect | undefined>;

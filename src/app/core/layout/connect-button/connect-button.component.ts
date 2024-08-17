@@ -9,12 +9,12 @@ import {
 } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { ChipModule } from 'primeng/chip';
-import { WalletDataState } from '../../../shared/services/wallet-data.service';
 import { AvatarModule } from 'primeng/avatar';
 import { OverlayPanel, OverlayPanelModule } from 'primeng/overlaypanel';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { metamaskIcon } from '../../../shared/constants/config.constants';
+import { WalletDataState } from '../../../shared/services/thirdweb.service';
 @Component({
   selector: 'jfudali-connect-button',
   standalone: true,

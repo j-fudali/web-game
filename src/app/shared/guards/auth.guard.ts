@@ -1,12 +1,12 @@
 import { inject } from '@angular/core';
 import { CanDeactivateFn, Router, type CanActivateFn } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { WalletDataService } from '../services/wallet-data.service';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ConnectWalletDialogComponent } from '../components/connect-wallet-dialog/connect-wallet-dialog.component';
 import { defaultIfEmpty, filter, map, of, switchMap, take, tap } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { StartComponent } from '../../features/home/pages/start/start.component';
+import { ThirdwebService } from '../services/thirdweb.service';
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
@@ -19,9 +19,9 @@ export const alreadyLoggedIn: CanActivateFn = (route, state) => {
   return authService.getToken() != null ? router.parseUrl('/game') : true;
 };
 export const walletConnected: CanActivateFn = (route, state) => {
-  const walletDataService = inject(WalletDataService);
+  const thirdwebService = inject(ThirdwebService);
   const authServuce = inject(AuthService);
-  const status$ = toObservable(walletDataService.state.status);
+  const status$ = toObservable(thirdwebService.state.status);
   const router = inject(Router);
   return status$.pipe(
     filter((s) => s !== 'loading'),
@@ -35,10 +35,10 @@ export const walletConnected: CanActivateFn = (route, state) => {
   );
 };
 export const forceWalletConnected: CanDeactivateFn<StartComponent> = () => {
-  const walletDataService = inject(WalletDataService);
+  const thirdwebService = inject(ThirdwebService);
   const dialogService = inject(DialogService);
-  const status$ = toObservable(walletDataService.state.status);
-  if (!walletDataService.state.data()) {
+  const status$ = toObservable(thirdwebService.state.status);
+  if (!thirdwebService.state.data()) {
     const ref = dialogService.open(ConnectWalletDialogComponent, {
       header: 'Połącz portfel',
       contentStyle: { overflow: 'auto' },
@@ -48,7 +48,7 @@ export const forceWalletConnected: CanDeactivateFn<StartComponent> = () => {
     });
     return ref.onClose.pipe(
       filter((connecting) => connecting === true),
-      tap(() => walletDataService.connect$.next()),
+      tap(() => thirdwebService.connect$.next()),
       switchMap(() => status$),
       map((status) => (status == 'connected' ? true : false)),
       take(1),

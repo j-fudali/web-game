@@ -4,5 +4,6 @@
             "style": "scss",
             "externalTemplate": true
         }
-    }
+    },
+    "editor.formatOnSave": true
 }

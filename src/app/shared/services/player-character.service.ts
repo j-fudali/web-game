@@ -13,19 +13,18 @@ import {
   of,
   shareReplay,
   switchMap,
-  take,
   tap,
   throwError,
 } from 'rxjs';
 import { OwnedItem } from '../interfaces/owned-item';
 import { CreateCharacter } from '../../features/game/interfaces/create-character';
 import { MessageService } from 'primeng/api';
-import { StartingItemsService } from '../../features/game/services/starting-items.service';
 import { Router } from '@angular/router';
 import { dealDamage, restoreHealth } from '../utils/functions';
+import { ThirdwebService } from './thirdweb.service';
 
 export interface PlayerCharacterState {
-  playerCharacter: Signal<PlayerCharacter | undefined>;
+  playerCharacter: Signal<PlayerCharacter | null | undefined>;
   status: Signal<'completed' | 'loading' | 'empty'>;
 }
 
@@ -36,7 +35,7 @@ export class PlayerCharacterService {
   private http = inject(HttpClient);
   private baseUrl = environment.url + '/player-character';
   private _messageService = inject(MessageService);
-  private _startingItems = inject(StartingItemsService);
+  private _thirdwebService = inject(ThirdwebService)
   private router = inject(Router);
   private fetchedPlayerCharacter$ = this.http
     .get<PlayerCharacter>(this.baseUrl)
@@ -47,7 +46,7 @@ export class PlayerCharacterService {
       })),
       catchError((err: HttpErrorResponse) => {
         if (err.status == 404) {
-          return of(undefined);
+          return of(null);
         }
         return throwError(() => err);
       }),
@@ -85,7 +84,7 @@ export class PlayerCharacterService {
             return of(undefined);
           })
         ),
-        this._startingItems.claimItem(BigInt(equippedItems[0])).pipe(
+        this._thirdwebService.claimStartingWeapon(BigInt(equippedItems[0])).pipe(
           catchError(() => {
             return of(null);
           })
@@ -132,7 +131,7 @@ export class PlayerCharacterService {
       return {...pc, ...restoreHealth(pc, health)}
     })
   )
-  playerCharacter$ = merge(
+  private playerCharacter$ = merge(
     this.onCreateCharacter$,
     this.fetchedPlayerCharacter$,
     this.onEquip$,
@@ -147,7 +146,7 @@ export class PlayerCharacterService {
     this.playerCharacter$.pipe(map((pc) => (pc ? 'completed' : 'empty')))
   );
 
-  private playerCharacter = toSignal<PlayerCharacter | undefined>(
+  private playerCharacter = toSignal<PlayerCharacter | null | undefined>(
     this.playerCharacter$,
     {
       initialValue: undefined,
