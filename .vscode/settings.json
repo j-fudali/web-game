@@ -1,9 +1,4 @@
 {
-    "angular-schematics.schematicsDefaultOptions": {
-        "angular-*": {
-            "style": "scss",
-            "externalTemplate": true
-        }
-    },
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
 }

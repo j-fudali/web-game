@@ -10,6 +10,7 @@ import {
   EnemyEncounterDto,
 } from '../../../shared/interfaces/encounter';
 import {
+  EMPTY,
   Subject,
   catchError,
   combineLatest,
@@ -21,6 +22,7 @@ import {
   switchMap,
   take,
   tap,
+  withLatestFrom,
 } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
@@ -32,6 +34,9 @@ import { Effect } from '../../../shared/interfaces/effect';
 import { SelectDecision } from '../interfaces/select-decision';
 import { DialogService } from 'primeng/dynamicdialog';
 import { EffectDisplayDialogComponent } from '../components/effect-display-dialog/effect-display-dialog.component';
+import { Router } from '@angular/router';
+import { GetRestDialogComponent } from '../components/get-rest-dialog/get-rest-dialog.component';
+import { PlayerCharacter } from '../../../shared/interfaces/player-character';
 export interface EncountersState {
   randomEncounter: Signal<EncounterOnDraw | undefined>;
   effect: Signal<Effect | undefined>;
@@ -46,6 +51,7 @@ export class RandomEncounterService {
   private _playerCharacterService = inject(PlayerCharacterService);
   private http = inject(HttpClient);
   private dialog = inject(DialogService)
+  private router = inject(Router)
   private readonly baseUrl = environment.url + '/encounters';
   dealDamageToEnemy$ = new Subject<number>();
   loadRandomEncounter$ = new Subject<void>();
@@ -71,14 +77,24 @@ export class RandomEncounterService {
     }), 
     shareReplay(1)
   )
-  private onLoadRandomEncounter$ = combineLatest([
-    this.loadRandomEncounter$,
-    toObservable(this._playerCharacterService.state.playerCharacter).pipe(
-      filter((pc) => pc !== undefined),
-      take(1)
-    ),
-  ]).pipe(
-    map(([_, pc]) => pc),
+  private onLoadRandomEncounter$ = this.loadRandomEncounter$.pipe(
+    withLatestFrom(  toObservable(this._playerCharacterService.state.playerCharacter).pipe(
+      filter((pc) => pc !== undefined && pc !== null),
+    )),
+    switchMap(([_, pc]) => {
+      if((pc as PlayerCharacter).statistics.health.actualValue === 0){
+        this.router.navigate(['/'])
+        const ref = this.dialog.open(GetRestDialogComponent, {
+          header: 'Odpoczynek'
+        })
+        ref.onClose.subscribe((rest) => {
+          if(rest) this._playerCharacterService.rest$.next()
+        })
+        return EMPTY;
+      }
+    
+      return of(pc);
+    }),
     switchMap((pc) => this.loadRandomEncounter(pc!.level)),
     shareReplay(1)
   );

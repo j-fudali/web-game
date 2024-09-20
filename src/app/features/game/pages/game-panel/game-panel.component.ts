@@ -37,9 +37,10 @@ export class GamePanelComponent {
   equipmentOrientation: 'vertical' | 'horizontal' =
     window.innerWidth > 922 ? 'vertical' : 'horizontal';
   private _itemsService = inject(ItemsService);
-  private _playerService = inject(PlayerCharacterService);
+  private _playerCharacterService = inject(PlayerCharacterService);
   private _messageService = inject(MessageService);
-  playerCharacter = this._playerService.state.playerCharacter;
+  playerCharacter = this._playerCharacterService.state.playerCharacter;
+  playerCharacterStatus = this._playerCharacterService.state.status
   equipmentSaveStatus = this._itemsService.state.equipmentSaveStatus;
   avaliableItems = this._itemsService.state.avaliableItems;
   equippedItems = this._itemsService.state.equippedItems;
@@ -63,16 +64,22 @@ export class GamePanelComponent {
       }
     });
   }
+  rest(){
+    this._playerCharacterService.rest$.next()
+  }
+  stopRest(){
+    this._playerCharacterService.stopRest$.next()
+  }
   equip() {
-    if (this.draggedItem) this._playerService.equipItem$.next(this.draggedItem);
+    if (this.draggedItem) this._playerCharacterService.equipItem$.next(this.draggedItem);
   }
   unequip() {
     if (this.draggedItem)
-      this._playerService.unequipItem$.next(this.draggedItem);
+      this._playerCharacterService.unequipItem$.next(this.draggedItem);
   }
 
   replaceItem(item: OwnedItem) {
-    this._playerService.unequipItem$.next(item);
-    if (this.draggedItem) this._playerService.equipItem$.next(this.draggedItem);
+    this._playerCharacterService.unequipItem$.next(item);
+    if (this.draggedItem) this._playerCharacterService.equipItem$.next(this.draggedItem);
   }
 }

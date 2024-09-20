@@ -1,6 +1,12 @@
 <div class="grid grid-nogutter gap-2 p-3 justify-content-center align-items-stretch">
-    <div class="col-12 md:col-8">
-        <a routerLink="play" pButton label="Graj" class="w-full"></a>
+    <div class="col-12 md:col-8 flex gap-2">
+        <a routerLink="play" pButton label="Graj" class="w-6"></a>
+        @if(playerCharacterStatus() === 'resting'){
+            <button pButton label="Zakończ" class="w-6" severity="success" (click)="stopRest()"></button>
+        }
+        @else{
+            <button [disabled]="playerCharacter()?.statistics?.health?.actualValue === playerCharacter()?.statistics?.health?.maximumValue" pButton label="Odpocznij" class="w-6" severity="warning" (click)="rest()"></button>
+        }
     </div>
     <jfudali-player-character class="col-12 md:col-8" [playerCharacter]="playerCharacter()!" />
     <jfudali-items-slots #slots class="col-12 md:col-8 lg:col-4" (replaceOnDrop)="replaceItem($event)"
