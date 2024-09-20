@@ -21,7 +21,7 @@
                 <span>Klatka</span>
             </div>
             @if(chestItem()){
-            <jfudali-item class="z-2 absolute top-0 -left- w-full h-full" pDraggable
+            <jfudali-item class="z-2 absolute top-0 -left- w-full h-8rem" pDraggable
                 (contextmenu)="onContextMenu($event, chestItem())" (onDragStart)="onDragStart(chestItem()!)"
                 (onDragEnd)="onDragEnd()" [item]="chestItem()!" />
             }

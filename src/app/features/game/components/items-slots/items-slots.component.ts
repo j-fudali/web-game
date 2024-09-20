@@ -32,13 +32,13 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 })
 export class ItemsSlotsComponent {
   @ViewChild('cm') cm: ContextMenu | undefined;
+  equippedItems = input.required<OwnedItem[]>();
+  status = input.required<'completed' | 'loading'>();
   equipOnDrop = output<void>();
   onCmUnequip = output<void>();
   replaceOnDrop = output<OwnedItem>();
-  avaliableItems = input.required<OwnedItem[]>();
-  draggedItem = model.required<OwnedItem | null>();
-  equippedItems = input.required<OwnedItem[]>();
-  status = input.required<'completed' | 'loading'>();
+  avaliableItems = input<OwnedItem[]>();
+  draggedItem = model<OwnedItem | null>();
 
   actions: MenuItem[] = [
     {
@@ -77,7 +77,7 @@ export class ItemsSlotsComponent {
   }
   drop() {
     if (!this.draggedItem()) return;
-    if (!this.avaliableItems().find((i) => i == this.draggedItem())) return;
+    if (!this.avaliableItems()?.find((i) => i == this.draggedItem())) return;
     const itemAlreadySet = this.equippedItems().find(
       (i) =>
         i.type == this.draggedItem()?.type &&

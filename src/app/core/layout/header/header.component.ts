@@ -8,11 +8,11 @@ import {
 } from '@angular/core';
 import { ToolbarModule } from 'primeng/toolbar';
 import { ConnectButtonComponent } from '../connect-button/connect-button.component';
-import { WalletDataState } from '../../../shared/services/wallet-data.service';
 import { MenubarModule } from 'primeng/menubar';
 import { MenuItem } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { ButtonGroupModule } from 'primeng/buttongroup';
+import { WalletDataState } from '../../../shared/services/thirdweb.service';
 @Component({
   selector: 'jfudali-header',
   standalone: true,

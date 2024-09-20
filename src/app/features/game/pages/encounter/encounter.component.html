@@ -1,0 +1,49 @@
+<div class="flex flex-column lg:flex-row gap-4 md:align-items-center lg:align-items-stretch m-3">
+    @if(playerCharacter(); as pc){
+    <jfudali-player-character class="flex-order-2 lg:flex-order-1 md:w-9 lg:w-3 " orientation="vertical"
+        [playerCharacter]="pc" />
+    }
+    <div class="relative flex flex-column gap-2 flex-order-1 lg:flex-order-2  lg:flex-1 md:w-9 lg:w-auto">
+
+        @if(encounterStatus() === 'error' || fightStatus() === 'error' ){
+        <div class="flex flex-column justify-content-center align-items-stretch">
+            <p-messages severity="info">
+                <ng-template pTemplate>
+                    <div class="w-full flex  justify-content-between align-items-center">
+                        {{encounterError() || fightError()}}
+                        <button pButton link [routerLink]=" ['..']">Powrót</button>
+                    </div>
+                </ng-template>
+            </p-messages>
+        </div>
+        }
+        @else {
+        @if (encounterStatus() === 'loading') {
+        <div class="absolute h-full w-full flex justify-content-center align-items-center">
+            <p-progressSpinner />
+        </div>
+        }
+        @else if (encounterStatus() === 'completed') {
+            @if(decisions()){
+                <div class="flex-1 flex gap-4 flex-column align-items-stretch">
+                    <jfudali-encounter-details [title]=" randomEncounter()!.title"
+                    [description]="randomEncounter()!.description" />
+                    <jfudali-encounter-decisions class="flex-1" [disabled]="selectedDecision ? true : false" (selectedDecision)="selectDecision($event)"
+                    [decisions]="decisions()" />
+                </div>
+            }
+    
+            @else {
+            <jfudali-fight class="h-full" (skip)="skip($event)" (dealDamageEnemy)="dealDamage($event, 'enemy')"
+                (dealDamagePlayerCharacter)="dealDamage($event, 'player-character')" (loadEncounter)="loadEncounter()"
+                (simulateFight)="simulateFight()" [title]="randomEncounter()!.title"
+                [description]="randomEncounter()!.description" [fight]="fight()!" [enemy]="enemy()" [status]="fightStatus()"
+                [playerCharacterName]="playerCharacter()!.name" [playerCharacterEquippedWeapon]="equippedWeapon()!" />
+            }
+        }
+
+        }
+
+    </div>
+
+</div>

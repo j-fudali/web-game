@@ -1,23 +1,14 @@
-import { Injectable, Signal, computed, inject, signal } from '@angular/core';
-import { getOwnedNFTs } from 'thirdweb/extensions/erc1155';
-import { startingWeapons } from '../constants/thirdweb.constants';
-import { WalletDataService } from './wallet-data.service';
+import { Injectable, Signal, computed, inject } from '@angular/core';
 import {
   Observable,
-  Subject,
   catchError,
   debounceTime,
   filter,
-  from,
   map,
   merge,
   of,
-  scan,
   shareReplay,
-  startWith,
   switchMap,
-  tap,
-  withLatestFrom,
 } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { convertNftToItem } from '../utils/functions';
@@ -26,6 +17,7 @@ import { PlayerCharacter } from '../interfaces/player-character';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { PlayerCharacterService } from './player-character.service';
+import { ThirdwebService } from './thirdweb.service';
 
 export interface ItemsState {
   avaliableItems: Signal<OwnedItem[]>;
@@ -39,19 +31,14 @@ export interface ItemsState {
 })
 export class ItemsService {
   private http = inject(HttpClient);
-  private _walletDataService = inject(WalletDataService);
+  private _thirdwebService = inject(ThirdwebService)
   private _playerService = inject(PlayerCharacterService);
   private fetchOwnedItems$ = toObservable(
-    this._walletDataService.state.data
+    this._thirdwebService.state.data
   ).pipe(
     switchMap((wallet) => {
       if (wallet)
-        return from(
-          getOwnedNFTs({
-            contract: startingWeapons,
-            address: this._walletDataService.state.data()!.account.address,
-          })
-        ).pipe(
+        return this._thirdwebService.getOwnedItems().pipe(
           map((nfts) =>
             nfts.map((nft) => ({
               tokenId: nft.id,
