@@ -21,6 +21,7 @@ import {
   EnemyEncounter,
 } from '../../../../shared/interfaces/encounter';
 import { tap } from 'rxjs';
+import { EquipmentService } from '../../../../shared/services/equipment.service';
 @Component({
   selector: 'jfudali-encounter',
   standalone: true,
@@ -44,11 +45,12 @@ import { tap } from 'rxjs';
 export class EncounterComponent implements OnInit {
   private _playerCharacterService = inject(PlayerCharacterService);
   private _itemsService = inject(ItemsService);
+  private _equipmentService = inject(EquipmentService);
   private _randomEncounterService = inject(RandomEncounterService);
   private _fightService = inject(FightService);
   playerCharacter = this._playerCharacterService.state.playerCharacter;
-  equippedItems = this._itemsService.state.equippedItems;
-  availableItems = this._itemsService.state.avaliableItems;
+  equippedItems = this._equipmentService.state.equippedItems;
+  availableItems = this._equipmentService.state.avaliableItems;
   itemsStatus = this._itemsService.state.status;
   equippedWeapon = computed(() =>
     this.equippedItems().find((item) => item.type === 'weapon')

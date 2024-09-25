@@ -5,6 +5,7 @@ import {
   forceWalletConnected,
   walletConnected,
 } from './shared/guards/auth.guard';
+import { PlayerCharacterService } from './shared/services/player-character.service';
 
 export const routes: Routes = [
   {
@@ -36,6 +37,11 @@ export const routes: Routes = [
     path: 'game',
     loadChildren: () => import('./features/game/game-shell.routes'),
     canActivate: [authGuard, walletConnected],
+  },
+  {
+    path: 'marketplace',
+    loadChildren: () => import('./features/marketplace/marketplace-shell.routes'),
+    canActivate: [walletConnected]
   },
   {
     path: '',

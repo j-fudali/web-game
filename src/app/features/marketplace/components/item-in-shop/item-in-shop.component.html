@@ -1,0 +1,24 @@
+<div class="flex p-4">
+    <div class="h-8rem w-8rem relative border-2 border-round">
+        <img class="absolute top-0 left-0 w-full h-full overflow-hidden" [src]="item().image">
+    </div>
+    <div class="flex-1 px-3 flex justify-content-between">
+        <div class="flex flex-column">
+            <h2 class="m-0">{{item().name}}</h2>
+            <i>{{item().type | jfudaliItemTranslate}} @if(item().bodySlot){
+                <b>{{item().bodySlot}}</b>
+            }</i>
+            <h3>Właściwości</h3>
+            @if(item().type === itemType.Weapon){
+                <span><b>Obrażenia: </b><i>{{item().damage}}</i></span>
+            }
+            @else {
+                <span><b>Pancerz: </b><i>{{item().armor}}</i></span>
+            }
+        </div>
+        <div class="flex flex-column justify-content-between">
+            <span>15 GEARCOIN</span>
+            <button pButton icon="pi pi-shopping-cart" [severity]="actionLabel() === 'Kup' ? 'success' : 'warning'" [label]="actionLabel()" size="small" (click)="onAction.emit()"></button>
+        </div>
+    </div>
+</div>

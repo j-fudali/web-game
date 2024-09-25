@@ -7,38 +7,25 @@ import {
   Observable,
   Subject,
   catchError,
-  combineLatest,
   concatMap,
-  delay,
-  distinctUntilChanged,
   endWith,
-  exhaustMap,
   filter,
-  finalize,
   forkJoin,
-  fromEvent,
-  ignoreElements,
   interval,
   map,
   merge,
-  mergeMap,
   of,
-  pipe,
-  share,
   shareReplay,
-  startWith,
   switchMap,
   takeUntil,
-  takeWhile,
   tap,
   throwError,
-  timeout,
   withLatestFrom,
 } from 'rxjs';
 import { OwnedItem } from '../interfaces/owned-item';
 import { CreateCharacter } from '../../features/game/interfaces/create-character';
 import { MessageService } from 'primeng/api';
-import { NavigationEnd, NavigationStart, Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { dealDamage, restoreHealth } from '../utils/functions';
 import { ThirdwebService } from './thirdweb.service';
 import { RestData } from '../interfaces/rest-data';
@@ -48,9 +35,7 @@ export interface PlayerCharacterState {
   status: Signal<PlayerCharacterStatus>;
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable()
 export class PlayerCharacterService {
   private http = inject(HttpClient);
   private baseUrl = environment.url + '/player-character';

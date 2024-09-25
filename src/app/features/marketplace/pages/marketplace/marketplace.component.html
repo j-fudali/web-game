@@ -1,0 +1,29 @@
+<div class="h-screen flex flex-column justify-content-center align-items-center">
+    <div class="relative p-1 sm:p-0 sm:w-10 md:w-7 flex flex-column gap-1">
+        <div class="flex justify-content-between surface-100 p-3 border-2 border-round">
+            <h1 class="m-0">Marketplace</h1>
+        </div>
+        <p-tabView>
+            <p-tabPanel header="Kup">
+                <ng-container *ngTemplateOutlet="itemsView; context: {label: 'Kup'}"></ng-container>
+            </p-tabPanel>
+            <p-tabPanel header="Sprzedaj">
+                <ng-container *ngTemplateOutlet="itemsView; context: {label: 'Sprzedaj'}"></ng-container>
+            </p-tabPanel>
+        </p-tabView>
+        
+    </div>
+</div>
+<ng-template #itemsView let-label="label">
+    <p-dataView [value]="items()" [rows]="5" [paginator]="true">
+        <ng-template pTemplate="list" let-items>
+            <div class="grid grid-nogutter">
+                @for (item of items; track i; let i = $index) {
+                    <div class="col-12" [class.border-top-1]="i !== 0">
+                        <jfudali-item-in-shop [item]="item" [actionLabel]="label" (onAction)="label === 'Kup' ? buy() : sell()"/>
+                    </div>
+                }
+            </div>
+        </ng-template>
+    </p-dataView>
+</ng-template>
