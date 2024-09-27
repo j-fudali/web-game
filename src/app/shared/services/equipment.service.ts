@@ -14,9 +14,7 @@ export interface EquipmentState{
   status: Signal<{ status: 'saved' | 'notSaved' } | undefined>;
 } 
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class EquipmentService {
   private http = inject(HttpClient);
   private _playerService = inject(PlayerCharacterService);

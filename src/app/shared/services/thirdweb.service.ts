@@ -40,7 +40,11 @@ export class ThirdwebService {
     chain: this.chain,
     address: environment.packContract,
   });
-
+  private marketplaceContract = getContract({
+    client: this.client,
+    chain: this.chain,
+    address: environment.marketplace
+  })
   disconnect$ = new Subject<void>();
   connect$ = new Subject<void>();
   error$ = new Subject<RPCError>();
@@ -150,14 +154,14 @@ export class ThirdwebService {
       })
     )
   }
-  connect(){
+  private connect(){
     return from(this.metamask.connect({ client: this.client }))
   }
-  disconnect(){
+  private disconnect(){
     return from(this.metamask.disconnect())
 
   }
-  autoConnect(){
+  private autoConnect(){
     return from(this.metamask.autoConnect({ client: this.client }))
   }
   getStartingItems(){
