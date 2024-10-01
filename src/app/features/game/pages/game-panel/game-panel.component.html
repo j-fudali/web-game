@@ -5,7 +5,7 @@
             <button pButton label="Zakończ" class="w-6" severity="success" (click)="stopRest()"></button>
         }
         @else{
-            <button [disabled]="playerCharacter()?.statistics?.health?.actualValue === playerCharacter()?.statistics?.health?.maximumValue" pButton label="Odpocznij" class="w-6" severity="warning" (click)="rest()"></button>
+            <button [disabled]="disabledRest()" pButton label="Odpocznij" class="w-6" severity="warning" (click)="rest()"></button>
         }
     </div>
     <jfudali-player-character class="col-12 md:col-8" [playerCharacter]="playerCharacter()!" />

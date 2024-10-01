@@ -7,42 +7,30 @@ import {
   Observable,
   Subject,
   catchError,
-  combineLatest,
   concatMap,
-  delay,
-  distinctUntilChanged,
   endWith,
-  exhaustMap,
   filter,
-  finalize,
   forkJoin,
-  fromEvent,
-  ignoreElements,
   interval,
   map,
   merge,
-  mergeMap,
   of,
-  pipe,
-  share,
   shareReplay,
-  startWith,
+  skipUntil,
   switchMap,
   takeUntil,
-  takeWhile,
   tap,
   throwError,
-  timeout,
   withLatestFrom,
 } from 'rxjs';
 import { OwnedItem } from '../interfaces/owned-item';
 import { CreateCharacter } from '../../features/game/interfaces/create-character';
 import { MessageService } from 'primeng/api';
-import { NavigationEnd, NavigationStart, Router } from '@angular/router';
-import { dealDamage, restoreHealth } from '../utils/functions';
+import { NavigationEnd, Router } from '@angular/router';
+import { dealDamage, reduceEnergyByTen, restoreEnergy, restoreHealth } from '../utils/functions';
 import { ThirdwebService } from './thirdweb.service';
 import { RestData } from '../interfaces/rest-data';
-export type  PlayerCharacterStatus = 'completed' | 'loading' | 'empty' | 'resting'
+export type  PlayerCharacterStatus = 'completed' | 'loading' | 'empty' | 'resting' | 'rested'
 export interface PlayerCharacterState {
   playerCharacter: Signal<PlayerCharacter | null | undefined>;
   status: Signal<PlayerCharacterStatus>;
@@ -62,6 +50,8 @@ export class PlayerCharacterService {
   unequipItem$ = new Subject<OwnedItem>();
   dealDamageToPlayerCharacter$ = new Subject<number>();
   restoreHealth$ = new Subject<number>()
+  restoreEnergy$ = new Subject<number>()
+  reduceEnergyByTen$ = new Subject<void>()
   rest$ = new Subject<void>()
   stopRest$ = new Subject<void>()
   private fetchedPlayerCharacter$ = this.http.get<PlayerCharacter>(this.baseUrl).pipe(
@@ -138,17 +128,21 @@ export class PlayerCharacterService {
   );
   private onDealDamage$: Observable<PlayerCharacter> =
     this.dealDamageToPlayerCharacter$.pipe(
-      map((damage) => {
-        const pc = this.playerCharacter()!;
-        return { ...pc, ...dealDamage(pc, damage) };
-      })
+      map((damage) => dealDamage(this.playerCharacter()!, damage) as PlayerCharacter),
+      shareReplay(1)
     );
   private onRestoreHealth$: Observable<PlayerCharacter> = 
   this.restoreHealth$.pipe(
-    map((health) => {
-      const pc = this.playerCharacter()!;
-      return {...pc, ...restoreHealth(pc, health)}
-    })
+    map((health) =>  restoreHealth(this.playerCharacter()!, health) as PlayerCharacter),
+    shareReplay(1)
+  )
+  private onReduceEnergyByTen$: Observable<PlayerCharacter> = this.reduceEnergyByTen$.pipe(
+    map(() => reduceEnergyByTen(this.playerCharacter()!)),
+    shareReplay(1)
+  )
+  private onRestoreEnergy$: Observable<PlayerCharacter> = this.restoreEnergy$.pipe(
+    map((energy) => restoreEnergy(this.playerCharacter()!, energy)),
+    shareReplay(1)
   )
   private playerCharacter$ = merge(
     this.onCreateCharacter$,
@@ -156,10 +150,13 @@ export class PlayerCharacterService {
     this.onEquip$,
     this.onUnequip$,
     this.onDealDamage$,
-    this.onRestoreHealth$
-  ).pipe(shareReplay(1));
+    this.onRestoreHealth$,
+    this.onRestoreEnergy$,
+    this.onReduceEnergyByTen$
+  );
   stopCondtionTriggers$ = merge(
     this.playerCharacter$.pipe(
+      filter((pc) => pc?.statistics.energy.actualValue === pc?.statistics.energy.maximumValue),
       filter((pc) => pc?.statistics.health.actualValue === pc?.statistics.health.maximumValue),
     ),
     this.stopRest$, 
@@ -182,23 +179,24 @@ export class PlayerCharacterService {
   //   }),
   //   catchError((err: HttpErrorResponse) => of(undefined))
   // );
-  private onRest$: Observable<'healing' | 'healed'> = this.rest$.pipe(
+  private onRest$: Observable<'resting' | 'rested'> = this.rest$.pipe(
     switchMap(() => this.http.post<RestData>(this.baseUrl + '/rest', {}).pipe(catchError((err: HttpErrorResponse) => of(undefined)))),
     filter((res) => res !== undefined),
     concatMap((restData) => interval(1000).pipe(
-      tap(() => this.restoreHealth$.next((restData as RestData).healthPerSecond)),
-      map(() => 'healing' as const),
+      tap(() => {
+        this.restoreHealth$.next((restData as RestData).healthPerSecond)
+        this.restoreEnergy$.next((restData as RestData).energyPerSecond)
+      }),
+      map(() => 'resting' as const),
       takeUntil(this.stopCondtionTriggers$),
-      endWith('healed' as const),
+      endWith('rested' as const),
     )),
     shareReplay(1),
   )
   private onStopRest$ = this.stopCondtionTriggers$
   .pipe(
-    tap(console.log),
     withLatestFrom(this.onRest$),
-    filter(([_, state]) => state === 'healing'),
-    tap(console.log),
+    filter(([_, state]) => state === 'resting'),
     switchMap(() => this.http.delete(this.baseUrl + '/rest/stop')), 
     tap(() => this._messageService.add({detail: 'Zakończono odpoczynek', severity: 'info'})),
   ) 
@@ -207,10 +205,8 @@ export class PlayerCharacterService {
       map(() => 'loading' as const)
     ),
     this.fetchedPlayerCharacter$.pipe(map((pc) => (pc ? 'completed' : 'empty'))),
-    merge(this.rest$, 
-      // this.initialRest$.pipe(filter(res => res !== undefined)), 
-      this.onRest$.pipe(filter((state) => state === 'healing'))).pipe(map(() => 'resting' as const)
-    ),
+    this.rest$.pipe(map(() => 'resting' as const)),
+    this.onRest$,
     this.onStopRest$.pipe(map(() => 'completed' as const))
   );
   private playerCharacter = toSignal<PlayerCharacter | null | undefined>(

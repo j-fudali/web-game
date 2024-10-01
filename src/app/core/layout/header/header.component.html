@@ -4,7 +4,7 @@
         <img ngSrc=" ../../assets/logo.png" fill priority />
     </a>
     <div class="flex gap-2 align-items-center">
-        <jfudali-connect-button (onDisconnectWallet)="onDisconnectWallet.emit()"
+        <jfudali-connect-button  (onDisconnectWallet)="onDisconnectWallet.emit()"
             (onMetamaskConnect)="onConnectMetamask.emit()" [walletData]="walletData()" />
         <p-menubar class="hidden lg:block" [model]="navigationsList()"></p-menubar>
         <p-button class="block lg:hidden" rounded text size="small" (click)="sidebarVisible.set(true)"

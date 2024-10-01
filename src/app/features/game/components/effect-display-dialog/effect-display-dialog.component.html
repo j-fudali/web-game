@@ -8,5 +8,5 @@
             <jfudali-statistic-effect  type="health" [value]="effect.healthAmount"/>
         }
     </div>
-    <button pButton label="Następne wyzwanie" severity="info" (click)="nextEncounter()"></button>
+    <button pButton label="Następne wyzwanie" severity="info" [loading]="transactionStatus() === 'loading'" (click)="nextEncounter()"></button>
 </div>
