@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, computed, inject, input } from '@angular/core';
 import { Effect } from '../../../../shared/interfaces/effect';
 import { PanelModule } from 'primeng/panel';
 import { MessagesModule } from 'primeng/messages';
@@ -24,6 +24,7 @@ export class EffectDisplayDialogComponent {
   private dialogConfig = inject(DynamicDialogConfig)
   private dialogRef = inject(DynamicDialogRef)
   effect = this.dialogConfig.data.effect as Effect
+  transactionStatus= this.dialogConfig.data.transactionStatus as Signal<string>
   nextEncounter(){
     this.dialogRef.close(true)
   }

@@ -14,11 +14,16 @@ import {
   Subject,
   catchError,
   combineLatest,
+  concatMap,
+  exhaustMap,
   filter,
   map,
   merge,
+  mergeMap,
   of,
+  retry,
   shareReplay,
+  skipUntil,
   switchMap,
   take,
   tap,
@@ -29,7 +34,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { PlayerCharacterService } from '../../../shared/services/player-character.service';
 import { Statistics } from '../../../shared/interfaces/statistics';
 import { Enemy } from '../../../shared/interfaces/enemy';
-import { dealDamage } from '../../../shared/utils/functions';
+import { dealDamage, reduceEnergyByTen } from '../../../shared/utils/functions';
 import { Effect } from '../../../shared/interfaces/effect';
 import { SelectDecision } from '../interfaces/select-decision';
 import { DialogService } from 'primeng/dynamicdialog';
@@ -37,6 +42,7 @@ import { EffectDisplayDialogComponent } from '../components/effect-display-dialo
 import { Router } from '@angular/router';
 import { GetRestDialogComponent } from '../components/get-rest-dialog/get-rest-dialog.component';
 import { PlayerCharacter } from '../../../shared/interfaces/player-character';
+import { ThirdwebService } from '../../../shared/services/thirdweb.service';
 export interface EncountersState {
   randomEncounter: Signal<EncounterOnDraw | undefined>;
   effect: Signal<Effect | undefined>;
@@ -49,6 +55,7 @@ export interface EncountersState {
 })
 export class RandomEncounterService {
   private _playerCharacterService = inject(PlayerCharacterService);
+  private _thirdwebService = inject(ThirdwebService);
   private http = inject(HttpClient);
   private dialog = inject(DialogService)
   private router = inject(Router)
@@ -65,7 +72,8 @@ export class RandomEncounterService {
     tap((effect) => {
       const ref = this.dialog.open(EffectDisplayDialogComponent, {
         data: {
-          effect
+          effect,
+          transactionStatus: this._thirdwebService.state.status
         },
         closable: false,
         header: 'Efekt'
@@ -78,11 +86,15 @@ export class RandomEncounterService {
     shareReplay(1)
   )
   private onLoadRandomEncounter$ = this.loadRandomEncounter$.pipe(
-    withLatestFrom(  toObservable(this._playerCharacterService.state.playerCharacter).pipe(
-      filter((pc) => pc !== undefined && pc !== null),
-    )),
-    switchMap(([_, pc]) => {
-      if((pc as PlayerCharacter).statistics.health.actualValue === 0){
+    withLatestFrom(toObservable(this._playerCharacterService.state.status)),
+    filter(([_, status]) => status === 'completed'),
+    withLatestFrom(
+      toObservable(this._playerCharacterService.state.playerCharacter),
+    ),
+    filter(([_, pc]) => pc !== undefined && pc !== null),
+    concatMap(([_, pc]) => {
+      if((pc as PlayerCharacter).statistics.health.actualValue === 0 || 
+        (pc as PlayerCharacter).statistics.energy.actualValue - 10 < 0){
         this.router.navigate(['/'])
         const ref = this.dialog.open(GetRestDialogComponent, {
           header: 'Odpoczynek'
@@ -92,10 +104,10 @@ export class RandomEncounterService {
         })
         return EMPTY;
       }
-    
       return of(pc);
     }),
-    switchMap((pc) => this.loadRandomEncounter(pc!.level)),
+    tap(() => this._playerCharacterService.reduceEnergyByTen$.next()),
+    concatMap((pc) => this.loadRandomEncounter(pc!.level)),
     shareReplay(1)
   );
   private randomEncounter$ = merge(
@@ -105,7 +117,7 @@ export class RandomEncounterService {
         const enemyEncounter = this.randomEncounter() as EnemyEncounter;
         return {
           ...enemyEncounter,
-          enemy: dealDamage(enemyEncounter.enemy, damage),
+          enemy: dealDamage(enemyEncounter.enemy, damage) as Enemy,
         } as EncounterOnDraw;
       })
     )
@@ -179,8 +191,10 @@ export class RandomEncounterService {
   }
   private resolveEffect(effect: Effect){
     if(effect.goldAmount){
-      //Thirdweb
-      //Claim Gearcoin
+      if(effect.goldAmount === 0) return;
+      if(effect.goldAmount > 0){
+        this._thirdwebService.gainGearcoins$.next(effect.goldAmount)
+      }
     }
     if(effect.healthAmount){
       if(effect.healthAmount >= 0){

@@ -45,15 +45,17 @@ export class ConnectButtonComponent {
         ?.account.address.slice(-4, -1)}`
   );
   balance = computed(
-    () =>
-      `${this.walletData().data()?.balance.displayValue} ${
+    () => {
+      const balance = Math.round(Number(this.walletData().data()?.balance.displayValue) * 100) / 100
+      return `${balance} ${
         this.walletData().data()?.balance.symbol
       }`
+    }
   );
   walletActions: MenuItem[] = [
     {
       label: 'Rozłącz',
-      icon: 'pi pi-disconnect',
+      icon: 'pi pi-sign-out',
       command: () => {
         this.onDisconnectWallet.emit();
         if (this.overlayPanel) {

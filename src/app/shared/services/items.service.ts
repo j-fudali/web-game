@@ -5,6 +5,7 @@ import {
   of,
   shareReplay,
   switchMap,
+  tap,
 } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { convertNftToItem } from '../utils/functions';
@@ -55,7 +56,6 @@ export class ItemsService {
   );
 
   private status$ = this.fetchOwnedItems$.pipe(
-    filter((items) => items.length > 0),
     map((items) => (items ? 'completed' : 'loading'))
   );
 

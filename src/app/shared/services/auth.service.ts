@@ -1,4 +1,4 @@
-import { Injectable, Signal, inject, signal } from '@angular/core';
+import { Injectable, Signal, inject } from '@angular/core';
 import { SignUpCredentials } from '../interfaces/sign-up-credentials';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment.development';
@@ -16,9 +16,9 @@ import {
   shareReplay,
   switchMap,
   tap,
-  throwError,
+  withLatestFrom,
 } from 'rxjs';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { MessageService } from 'primeng/api';
 
 export interface AuthState {
@@ -107,10 +107,10 @@ export class AuthService {
     shareReplay(1)
   );
   onSignOut$ = this.signOut$.pipe(
-    tap(() => {
-      this._cookies.delete('token', '/');
-      this.router.navigate(['/']);
-    })
+    switchMap(() => 
+      of(this.router.navigate(['/']))
+    ),
+    tap(() => this._cookies.delete('token'))
   );
   private isLogged$ = merge(
     merge(this.onLogin$, this.onSignUp$).pipe(

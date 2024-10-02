@@ -6,6 +6,7 @@ import {
 import { Item } from '../interfaces/item';
 import { PlayerCharacter } from '../interfaces/player-character';
 import { Enemy } from '../interfaces/enemy';
+import { Character } from '../interfaces/character';
 
 export const convertIpfs = (image: string) =>
   `http://ipfs.io/ipfs/${image.substring(7)}`;
@@ -59,10 +60,7 @@ export const dealDamage = (
       ...character.statistics,
       health: {
         ...character.statistics.health,
-        actualValue:
-          character.statistics.health.actualValue - damage > 0
-            ? character.statistics.health.actualValue - damage
-            : 0,
+        actualValue: Math.max(character.statistics.health.actualValue - damage , 0)
       },
     },
   };
@@ -77,11 +75,33 @@ export const restoreHealth = (character: PlayerCharacter
       ...character.statistics,
       health: {
         ...character.statistics.health,
-        actualValue:
-          character.statistics.health.actualValue + health < character.statistics.health.maximumValue
-            ? character.statistics.health.actualValue + health
-            : character.statistics.health.maximumValue,
+        actualValue: Math.min(character.statistics.health.actualValue + health, character.statistics.health.maximumValue),
       },
     },
-  };
+  } ;
 }
+export const restoreEnergy = (character: PlayerCharacter, energy: number) => {
+  return {
+    ...character,
+    statistics: {
+      ...character.statistics,
+      energy: {
+        ...character.statistics.energy,
+        actualValue: Math.min(character.statistics.energy.actualValue + energy, character.statistics.energy.maximumValue)
+      }
+    }
+  } as PlayerCharacter;
+}
+export const reduceEnergyByTen = (character: PlayerCharacter) => {
+  return {
+    ...character,
+    statistics: {
+      ...character.statistics,
+      energy: {
+        ...character.statistics.energy,
+        actualValue: Math.max(character.statistics.energy.actualValue - 10, 0)
+      }
+    }
+  } as PlayerCharacter
+}
+
