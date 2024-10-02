@@ -79,7 +79,7 @@ export class ThirdwebService {
   );
   private autoConnect$ = this.isDiconnected$.pipe(
     switchMap((val) =>
-      !val || val == 'false'
+      val === null || val == 'false'
         ? this.autoConnect().pipe(
             catchError((err) => {
               this.error$.next(err);
@@ -125,16 +125,21 @@ export class ThirdwebService {
         } as WalletData)
         ),
       )),
-      startWith(undefined),
       shareReplay(1),
   );
 
   private status$ = merge(
-    this.walletData$.pipe(map((data) => (data ? 'connected' : 'disconnected'))),
+    this.walletData$.pipe(map((data) => (data ? 'connected' as const : 'disconnected' as const))),
     this.disconnectWallet$.pipe(map(() => 'disconnected' as const)),
-    merge(this.connect$, this.disconnect$, this.gainGearcoins$).pipe(map(() => 'loading' as const)),
+    merge(
+      this.connect$, 
+      this.disconnect$, 
+      this.autoConnect$.pipe(filter(acc => acc !== undefined)
+    ), 
+    this.gainGearcoins$).pipe(map(() => 'loading' as const)),
+    this.autoConnect$.pipe(filter(acc => acc === undefined), map(() => 'disconnected' as const)),
     this.error$.pipe(map(() => 'error' as const))
-  );
+  )
 
   private status = toSignal(this.status$, { initialValue: 'loading' });
   private walletData = toSignal<WalletData | undefined>(this.walletData$, {

@@ -16,7 +16,6 @@ import {
   merge,
   of,
   shareReplay,
-  skipUntil,
   switchMap,
   takeUntil,
   tap,
@@ -26,7 +25,7 @@ import {
 import { OwnedItem } from '../interfaces/owned-item';
 import { CreateCharacter } from '../../features/game/interfaces/create-character';
 import { MessageService } from 'primeng/api';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { dealDamage, reduceEnergyByTen, restoreEnergy, restoreHealth } from '../utils/functions';
 import { ThirdwebService } from './thirdweb.service';
 import { RestData } from '../interfaces/rest-data';
@@ -162,8 +161,12 @@ export class PlayerCharacterService {
     this.stopRest$, 
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
-      filter(event => (event as NavigationEnd).urlAfterRedirects == '/game/play'),
+      filter(event => {
+        const url =(event as NavigationEnd).urlAfterRedirects
+        return url == '/game/play' || url == '/marketplace'
+      })
     ),
+
     // fromEvent(window, 'beforeunload')
   )
   // private initialRest$ = this.http.get<RestData>(this.baseUrl + '/rest').pipe(
@@ -180,7 +183,8 @@ export class PlayerCharacterService {
   //   catchError((err: HttpErrorResponse) => of(undefined))
   // );
   private onRest$: Observable<'resting' | 'rested'> = this.rest$.pipe(
-    switchMap(() => this.http.post<RestData>(this.baseUrl + '/rest', {}).pipe(catchError((err: HttpErrorResponse) => of(undefined)))),
+    switchMap(() => this.http.post<RestData>(this.baseUrl + '/rest', {})
+      .pipe(catchError((err: HttpErrorResponse) => of(undefined)))),
     filter((res) => res !== undefined),
     concatMap((restData) => interval(1000).pipe(
       tap(() => {

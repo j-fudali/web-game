@@ -85,10 +85,8 @@ export class RandomEncounterService {
     }), 
     shareReplay(1)
   )
-  private onLoadRandomEncounter$ = combineLatest(
-    [this.loadRandomEncounter$,
-    toObservable(this._playerCharacterService.state.status)]
-  ).pipe(
+  private onLoadRandomEncounter$ = this.loadRandomEncounter$.pipe(
+    withLatestFrom(toObservable(this._playerCharacterService.state.status)),
     filter(([_, status]) => status === 'completed'),
     withLatestFrom(
       toObservable(this._playerCharacterService.state.playerCharacter),

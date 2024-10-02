@@ -55,7 +55,7 @@ export class ConnectButtonComponent {
   walletActions: MenuItem[] = [
     {
       label: 'Rozłącz',
-      icon: 'pi pi-disconnect',
+      icon: 'pi pi-sign-out',
       command: () => {
         this.onDisconnectWallet.emit();
         if (this.overlayPanel) {

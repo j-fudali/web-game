@@ -20,6 +20,7 @@ import { SidebarModule } from 'primeng/sidebar';
 import { Menu, MenuModule } from 'primeng/menu';
 import { ButtonModule } from 'primeng/button';
 import { ThirdwebService } from './shared/services/thirdweb.service';
+import { PlayerCharacterService } from './shared/services/player-character.service';
 @Component({
   selector: 'jfudali-root',
   standalone: true,
@@ -45,6 +46,7 @@ export class AppComponent implements OnInit {
   private _authService = inject(AuthService);
   private primengConfig = inject(PrimeNGConfig);
   private _thirdwebService = inject(ThirdwebService);
+  private _playerCharacterService = inject(PlayerCharacterService)
   isLoggedIn = this._authService.state.isLogged;
   error = this._authService.state.error;
   status = this._authService.state.status;
@@ -79,6 +81,8 @@ export class AppComponent implements OnInit {
     this.primengConfig.ripple = true;
   }
   signOut() {
+    if(this._playerCharacterService.state.status() === 'resting')
+      this._playerCharacterService.stopRest$.next()
     this._authService.signOut$.next();
   }
   disconnectWallet() {
