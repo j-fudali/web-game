@@ -1,26 +1,30 @@
-<div class="h-screen flex flex-column justify-content-center align-items-center">
-    <div class="relative p-1 sm:p-0 sm:w-10 md:w-7 flex flex-column gap-1">
-        <div class="flex justify-content-between surface-100 p-3 border-2 border-round">
-            <h1 class="m-0">Marketplace</h1>
-        </div>
-        <p-tabView>
+<div class="flex flex-column align-items-center">
+    <div class="w-full sm:w-10 md:w-full flex flex-column md:flex-row gap-4 md:gap-2 py-4 px-2">
+        <h1 class="m-0 text-center md:px-4 md:align-self-center">Marketplace</h1>
+        <p-tabView class="w-full">
             <p-tabPanel header="Kup">
-                <ng-container *ngTemplateOutlet="itemsView; context: {label: 'Kup'}"></ng-container>
+                <ng-container *ngTemplateOutlet="itemsView; context: {mode: 'buy', label: 'Kup', items: itemsToBuy, status: marketplaceStatus}"></ng-container>
             </p-tabPanel>
             <p-tabPanel header="Sprzedaj">
-                <ng-container *ngTemplateOutlet="itemsView; context: {label: 'Sprzedaj'}"></ng-container>
+                <ng-container *ngTemplateOutlet="itemsView; context: {mode: 'sell', label: 'Sprzedaj', items: ownedItems, status: ownedItemsStatus}"></ng-container>
             </p-tabPanel>
         </p-tabView>
-        
     </div>
 </div>
-<ng-template #itemsView let-label="label">
-    <p-dataView [value]="items()" [rows]="5" [paginator]="true">
-        <ng-template pTemplate="list" let-items>
-            <div class="grid grid-nogutter">
-                @for (item of items; track i; let i = $index) {
+<ng-template #itemsView let-mode="mode" let-label="label" let-items="items" let-status="status">
+    <p-dataView layout="list" [lazy]="true"  [loading]="status() === 'loading'"  [value]="items()">
+        <ng-template pTemplate="list">
+            <div class="h-24rem md:h-30rem grid grid-nogutter overflow-y-auto">
+                @for (item of items(); track i; let i = $index) {
                     <div class="col-12" [class.border-top-1]="i !== 0">
-                        <jfudali-item-in-shop [item]="item" [actionLabel]="label" (onAction)="label === 'Kup' ? buy() : sell()"/>
+                        <jfudali-item-in-shop 
+                        [status]="status()"
+                        [walletData]="walletData()!"
+                        [itemsToBuy]="itemsToBuy()"
+                        [mode]="mode" 
+                        [item]="item" 
+                        [actionLabel]="label"
+                        (onAction)="performAction(mode, $event)"/>
                     </div>
                 }
             </div>

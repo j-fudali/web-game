@@ -52,7 +52,7 @@ export default [
   {
     path: '',
     component: GameComponent,
-    providers: [PlayerCharacterService, EquipmentService],
+    providers: [ EquipmentService],
     children: [
       {
         path: '',

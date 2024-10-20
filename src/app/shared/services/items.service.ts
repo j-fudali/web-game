@@ -22,11 +22,6 @@ export interface ItemsState {
 })
 export class ItemsService {
   private _thirdwebService = inject(ThirdwebService)
-
-  // buy$;
-  // sell$;
-
-
   private fetchOwnedItems$ = toObservable(
     this._thirdwebService.state.data
   ).pipe(

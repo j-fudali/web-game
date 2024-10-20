@@ -5,7 +5,6 @@ import {
   forceWalletConnected,
   walletConnected,
 } from './shared/guards/auth.guard';
-import { PlayerCharacterService } from './shared/services/player-character.service';
 
 export const routes: Routes = [
   {

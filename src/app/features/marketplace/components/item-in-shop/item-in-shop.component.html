@@ -1,14 +1,18 @@
-<div class="flex p-4">
+<div class="grid grid-nogutter p-4">
     <div class="h-8rem w-8rem relative border-2 border-round">
         <img class="absolute top-0 left-0 w-full h-full overflow-hidden" [src]="item().image">
     </div>
-    <div class="flex-1 px-3 flex justify-content-between">
-        <div class="flex flex-column">
-            <h2 class="m-0">{{item().name}}</h2>
-            <i>{{item().type | jfudaliItemTranslate}} @if(item().bodySlot){
-                <b>{{item().bodySlot}}</b>
-            }</i>
-            <h3>Właściwości</h3>
+    <div class="col-12 mt-2 md:mt-0 md:px-2 md:col flex flex-column lg:justify-content-between">
+        <div>
+            <h3 class="m-0">{{item().name}}</h3>
+            <div class="flex flex-column gap-1">
+                <i>{{item().type | jfudaliItemTranslate}}</i>
+                @if(item().bodySlot){
+                    <small>({{item().bodySlot! | jfudaliBodySlotTranslate}})</small>
+                }
+            </div>
+        </div>
+        <div>
             @if(item().type === itemType.Weapon){
                 <span><b>Obrażenia: </b><i>{{item().damage}}</i></span>
             }
@@ -16,9 +20,23 @@
                 <span><b>Pancerz: </b><i>{{item().armor}}</i></span>
             }
         </div>
-        <div class="flex flex-column justify-content-between">
-            <span>15 GEARCOIN</span>
-            <button pButton icon="pi pi-shopping-cart" [severity]="actionLabel() === 'Kup' ? 'success' : 'warning'" [label]="actionLabel()" size="small" (click)="onAction.emit()"></button>
-        </div>
+    </div>
+    <div class="col-12 mt-2 lg:mt-0 lg:col flex lg:flex-column lg:justify-content-end">
+        <button class="w-full pointer-events-auto" pButton icon="pi pi-shopping-cart" 
+        [loading]="status() === 'action-loading'"
+        [disabled]="disabledAction() !== null"
+        [pTooltip]="disabledAction() || ''" 
+        [tooltipDisabled]="disabledAction() === null"
+        tooltipPosition="top"
+        [severity]="mode() === 'buy' ? 'success' : 'warning'" 
+        [label]="label()" 
+        size="small" (click)="performAction($event)"></button>
     </div>
 </div>
+<p-overlayPanel #op >
+    <div class="flex flex-column gap-2">
+        <h3 class="text-center">Cena</h3>
+        <p-inputNumber inputId="price" [(ngModel)]="sellPrice" maxFractionDigits="2"/>
+        <button pButton severity="success" outlined icon="pi pi-shopping-cart" label="Zatwierdź"  (click)="sell()"></button>
+    </div>
+</p-overlayPanel>

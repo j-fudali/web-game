@@ -2,7 +2,7 @@ import { Injectable, Signal, inject } from '@angular/core';
 import { PlayerCharacter } from '../interfaces/player-character';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
   Observable,
   Subject,
@@ -29,18 +29,20 @@ import { NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { dealDamage, reduceEnergyByTen, restoreEnergy, restoreHealth } from '../utils/functions';
 import { ThirdwebService } from './thirdweb.service';
 import { RestData } from '../interfaces/rest-data';
+import { AuthService } from './auth.service';
 export type  PlayerCharacterStatus = 'completed' | 'loading' | 'empty' | 'resting' | 'rested'
 export interface PlayerCharacterState {
   playerCharacter: Signal<PlayerCharacter | null | undefined>;
   status: Signal<PlayerCharacterStatus>;
 }
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class PlayerCharacterService {
   private http = inject(HttpClient);
   private baseUrl = environment.url + '/player-character';
   private _messageService = inject(MessageService);
   private _thirdwebService = inject(ThirdwebService)
+  private _authService = inject(AuthService)
   private router = inject(Router);
   createCharacter$ = new Subject<CreateCharacter>();
   equipItem$ = new Subject<OwnedItem>();
@@ -51,7 +53,10 @@ export class PlayerCharacterService {
   reduceEnergyByTen$ = new Subject<void>()
   rest$ = new Subject<void>()
   stopRest$ = new Subject<void>()
-  private fetchedPlayerCharacter$ = this.http.get<PlayerCharacter>(this.baseUrl).pipe(
+  private fetchedPlayerCharacter$ = toObservable(this._authService.state.isLogged)
+  .pipe(
+    filter((isLogged) => isLogged === true),
+    switchMap(() => this.http.get<PlayerCharacter>(this.baseUrl)),
     map((pc) => ({
       ...pc,
       equippedItems: pc.equippedItems.map((i) => BigInt(i)),
@@ -63,7 +68,7 @@ export class PlayerCharacterService {
       return throwError(() => err);
     }),
     shareReplay(1)
-  );       
+  )
   private onCreateCharacter$ = this.createCharacter$.pipe(
     switchMap(({ name, image, characterClassId, equippedItems }) => {
       const formdata = new FormData();

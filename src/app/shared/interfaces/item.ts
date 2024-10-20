@@ -1,13 +1,15 @@
+import { BodySlot } from "../enums/body-slot.enum";
 import { ClassType } from "../enums/class-type.enum";
 import { ItemType } from "../enums/item-type.enum";
-
-export interface Item {
-  tokenId: bigint;
+export interface ItemProperties {
   name: string;
   image: string;
   classType: ClassType;
   type: ItemType;
   damage?: number;
   armor?: number;
-  bodySlot?: string;
+  bodySlot?: BodySlot;
+}
+export interface Item extends ItemProperties {
+  tokenId: bigint;
 }

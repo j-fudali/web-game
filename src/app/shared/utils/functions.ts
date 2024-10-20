@@ -6,7 +6,6 @@ import {
 import { Item } from '../interfaces/item';
 import { PlayerCharacter } from '../interfaces/player-character';
 import { Enemy } from '../interfaces/enemy';
-import { Character } from '../interfaces/character';
 
 export const convertIpfs = (image: string) =>
   `http://ipfs.io/ipfs/${image.substring(7)}`;

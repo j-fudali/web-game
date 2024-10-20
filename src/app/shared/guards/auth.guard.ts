@@ -38,7 +38,7 @@ export const forceWalletConnected: CanDeactivateFn<StartComponent> = () => {
   const thirdwebService = inject(ThirdwebService);
   const dialogService = inject(DialogService);
   const status$ = toObservable(thirdwebService.state.status);
-  if (!thirdwebService.state.data()) {
+  if (thirdwebService.state.status() === 'disconnected') {
     const ref = dialogService.open(ConnectWalletDialogComponent, {
       header: 'Połącz portfel',
       contentStyle: { overflow: 'auto' },
