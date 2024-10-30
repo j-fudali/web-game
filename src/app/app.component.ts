@@ -2,25 +2,19 @@ import {
   Component,
   HostListener,
   OnInit,
-  Signal,
-  WritableSignal,
   computed,
-  effect,
   inject,
-  signal,
-  viewChild,
 } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { MenuItem, PrimeNGConfig } from 'primeng/api';
+import { PrimeNGConfig } from 'primeng/api';
 import { AuthService } from './shared/services/auth.service';
 import { FooterComponent } from './core/layout/footer/footer.component';
 import { HeaderComponent } from './core/layout/header/header.component';
 import { ToastModule } from 'primeng/toast';
 import { SidebarModule } from 'primeng/sidebar';
-import { Menu, MenuModule } from 'primeng/menu';
+import { MenuModule } from 'primeng/menu';
 import { ButtonModule } from 'primeng/button';
 import { ThirdwebService } from './shared/services/thirdweb.service';
-import { PlayerCharacterService } from './shared/services/player-character.service';
 @Component({
   selector: 'jfudali-root',
   standalone: true,
@@ -46,7 +40,6 @@ export class AppComponent implements OnInit {
   private _authService = inject(AuthService);
   private primengConfig = inject(PrimeNGConfig);
   private _thirdwebService = inject(ThirdwebService);
-  private _playerCharacterService = inject(PlayerCharacterService)
   isLoggedIn = this._authService.state.isLogged;
   error = this._authService.state.error;
   status = this._authService.state.status;
@@ -81,8 +74,6 @@ export class AppComponent implements OnInit {
     this.primengConfig.ripple = true;
   }
   signOut() {
-    if(this._playerCharacterService.state.status() === 'resting')
-      this._playerCharacterService.stopRest$.next()
     this._authService.signOut$.next();
   }
   disconnectWallet() {

@@ -14,52 +14,56 @@ const alreadyHasCharacter: CanActivateFn = (route, state) => {
   const playerService = inject(PlayerCharacterService);
   const router = inject(Router);
   return toObservable(playerService.state.playerCharacter).pipe(
-    filter((pc) => pc !== undefined),
-    map((pc) =>
-      pc != null ? true : router.parseUrl('/game/create-character')
-    )
+    filter(pc => pc !== undefined),
+    map(pc => (pc != null ? true : router.parseUrl('/game/create-character')))
   );
 };
 const hasNotAnyCharacter: CanActivateFn = (route, state) => {
   const playerService = inject(PlayerCharacterService);
   const router = inject(Router);
   return toObservable(playerService.state.playerCharacter).pipe(
-    filter((pc) => pc !== undefined),
-    map((pc) => pc == null ? true : router.parseUrl('/'))
+    filter(pc => pc !== undefined),
+    map(pc => (pc == null ? true : router.parseUrl('/')))
   );
 };
-const hasEnoughHealthPoints: CanActivateFn = (route,state) => {
+const hasEnoughHealthPoints: CanActivateFn = (route, state) => {
   const playerService = inject(PlayerCharacterService);
   const router = inject(Router);
-  const dialog = inject(DialogService)
+  const dialog = inject(DialogService);
   return toObservable(playerService.state.playerCharacter).pipe(
     filter(pc => pc !== undefined && pc !== null),
     map(pc => {
-      if((pc as PlayerCharacter).statistics.health.actualValue > 0){
-        return true
+      if ((pc as PlayerCharacter).statistics.health.actualValue > 0) {
+        return true;
       }
-      const ref = dialog.open(GetRestDialogComponent, {header: 'Odpocznij'})
-      ref.onClose.subscribe((rest) => {
-        if(rest) playerService.rest$.next()
-      })
-      return router.parseUrl('/')}
-    )
-  )
-}
+      const ref = dialog.open(GetRestDialogComponent, { header: 'Odpocznij' });
+      ref.onClose.subscribe(rest => {
+        if (rest) playerService.rest$.next();
+      });
+      return router.parseUrl('/');
+    })
+  );
+};
 export default [
   {
     path: '',
-    component: GamePanelComponent,
-    canActivate: [alreadyHasCharacter],
-  },
-  {
-    path: 'create-character',
-    component: CreateCharacterComponent,
-    canActivate: [hasNotAnyCharacter],
-  },
-  {
-    path: 'play',
-    component: EncounterComponent,
-    canActivate: [hasEnoughHealthPoints]
+    children: [
+      {
+        path: '',
+        component: GamePanelComponent,
+        canActivate: [alreadyHasCharacter],
+      },
+      {
+        path: 'create-character',
+        component: CreateCharacterComponent,
+        canActivate: [hasNotAnyCharacter],
+      },
+      {
+        path: 'play',
+        component: EncounterComponent,
+        canActivate: [hasEnoughHealthPoints],
+      },
+    ],
+    providers: [PlayerCharacterService],
   },
 ] as Route[];

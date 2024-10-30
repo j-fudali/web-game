@@ -4,17 +4,15 @@ import { environment } from '../../../environments/environment';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CharacterClass } from '../interfaces/character-class';
 import { take, tap } from 'rxjs';
+import { CharacterClassesApiService } from '../api/character-classes/character-classes-api.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CharacterClassesService {
-  private http = inject(HttpClient);
-  private baseUrl = environment.url + '/character-classes';
-
-  private characterClasses$ = this.http
-    .get<CharacterClass[]>(this.baseUrl)
-    .pipe(take(1));
+  private _characterClasssesApiService = inject(CharacterClassesApiService);
+  private characterClasses$ =
+    this._characterClasssesApiService.getCharacterClasses();
   characterClasses = toSignal<CharacterClass[], CharacterClass[]>(
     this.characterClasses$,
     {

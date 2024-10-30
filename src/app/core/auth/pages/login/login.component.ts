@@ -9,7 +9,7 @@ import {
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
-import { LoginCredentials } from '../../../../shared/interfaces/login-credentials';
+import { LoginCredentials } from '../../../../shared/api/auth/model/login-credentials';
 import { AuthService } from '../../../../shared/services/auth.service';
 
 @Component({

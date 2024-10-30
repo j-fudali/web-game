@@ -3,22 +3,20 @@ import {
   Observable,
   catchError,
   debounceTime,
-  filter,
   map,
   merge,
   of,
   shareReplay,
   switchMap,
-  tap,
 } from 'rxjs';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { convertNftToItem } from '../utils/functions';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { OwnedItem } from '../interfaces/owned-item';
 import { PlayerCharacter } from '../interfaces/player-character';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { PlayerCharacterService } from './player-character.service';
 import { ThirdwebService } from './thirdweb.service';
+import { ItemMapper } from '../utils/item-mapper';
 
 export interface ItemsState {
   avaliableItems: Signal<OwnedItem[]>;
@@ -32,38 +30,22 @@ export interface ItemsState {
 })
 export class ItemsService {
   private http = inject(HttpClient);
-  private _thirdwebService = inject(ThirdwebService)
+  private _thirdwebService = inject(ThirdwebService);
   private _playerService = inject(PlayerCharacterService);
-  private fetchOwnedItems$ = toObservable(
-    this._thirdwebService.state.data
-  ).pipe(
-    switchMap((wallet) => {
-      if (wallet)
-        return this._thirdwebService.getOwnedItems().pipe(
-          map((nfts) =>
-            nfts.map((nft) => ({
-              tokenId: nft.id,
-              quantity: nft.quantityOwned,
-              ...nft.metadata,
-            }))
-          ),
-          map((nfts) =>
-            nfts.map(
-              (nft) =>
-                ({
-                  quantity: nft.quantity,
-                  ...convertNftToItem(nft),
-                } as OwnedItem)
-            )
-          )
-        );
-      return of([]);
-    }),
-    shareReplay(1)
-  );
+  private fetchOwnedItems$: Observable<OwnedItem[]> = this._thirdwebService
+    .getOwnedItems()
+    .pipe(
+      map(nfts =>
+        nfts.map(({ quantityOwned, ...nft }) => {
+          const item = ItemMapper.convertNftToItem(nft);
+          return ItemMapper.convertItemToOwnedItem(item, quantityOwned);
+        })
+      ),
+      shareReplay(1)
+    );
 
   private status$ = this.fetchOwnedItems$.pipe(
-    map((items) => (items ? 'completed' : 'loading'))
+    map(items => (items ? 'completed' : 'loading'))
   );
 
   private status = toSignal(this.status$, {
@@ -76,7 +58,7 @@ export class ItemsService {
     }
   );
   private equippedItems = computed(() =>
-    this.ownedItems().filter((item) =>
+    this.ownedItems().filter(item =>
       this._playerService.state
         .playerCharacter()
         ?.equippedItems.includes(item.tokenId)
@@ -84,7 +66,7 @@ export class ItemsService {
   );
   private availableItems = computed(() => {
     return this.ownedItems().filter(
-      (item) =>
+      item =>
         !this._playerService.state
           .playerCharacter()
           ?.equippedItems.includes(item.tokenId)
@@ -96,7 +78,7 @@ export class ItemsService {
     this.http.put<Pick<PlayerCharacter, 'equippedItems'>>(
       environment.url + '/player-character/equipped-items',
       {
-        equippedItems: items.map((i) => i.toString()),
+        equippedItems: items.map(i => i.toString()),
       }
     );
   private equipmentSaveStatus$: Observable<{ status: 'saved' | 'notSaved' }> =
@@ -106,7 +88,7 @@ export class ItemsService {
     ).pipe(
       debounceTime(3000),
       switchMap(() =>
-        this.setEquippedItems(this.equippedItems().map((i) => i.tokenId))
+        this.setEquippedItems(this.equippedItems().map(i => i.tokenId))
       ),
       map(() => ({ status: 'saved' } as { status: 'saved' | 'notSaved' })),
       catchError(() =>

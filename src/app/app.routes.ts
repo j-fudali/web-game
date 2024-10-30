@@ -11,7 +11,7 @@ export const routes: Routes = [
     path: 'home',
     loadComponent: () =>
       import('./features/home/pages/start/start.component').then(
-        (c) => c.StartComponent
+        c => c.StartComponent
       ),
     canActivate: [alreadyLoggedIn],
     canDeactivate: [forceWalletConnected],
@@ -20,7 +20,7 @@ export const routes: Routes = [
     path: 'sign-up',
     loadComponent: () =>
       import('./core/auth/pages/sign-up/sign-up.component').then(
-        (c) => c.SignUpComponent
+        c => c.SignUpComponent
       ),
     canActivate: [alreadyLoggedIn, walletConnected],
   },
@@ -28,7 +28,7 @@ export const routes: Routes = [
     path: 'login',
     loadComponent: () =>
       import('./core/auth/pages/login/login.component').then(
-        (c) => c.LoginComponent
+        c => c.LoginComponent
       ),
     canActivate: [alreadyLoggedIn, walletConnected],
   },

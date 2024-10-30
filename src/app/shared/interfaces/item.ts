@@ -2,7 +2,7 @@ export interface Item {
   tokenId: bigint;
   name: string;
   image: string;
-  classType: 'warrior' | 'wizard' | 'rouge';
+  classType: 'warrior' | 'wizard' | 'rouge' | 'any';
   type: 'weapon' | 'armor';
   damage?: number;
   armor?: number;

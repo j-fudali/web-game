@@ -3,9 +3,9 @@ import { createThirdwebClient, getContract, sendAndConfirmTransaction, sendTrans
 import { polygonAmoy } from 'thirdweb/chains';
 import { Account, createWallet, getWalletBalance } from 'thirdweb/wallets';
 import { environment } from '../../../environments/environment.development';
-import { burn, burnFrom, claimTo as claimToERC20, deposit, isERC20, transfer} from "thirdweb/extensions/erc20";
+import { claimTo as claimToERC20} from "thirdweb/extensions/erc20";
 import { claimTo, getNFTs, getOwnedNFTs } from "thirdweb/extensions/erc1155";
-import { BehaviorSubject, Observable, Subject, catchError, filter, from, map, merge, of, scan, shareReplay, startWith, switchMap, tap, withLatestFrom } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, catchError, filter, from, map, merge, of, shareReplay, switchMap, tap, withLatestFrom } from 'rxjs';
 import { RPCError } from '../interfaces/rpc-error';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MessageService } from 'primeng/api';
@@ -33,7 +33,7 @@ export class ThirdwebService {
   private startingWeapons = getContract({
     client: this.client,
     chain: this.chain,
-    address: environment.startingWeaponsAddress,
+    address: environment.itemsAddress,
   });
   private packContract = getContract({
     client: this.client,
