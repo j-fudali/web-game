@@ -59,7 +59,7 @@ export class AppComponent implements OnInit {
     },
     {
       label: 'Otwórz rynek',
-      routerLink: '/',
+      routerLink: '/marketplace',
     },
     {
       label: 'Wyloguj',

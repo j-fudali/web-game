@@ -38,6 +38,11 @@ export const routes: Routes = [
     canActivate: [authGuard, walletConnected],
   },
   {
+    path: 'marketplace',
+    loadChildren: () => import('./features/marketplace/marketplace-shell.routes'),
+    canActivate: [walletConnected]
+  },
+  {
     path: '',
     redirectTo: '/home',
     pathMatch: 'full',

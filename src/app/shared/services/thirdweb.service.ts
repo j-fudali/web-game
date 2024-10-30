@@ -1,24 +1,64 @@
 import { Injectable, Signal, inject } from '@angular/core';
-import { createThirdwebClient, getContract, sendAndConfirmTransaction, sendTransaction } from 'thirdweb';
+import {
+  createThirdwebClient,
+  getContract,
+  prepareContractCall,
+  sendAndConfirmTransaction,
+  sendTransaction,
+  toTokens,
+} from 'thirdweb';
 import { polygonAmoy } from 'thirdweb/chains';
 import { Account, createWallet, getWalletBalance } from 'thirdweb/wallets';
 import { environment } from '../../../environments/environment.development';
-import { claimTo as claimToERC20} from "thirdweb/extensions/erc20";
-import { claimTo, getNFTs, getOwnedNFTs } from "thirdweb/extensions/erc1155";
-import { BehaviorSubject, Observable, Subject, catchError, filter, from, map, merge, of, shareReplay, switchMap, tap, withLatestFrom } from 'rxjs';
+import { approve, claimTo as claimToERC20 } from 'thirdweb/extensions/erc20';
+import {
+  buyFromListing,
+  createListing,
+  getAllValidListings,
+  isBuyerApprovedForListing,
+} from 'thirdweb/extensions/marketplace';
+import {
+  claimTo,
+  getNFTs,
+  getOwnedNFTs,
+  isApprovedForAll,
+  mintTo,
+  setApprovalForAll,
+} from 'thirdweb/extensions/erc1155';
+import {
+  BehaviorSubject,
+  Observable,
+  Subject,
+  catchError,
+  combineLatest,
+  filter,
+  from,
+  map,
+  merge,
+  of,
+  shareReplay,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from 'rxjs';
 import { RPCError } from '../interfaces/rpc-error';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MessageService } from 'primeng/api';
 import { WalletData } from '../interfaces/wallet-data';
+import { SellData } from '../../features/marketplace/interfaces/sell-data';
+import { Hex } from 'thirdweb/dist/types/utils/encoding/hex';
+import { MarketplaceItem } from '../../features/marketplace/interfaces/marketplace-item';
 
 export interface WalletDataState {
   data: Signal<WalletData | undefined>;
-  status: Signal<'connected' | 'disconnected' | 'loading' | 'error' | 'token-claimed' | 'token-burned'>;
+  status: Signal<
+    'connected' | 'disconnected' | 'loading' | 'error' | 'token-claimed'
+  >;
   error: Signal<string | null>;
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ThirdwebService {
   private _messageService = inject(MessageService);
@@ -28,9 +68,11 @@ export class ThirdwebService {
     clientId: environment.clientId,
   });
   private gearcoin = getContract({
-    client: this.client, chain: this.chain, address: environment.gearcoin
+    client: this.client,
+    chain: this.chain,
+    address: environment.gearcoin,
   });
-  private startingWeapons = getContract({
+  private items = getContract({
     client: this.client,
     chain: this.chain,
     address: environment.itemsAddress,
@@ -40,18 +82,22 @@ export class ThirdwebService {
     chain: this.chain,
     address: environment.packContract,
   });
-
+  private marketplaceContract = getContract({
+    client: this.client,
+    chain: this.chain,
+    address: environment.marketplace,
+  });
   disconnect$ = new Subject<void>();
   connect$ = new Subject<void>();
-  error$ = new Subject<RPCError>();
-  gainGearcoins$ = new Subject<number>()
+  error$ = new Subject<Error>();
+  gainGearcoins$ = new Subject<number>();
   private isDiconnected$ = new BehaviorSubject<string | null>(
     localStorage.getItem('isDisconnected')
   );
   private disconnectWallet$ = this.disconnect$.pipe(
     switchMap(() =>
-     this.disconnect().pipe(
-        catchError((err) => {
+      this.disconnect().pipe(
+        catchError(err => {
           this.error$.next(err);
           return of(undefined);
         })
@@ -78,10 +124,10 @@ export class ThirdwebService {
     shareReplay(1)
   );
   private autoConnect$ = this.isDiconnected$.pipe(
-    switchMap((val) =>
+    switchMap(val =>
       val === null || val == 'false'
         ? this.autoConnect().pipe(
-            catchError((err) => {
+            catchError(err => {
               this.error$.next(err);
               return of(undefined);
             })
@@ -90,62 +136,73 @@ export class ThirdwebService {
     ),
     shareReplay(1)
   );
-  private account$ =  merge(
+  private account$ = merge(
     this.autoConnect$,
     this.onConnect$,
-    this.disconnectWallet$,
+    this.disconnectWallet$
   ).pipe(
-    filter((account) => account !== undefined),
-    map((account) => account as Account),
-  )
+    filter(account => account !== undefined),
+    map(account => account as Account)
+  );
   private onGainGearcoins$ = this.gainGearcoins$.pipe(
-    switchMap((coinsAmount) => this.claimGearcoin(coinsAmount)
-      .pipe(
+    switchMap(coinsAmount =>
+      this.claimGearcoin(coinsAmount).pipe(
         catchError((err: RPCError) => {
-          console.log(err)
-          if(err.code === 4001){
-            of(true)
+          console.log(err);
+          if (err.code === 4001) {
+            of(true);
           }
-          return of(undefined)
+          return of(undefined);
         })
       )
     ),
-    filter((res) => res !== undefined),
+    filter(res => res !== undefined),
     withLatestFrom(this.account$),
     map(([_, account]) => account),
     shareReplay(1)
-  )
- 
-  private walletData$: Observable<WalletData | undefined> = merge(this.account$, this.onGainGearcoins$)
-    .pipe(
-      switchMap((account) => this.getBalance(account).pipe(
-        map((balance) => ({
-          account,
-          balance,
-        } as WalletData)
-        ),
-      )),
-      shareReplay(1),
+  );
+
+  private walletData$: Observable<WalletData | undefined> = merge(
+    this.account$,
+    this.onGainGearcoins$
+  ).pipe(
+    switchMap(account =>
+      this.getBalance(account).pipe(
+        map(
+          balance =>
+            ({
+              account,
+              balance,
+            } as WalletData)
+        )
+      )
+    ),
+    shareReplay(1)
   );
 
   private status$ = merge(
-    this.walletData$.pipe(map((data) => (data ? 'connected' as const : 'disconnected' as const))),
+    this.walletData$.pipe(
+      map(data => (data ? ('connected' as const) : ('disconnected' as const)))
+    ),
     this.disconnectWallet$.pipe(map(() => 'disconnected' as const)),
     merge(
-      this.connect$, 
-      this.disconnect$, 
-      this.autoConnect$.pipe(filter(acc => acc !== undefined)
-    ), 
-    this.gainGearcoins$).pipe(map(() => 'loading' as const)),
-    this.autoConnect$.pipe(filter(acc => acc === undefined), map(() => 'disconnected' as const)),
+      this.connect$,
+      this.disconnect$,
+      this.autoConnect$.pipe(filter(acc => acc !== undefined)),
+      this.gainGearcoins$
+    ).pipe(map(() => 'loading' as const)),
+    this.autoConnect$.pipe(
+      filter(acc => acc === undefined),
+      map(() => 'disconnected' as const)
+    ),
     this.error$.pipe(map(() => 'error' as const))
-  )
+  );
 
   private status = toSignal(this.status$, { initialValue: 'loading' });
   private walletData = toSignal<WalletData | undefined>(this.walletData$, {
     initialValue: undefined,
   });
-  private error = toSignal(this.error$.pipe(map((err) => err.message)), {
+  private error = toSignal(this.error$.pipe(map(err => err.message)), {
     initialValue: null,
   });
 
@@ -154,18 +211,138 @@ export class ThirdwebService {
     status: this.status,
     error: this.error,
   };
-
-  private getErrorMessage(err: RPCError){
+  connect() {
+    return from(this.metamask.connect({ client: this.client }));
+  }
+  getStartingItems() {
+    return from(getNFTs({ contract: this.items }));
+  }
+  getOwnedItems() {
+    return this.account$.pipe(
+      switchMap(({ address }) =>
+        getOwnedNFTs({
+          contract: this.items,
+          address,
+        })
+      )
+    );
+  }
+  claimStartingWeapon(tokenId: bigint) {
+    return this.account$.pipe(
+      switchMap(account =>
+        sendAndConfirmTransaction({
+          transaction: claimTo({
+            contract: this.items,
+            to: account.address,
+            tokenId,
+            quantity: 1n,
+          }),
+          account,
+        })
+      )
+    );
+  }
+  getListings() {
+    return from(getAllValidListings({ contract: this.marketplaceContract }));
+  }
+  createListing({ item, price }: SellData) {
+    return this.account$.pipe(
+      switchMap(account =>
+        this.checkApproval(account).pipe(
+          filter(res => res !== undefined),
+          map(() => account)
+        )
+      ),
+      switchMap(account =>
+        sendAndConfirmTransaction({
+          account,
+          transaction: createListing({
+            contract: this.marketplaceContract,
+            assetContractAddress: this.items.address,
+            tokenId: item.tokenId,
+            quantity: 1n,
+            pricePerToken: price.toString(),
+            currencyContractAddress: this.gearcoin.address,
+          }),
+        })
+      )
+    );
+  }
+  buyFromListing(item: MarketplaceItem) {
+    return this.account$.pipe(
+      switchMap(account =>
+        from(
+          sendAndConfirmTransaction({
+            account,
+            transaction: approve({
+              contract: this.gearcoin,
+              spender: this.marketplaceContract.address as Hex,
+              amount: toTokens(item.balance.value, item.balance.decimals),
+            }),
+          })
+        ).pipe(map(() => account))
+      ),
+      switchMap(account =>
+        sendAndConfirmTransaction({
+          account,
+          transaction: buyFromListing({
+            contract: this.marketplaceContract,
+            listingId: item.listingId,
+            quantity: 1n,
+            recipient: account.address,
+          }),
+        })
+      ),
+      catchError((err: Error) => {
+        this.error$.next(err);
+        return of(undefined);
+      })
+    );
+  }
+  private checkApproval(account: Account) {
+    return from(
+      isApprovedForAll({
+        contract: this.items,
+        owner: account.address,
+        operator: this.marketplaceContract.address,
+      })
+    ).pipe(
+      switchMap(isApproved =>
+        isApproved
+          ? of(true)
+          : sendAndConfirmTransaction({
+              account,
+              transaction: setApprovalForAll({
+                contract: this.items,
+                operator: this.marketplaceContract.address,
+                approved: true,
+              }),
+            })
+      ),
+      catchError((err: RPCError) => {
+        this._messageService.add({
+          severity: 'error',
+          summary: 'Błąd',
+          detail: this.getErrorMessage(err),
+        });
+        this.error$.next(err);
+        return of(undefined);
+      })
+    );
+  }
+  private getErrorMessage(err: RPCError) {
     switch (err.code) {
       case 4001:
         return 'Połączenie zostało odrzucone';
       case -32002:
         return 'Zajrzyj do swojego portfela i zaakceptuj połączenie';
+      case -32603:
+        return 'Błąd wewnętrzny Metamask. Spróbuj ponownie później';
       default:
-       return 'Nie można nawiązać połączenia';
+        return 'Nie można nawiązać połączenia';
     }
   }
-  private getBalance({address}: Account){
+  private getBalance({ address }: Account) {
     return from(
       getWalletBalance({
         client: this.client,
@@ -173,60 +350,25 @@ export class ThirdwebService {
         address,
         tokenAddress: this.gearcoin.address,
       })
-    )
+    );
   }
- 
-  private claimGearcoin(quantity: number){
+
+  private claimGearcoin(quantity: number) {
     return this.account$.pipe(
-      switchMap((account) => {
+      switchMap(account => {
         const transaction = claimToERC20({
           contract: this.gearcoin,
           to: account.address,
-          quantity: BigInt(quantity).toString()
-        })
-        return sendAndConfirmTransaction({transaction, account})
+          quantity: BigInt(quantity).toString(),
+        });
+        return sendAndConfirmTransaction({ transaction, account });
       })
-    )
+    );
   }
-
-
-  connect(){
-    return from(this.metamask.connect({ client: this.client }))
+  private disconnect() {
+    return from(this.metamask.disconnect());
   }
-  disconnect(){
-    return from(this.metamask.disconnect())
-
+  private autoConnect() {
+    return from(this.metamask.autoConnect({ client: this.client }));
   }
-  autoConnect(){
-    return from(this.metamask.autoConnect({ client: this.client }))
-  }
-  getStartingItems(){
-    return from(getNFTs({ contract: this.startingWeapons }));
-  }
-  getOwnedItems(){
-    return this.account$.pipe(
-      switchMap(({address}) => 
-        getOwnedNFTs({
-          contract: this.startingWeapons,
-          address,
-        })
-    ))
-  }
-
-  claimStartingWeapon(tokenId: bigint){
-    return this.walletData$.pipe(
-      filter(walletData => walletData !== undefined),
-      map(walletData => (walletData as WalletData).account),
-      switchMap((account) => sendTransaction({
-        transaction: claimTo({
-          contract: this.startingWeapons,
-          to: account.address,
-          tokenId,
-          quantity: 1n,
-        }),
-        account,
-      }))
-    )
-  }
-
 }

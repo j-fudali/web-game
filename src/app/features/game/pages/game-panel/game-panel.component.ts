@@ -10,6 +10,7 @@ import { MessageService } from 'primeng/api';
 import { PlayerCharacterService } from '../../../../shared/services/player-character.service';
 import { ButtonModule } from 'primeng/button';
 import { RouterModule } from '@angular/router';
+import { EquipmentService } from '../../../../shared/services/equipment.service';
 @Component({
   selector: 'jfudali-game-panel',
   standalone: true,
@@ -39,11 +40,12 @@ export class GamePanelComponent {
   private _itemsService = inject(ItemsService);
   private _playerCharacterService = inject(PlayerCharacterService);
   private _messageService = inject(MessageService);
+  private _equipmentService = inject(EquipmentService)
   playerCharacter = this._playerCharacterService.state.playerCharacter;
   playerCharacterStatus = this._playerCharacterService.state.status
-  equipmentSaveStatus = this._itemsService.state.equipmentSaveStatus;
-  avaliableItems = this._itemsService.state.avaliableItems;
-  equippedItems = this._itemsService.state.equippedItems;
+  equipmentSaveStatus = this._equipmentService.state.status;
+  avaliableItems = this._equipmentService.state.avaliableItems;
+  equippedItems = this._equipmentService.state.equippedItems;
   status = this._itemsService.state.status;
   draggedItem: OwnedItem | null = null;
   disabledRest = computed(() => 

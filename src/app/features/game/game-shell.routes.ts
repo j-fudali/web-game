@@ -9,6 +9,8 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { PlayerCharacter } from '../../shared/interfaces/player-character';
 import { DialogService } from 'primeng/dynamicdialog';
 import { GetRestDialogComponent } from './components/get-rest-dialog/get-rest-dialog.component';
+import { GameComponent } from './game.component';
+import { EquipmentService } from '../../shared/services/equipment.service';
 
 const alreadyHasCharacter: CanActivateFn = (route, state) => {
   const playerService = inject(PlayerCharacterService);
@@ -47,6 +49,8 @@ const hasEnoughHealthPoints: CanActivateFn = (route, state) => {
 export default [
   {
     path: '',
+    component: GameComponent,
+    providers: [EquipmentService],
     children: [
       {
         path: '',
@@ -64,6 +68,5 @@ export default [
         canActivate: [hasEnoughHealthPoints],
       },
     ],
-    providers: [PlayerCharacterService],
   },
 ] as Route[];

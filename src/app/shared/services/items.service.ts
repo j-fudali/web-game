@@ -1,37 +1,20 @@
-import { Injectable, Signal, computed, inject } from '@angular/core';
-import {
-  Observable,
-  catchError,
-  debounceTime,
-  map,
-  merge,
-  of,
-  shareReplay,
-  switchMap,
-} from 'rxjs';
+import { Injectable, Signal, inject } from '@angular/core';
+import { map, of, shareReplay, switchMap } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { OwnedItem } from '../interfaces/owned-item';
-import { PlayerCharacter } from '../interfaces/player-character';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
-import { PlayerCharacterService } from './player-character.service';
 import { ThirdwebService } from './thirdweb.service';
 import { ItemMapper } from '../utils/item-mapper';
 
 export interface ItemsState {
-  avaliableItems: Signal<OwnedItem[]>;
-  equippedItems: Signal<OwnedItem[]>;
+  onwedItems: Signal<OwnedItem[]>;
   status: Signal<'completed' | 'loading'>;
-  equipmentSaveStatus: Signal<{ status: 'saved' | 'notSaved' } | undefined>;
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class ItemsService {
-  private http = inject(HttpClient);
   private _thirdwebService = inject(ThirdwebService);
-  private _playerService = inject(PlayerCharacterService);
   private fetchOwnedItems$: Observable<OwnedItem[]> = this._thirdwebService
     .getOwnedItems()
     .pipe(
@@ -57,53 +40,8 @@ export class ItemsService {
       initialValue: [],
     }
   );
-  private equippedItems = computed(() =>
-    this.ownedItems().filter(item =>
-      this._playerService.state
-        .playerCharacter()
-        ?.equippedItems.includes(item.tokenId)
-    )
-  );
-  private availableItems = computed(() => {
-    return this.ownedItems().filter(
-      item =>
-        !this._playerService.state
-          .playerCharacter()
-          ?.equippedItems.includes(item.tokenId)
-    );
-  });
-
-  //Saving equipment state
-  private setEquippedItems = (items: bigint[]) =>
-    this.http.put<Pick<PlayerCharacter, 'equippedItems'>>(
-      environment.url + '/player-character/equipped-items',
-      {
-        equippedItems: items.map(i => i.toString()),
-      }
-    );
-  private equipmentSaveStatus$: Observable<{ status: 'saved' | 'notSaved' }> =
-    merge(
-      this._playerService.equipItem$,
-      this._playerService.unequipItem$
-    ).pipe(
-      debounceTime(3000),
-      switchMap(() =>
-        this.setEquippedItems(this.equippedItems().map(i => i.tokenId))
-      ),
-      map(() => ({ status: 'saved' } as { status: 'saved' | 'notSaved' })),
-      catchError(() =>
-        of({
-          status: 'notSaved',
-        } as { status: 'saved' | 'notSaved' })
-      )
-    );
-  private equipmentSaveStatus = toSignal(this.equipmentSaveStatus$, {
-    initialValue: undefined,
-  });
   state: ItemsState = {
-    avaliableItems: this.availableItems,
-    equippedItems: this.equippedItems,
+    onwedItems: this.ownedItems,
     status: this.status,
-    equipmentSaveStatus: this.equipmentSaveStatus,
   };
 }
