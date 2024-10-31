@@ -35,6 +35,7 @@ import {
 import { ThirdwebService } from './thirdweb.service';
 import { RestData } from '../interfaces/rest-data';
 import { AuthService } from './auth.service';
+import { PlayerCharacterApiService } from '../api/player-character/player-character-api.service';
 export type PlayerCharacterStatus =
   | 'completed'
   | 'loading'
@@ -48,8 +49,7 @@ export interface PlayerCharacterState {
 
 @Injectable({ providedIn: 'root' })
 export class PlayerCharacterService {
-  private http = inject(HttpClient);
-  private baseUrl = environment.url + '/player-character';
+  private _playerCharacterApiService = inject(PlayerCharacterApiService);
   private _messageService = inject(MessageService);
   private _thirdwebService = inject(ThirdwebService);
   private _authService = inject(AuthService);
@@ -67,64 +67,38 @@ export class PlayerCharacterService {
     this._authService.state.isLogged
   ).pipe(
     filter(isLogged => isLogged === true),
-    switchMap(() => this.http.get<PlayerCharacter>(this.baseUrl)),
-    map(pc => ({
-      ...pc,
-      equippedItems: pc.equippedItems.map(i => BigInt(i)),
-    })),
-    catchError((err: HttpErrorResponse) => {
-      if (err.status == 404) {
-        return of(null);
-      }
-      return throwError(() => err);
-    }),
+    switchMap(() => this._playerCharacterApiService.getPlayerCharacter()),
+    filter(res => res !== undefined),
+    map(
+      pc =>
+        ({
+          ...pc,
+          equippedItems: (pc as PlayerCharacter).equippedItems.map(i =>
+            BigInt(i)
+          ),
+        } as PlayerCharacter)
+    ),
     shareReplay(1)
   );
   private onCreateCharacter$ = this.createCharacter$.pipe(
-    switchMap(({ name, image, characterClassId, equippedItems }) => {
-      const formdata = new FormData();
-      formdata.set('name', name);
-      formdata.set('image', image);
-      formdata.set('characterClassId', characterClassId);
-      formdata.set('equippedItems[]', equippedItems[0]);
-      return forkJoin([
-        this.http.post<PlayerCharacter>(this.baseUrl, formdata).pipe(
-          catchError(err => {
-            if (err.status == 409) {
-              this._messageService.add({
-                summary: 'Błąd',
-                severity: 'error',
-                detail: 'Posiadasz już postać',
-              });
-            } else {
-              this._messageService.add({
-                summary: 'Błąd',
-                detail: 'Nie można utworzyć postaci',
-                severity: 'error',
-              });
-            }
-            return of(undefined);
-          })
+    switchMap(newCharacter =>
+      forkJoin([
+        this._playerCharacterApiService.createCharacter(newCharacter),
+        this._thirdwebService.claimStartingWeapon(
+          BigInt(newCharacter.equippedItems[0])
         ),
-        this._thirdwebService
-          .claimStartingWeapon(BigInt(equippedItems[0]))
-          .pipe(
-            catchError(() => {
-              return of(null);
-            })
-          ),
-      ]).pipe(
-        tap(() => {
-          this.router.navigate(['/game']);
-          this._messageService.add({
-            summary: 'Utworzono!',
-            detail: 'Postać została utworzona',
-            severity: 'success',
-          });
-        })
-      );
+      ])
+    ),
+    filter(([pc, itemClaim]) => pc !== null && itemClaim !== null),
+    tap(() => {
+      this.router.navigate(['/game']);
+      this._messageService.add({
+        summary: 'Utworzono!',
+        detail: 'Postać została utworzona',
+        severity: 'success',
+      });
     }),
-    map(([character, transaction]) => character),
+    map(([character, _]) => character),
     shareReplay(1)
   );
   private onEquip$: Observable<PlayerCharacter> = this.equipItem$.pipe(
@@ -180,13 +154,13 @@ export class PlayerCharacterService {
     this.playerCharacter$.pipe(
       filter(
         pc =>
-          pc?.statistics.energy.actualValue ===
-          pc?.statistics.energy.maximumValue
+          pc?.statistics?.energy.actualValue ===
+          pc?.statistics?.energy.maximumValue
       ),
       filter(
         pc =>
-          pc?.statistics.health.actualValue ===
-          pc?.statistics.health.maximumValue
+          pc?.statistics?.health.actualValue ===
+          pc?.statistics?.health.maximumValue
       )
     ),
     this.stopRest$,
@@ -214,11 +188,7 @@ export class PlayerCharacterService {
   //   catchError((err: HttpErrorResponse) => of(undefined))
   // );
   private onRest$: Observable<'resting' | 'rested'> = this.rest$.pipe(
-    switchMap(() =>
-      this.http
-        .post<RestData>(this.baseUrl + '/rest', {})
-        .pipe(catchError((err: HttpErrorResponse) => of(undefined)))
-    ),
+    switchMap(() => this._playerCharacterApiService.rest()),
     filter(res => res !== undefined),
     concatMap(restData =>
       interval(1000).pipe(
@@ -236,7 +206,8 @@ export class PlayerCharacterService {
   private onStopRest$ = this.stopCondtionTriggers$.pipe(
     withLatestFrom(this.onRest$),
     filter(([_, state]) => state === 'resting'),
-    switchMap(() => this.http.delete(this.baseUrl + '/rest/stop')),
+    switchMap(() => this._playerCharacterApiService.stopRest()),
+    filter(res => res !== undefined),
     tap(() =>
       this._messageService.add({
         detail: 'Zakończono odpoczynek',
@@ -253,7 +224,7 @@ export class PlayerCharacterService {
     this.onRest$,
     this.onStopRest$.pipe(map(() => 'completed' as const))
   );
-  private playerCharacter = toSignal<PlayerCharacter | null | undefined>(
+  private playerCharacter = toSignal<PlayerCharacter | undefined>(
     this.playerCharacter$,
     {
       initialValue: undefined,

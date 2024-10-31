@@ -1,9 +1,10 @@
 import { Injectable, Signal, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Subject, map, merge, shareReplay } from 'rxjs';
+import { Subject, filter, map, merge, shareReplay } from 'rxjs';
 import { Item } from '../../../shared/interfaces/item';
 import { ThirdwebService } from '../../../shared/services/thirdweb.service';
 import { ItemMapper } from '../../../shared/utils/item-mapper';
+import { NFT } from 'thirdweb';
 
 export interface StartingItemsState {
   items: Signal<Item[]>;
@@ -21,6 +22,8 @@ export class StartingItemsService {
   private _thirdwebService = inject(ThirdwebService);
   private error$ = new Subject<string>();
   private startingItems$ = this._thirdwebService.getStartingItems().pipe(
+    filter(res => res !== undefined),
+    map(nfts => nfts as NFT[]),
     map(nfts =>
       nfts.filter(nft => [BigInt(0), BigInt(1), BigInt(2)].includes(nft.id))
     ),

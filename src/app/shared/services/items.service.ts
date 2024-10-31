@@ -1,9 +1,10 @@
 import { Injectable, Signal, inject } from '@angular/core';
-import { map, of, shareReplay, switchMap } from 'rxjs';
+import { Observable, filter, map, shareReplay } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { OwnedItem } from '../interfaces/owned-item';
 import { ThirdwebService } from './thirdweb.service';
 import { ItemMapper } from '../utils/item-mapper';
+import { NFT } from 'thirdweb';
 
 export interface ItemsState {
   onwedItems: Signal<OwnedItem[]>;
@@ -18,6 +19,8 @@ export class ItemsService {
   private fetchOwnedItems$: Observable<OwnedItem[]> = this._thirdwebService
     .getOwnedItems()
     .pipe(
+      filter(res => res !== undefined),
+      map(nfts => nfts as (NFT & { quantityOwned: bigint })[]),
       map(nfts =>
         nfts.map(({ quantityOwned, ...nft }) => {
           const item = ItemMapper.convertNftToItem(nft);

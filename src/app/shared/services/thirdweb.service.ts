@@ -36,9 +36,11 @@ import {
   map,
   merge,
   of,
+  pipe,
   shareReplay,
   switchMap,
   tap,
+  throwError,
   withLatestFrom,
 } from 'rxjs';
 import { RPCError } from '../interfaces/rpc-error';
@@ -48,6 +50,7 @@ import { WalletData } from '../interfaces/wallet-data';
 import { SellData } from '../../features/marketplace/interfaces/sell-data';
 import { Hex } from 'thirdweb/dist/types/utils/encoding/hex';
 import { MarketplaceItem } from '../../features/marketplace/interfaces/marketplace-item';
+import { LoggerService } from './logger.service';
 
 export interface WalletDataState {
   data: Signal<WalletData | undefined>;
@@ -61,7 +64,17 @@ export interface WalletDataState {
   providedIn: 'root',
 })
 export class ThirdwebService {
-  private _messageService = inject(MessageService);
+  private logger = inject(LoggerService);
+  private CONNECT_ERROR = 'Błąd połączenia z portfelem kryptowalut';
+  private AUTOCONNECT_ERROR =
+    'Błąd automatycznego połączenia z portfelem kryptowalut';
+  private DISCONNECT_ERROR = 'Błąd rozłączenia z portfelem kryptowalut';
+  private GET_OWNED_ITEMS_ERROR = 'Błąd pobrania posiadanych przedmiotów';
+  private GET_STARTING_WEAPON_ERROR = 'Błąd pobierania broni startowych';
+  private CLAIM_STARTING_WEAPON_ERROR = 'Błąd odbierania broni startowej';
+  private GET_LISTINGS_ERROR = 'Błąd pobrania listingu przedmiotów';
+  private CREATE_LISTING_ERROR = 'Błąd dodowania listingu przedmiotu';
+  private BUY_FROM_LISTING_ERROR = 'Błąd kupowania listingu przedmiotu';
   private metamask = createWallet('io.metamask');
   private chain = polygonAmoy;
   private client = createThirdwebClient({
@@ -98,7 +111,9 @@ export class ThirdwebService {
     switchMap(() =>
       this.disconnect().pipe(
         catchError(err => {
+          this.logger.showErrorMessage(this.DISCONNECT_ERROR);
           this.error$.next(err);
+          localStorage.removeItem('isDisconnected');
           return of(undefined);
         })
       )
@@ -109,13 +124,9 @@ export class ThirdwebService {
     switchMap(() =>
       this.connect().pipe(
         catchError((err: RPCError) => {
-          const message = this.getErrorMessage(err);
-          this._messageService.add({
-            severity: 'error',
-            summary: 'Błąd',
-            detail: message,
-          });
+          this.logger.showErrorMessage(this.CONNECT_ERROR);
           this.error$.next(err);
+          localStorage.removeItem('isDisconnected');
           return of(undefined);
         })
       )
@@ -128,6 +139,7 @@ export class ThirdwebService {
       val === null || val == 'false'
         ? this.autoConnect().pipe(
             catchError(err => {
+              this.logger.showErrorMessage(this.AUTOCONNECT_ERROR);
               this.error$.next(err);
               return of(undefined);
             })
@@ -211,12 +223,6 @@ export class ThirdwebService {
     status: this.status,
     error: this.error,
   };
-  connect() {
-    return from(this.metamask.connect({ client: this.client }));
-  }
-  getStartingItems() {
-    return from(getNFTs({ contract: this.items }));
-  }
   getOwnedItems() {
     return this.account$.pipe(
       switchMap(({ address }) =>
@@ -224,7 +230,11 @@ export class ThirdwebService {
           contract: this.items,
           address,
         })
-      )
+      ),
+      catchError(err => {
+        this.logger.showErrorMessage(this.GET_OWNED_ITEMS_ERROR);
+        return of(undefined);
+      })
     );
   }
   claimStartingWeapon(tokenId: bigint) {
@@ -239,11 +249,22 @@ export class ThirdwebService {
           }),
           account,
         })
-      )
+      ),
+      catchError(err => {
+        this.logger.showErrorMessage(this.CLAIM_STARTING_WEAPON_ERROR);
+        return throwError(() => err);
+      })
     );
   }
   getListings() {
-    return from(getAllValidListings({ contract: this.marketplaceContract }));
+    return from(
+      getAllValidListings({ contract: this.marketplaceContract })
+    ).pipe(
+      catchError(err => {
+        this.logger.showErrorMessage(this.GET_LISTINGS_ERROR);
+        return throwError(() => err);
+      })
+    );
   }
   createListing({ item, price }: SellData) {
     return this.account$.pipe(
@@ -265,7 +286,11 @@ export class ThirdwebService {
             currencyContractAddress: this.gearcoin.address,
           }),
         })
-      )
+      ),
+      catchError(err => {
+        this.logger.showErrorMessage(this.CREATE_LISTING_ERROR);
+        return throwError(() => err);
+      })
     );
   }
   buyFromListing(item: MarketplaceItem) {
@@ -294,8 +319,16 @@ export class ThirdwebService {
         })
       ),
       catchError((err: Error) => {
-        this.error$.next(err);
-        return of(undefined);
+        this.logger.showErrorMessage(this.BUY_FROM_LISTING_ERROR);
+        return throwError(() => err);
+      })
+    );
+  }
+  getStartingItems() {
+    return from(getNFTs({ contract: this.items })).pipe(
+      catchError(err => {
+        this.logger.showErrorMessage(this.GET_STARTING_WEAPON_ERROR);
+        return throwError(() => err);
       })
     );
   }
@@ -320,11 +353,66 @@ export class ThirdwebService {
             })
       ),
       catchError((err: RPCError) => {
-        this._messageService.add({
-          severity: 'error',
-          summary: 'Błąd',
-          detail: this.getErrorMessage(err),
+        this.logger.showErrorMessage(this.getErrorMessage(err));
+        return throwError(() => err);
+      })
+    );
+  }
+  private getBalance({ address }: Account) {
+    return from(
+      getWalletBalance({
+        client: this.client,
+        chain: this.chain,
+        address,
+        tokenAddress: this.gearcoin.address,
+      })
+    ).pipe(
+      catchError((err: RPCError) => {
+        this.logger.showErrorMessage(this.getErrorMessage(err));
+        this.error$.next(err);
+        return of(undefined);
+      })
+    );
+  }
+  private claimGearcoin(quantity: number) {
+    return this.account$.pipe(
+      switchMap(account => {
+        const transaction = claimToERC20({
+          contract: this.gearcoin,
+          to: account.address,
+          quantity: BigInt(quantity).toString(),
         });
+        return sendAndConfirmTransaction({ transaction, account });
+      }),
+      catchError((err: RPCError) => {
+        this.logger.showErrorMessage(this.getErrorMessage(err));
+        this.error$.next(err);
+        return of(undefined);
+      })
+    );
+  }
+  private connect() {
+    return from(this.metamask.connect({ client: this.client })).pipe(
+      catchError((err: RPCError) => {
+        this.logger.showErrorMessage(this.getErrorMessage(err));
+        this.error$.next(err);
+        return of(undefined);
+      })
+    );
+  }
+  private disconnect() {
+    return from(this.metamask.disconnect()).pipe(
+      catchError((err: RPCError) => {
+        this.logger.showErrorMessage(this.getErrorMessage(err));
+        this.error$.next(err);
+        return of(undefined);
+      })
+    );
+  }
+  private autoConnect() {
+    return from(this.metamask.autoConnect({ client: this.client })).pipe(
+      catchError((err: RPCError) => {
+        this.logger.showErrorMessage(this.getErrorMessage(err));
         this.error$.next(err);
         return of(undefined);
       })
@@ -341,34 +429,5 @@ export class ThirdwebService {
       default:
         return 'Nie można nawiązać połączenia';
     }
-  }
-  private getBalance({ address }: Account) {
-    return from(
-      getWalletBalance({
-        client: this.client,
-        chain: this.chain,
-        address,
-        tokenAddress: this.gearcoin.address,
-      })
-    );
-  }
-
-  private claimGearcoin(quantity: number) {
-    return this.account$.pipe(
-      switchMap(account => {
-        const transaction = claimToERC20({
-          contract: this.gearcoin,
-          to: account.address,
-          quantity: BigInt(quantity).toString(),
-        });
-        return sendAndConfirmTransaction({ transaction, account });
-      })
-    );
-  }
-  private disconnect() {
-    return from(this.metamask.disconnect());
-  }
-  private autoConnect() {
-    return from(this.metamask.autoConnect({ client: this.client }));
   }
 }
