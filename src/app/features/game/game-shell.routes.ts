@@ -2,13 +2,10 @@ import { CanActivateFn, Route, Router } from '@angular/router';
 import { GamePanelComponent } from './pages/game-panel/game-panel.component';
 import { CreateCharacterComponent } from './pages/create-character/create-character.component';
 import { inject } from '@angular/core';
-import { filter, map, take, tap } from 'rxjs';
+import { combineLatest, filter, map } from 'rxjs';
 import { PlayerCharacterService } from '../../shared/services/player-character.service';
 import { EncounterComponent } from './pages/encounter/encounter.component';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { PlayerCharacter } from '../../shared/interfaces/player-character';
-import { DialogService } from 'primeng/dynamicdialog';
-import { GetRestDialogComponent } from './components/get-rest-dialog/get-rest-dialog.component';
 import { GameComponent } from './game.component';
 import { EquipmentService } from '../../shared/services/equipment.service';
 
@@ -28,24 +25,7 @@ const hasNotAnyCharacter: CanActivateFn = (route, state) => {
     map(pc => (pc == null ? true : router.parseUrl('/')))
   );
 };
-const hasEnoughHealthPoints: CanActivateFn = (route, state) => {
-  const playerService = inject(PlayerCharacterService);
-  const router = inject(Router);
-  const dialog = inject(DialogService);
-  return toObservable(playerService.state.playerCharacter).pipe(
-    filter(pc => pc !== undefined && pc !== null),
-    map(pc => {
-      if ((pc as PlayerCharacter).statistics.health.actualValue > 0) {
-        return true;
-      }
-      const ref = dialog.open(GetRestDialogComponent, { header: 'Odpocznij' });
-      ref.onClose.subscribe(rest => {
-        if (rest) playerService.rest$.next();
-      });
-      return router.parseUrl('/');
-    })
-  );
-};
+
 export default [
   {
     path: '',
@@ -65,7 +45,7 @@ export default [
       {
         path: 'play',
         component: EncounterComponent,
-        canActivate: [hasEnoughHealthPoints],
+        // canActivate: [hasEnoughHealthAndEnergy],
       },
     ],
   },

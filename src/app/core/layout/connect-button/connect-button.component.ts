@@ -14,7 +14,7 @@ import { OverlayPanel, OverlayPanelModule } from 'primeng/overlaypanel';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { metamaskIcon } from '../../../shared/constants/config.constants';
-import { WalletDataState } from '../../../shared/services/thirdweb.service';
+import { WalletDataState } from '../../../shared/services/wallet.service';
 @Component({
   selector: 'jfudali-connect-button',
   standalone: true,
@@ -39,19 +39,18 @@ export class ConnectButtonComponent {
   label = computed(
     () =>
       `${this.walletData()
-        .data()
+        .wallet()
         ?.account.address.slice(0, 6)}...${this.walletData()
-        .data()
+        .wallet()
         ?.account.address.slice(-4, -1)}`
   );
-  balance = computed(
-    () => {
-      const balance = Math.round(Number(this.walletData().data()?.balance.displayValue) * 100) / 100
-      return `${balance} ${
-        this.walletData().data()?.balance.symbol
-      }`
-    }
-  );
+  balance = computed(() => {
+    const balance =
+      Math.round(
+        Number(this.walletData().wallet()?.balance.displayValue) * 100
+      ) / 100;
+    return `${balance} ${this.walletData().wallet()?.balance.symbol}`;
+  });
   walletActions: MenuItem[] = [
     {
       label: 'Rozłącz',

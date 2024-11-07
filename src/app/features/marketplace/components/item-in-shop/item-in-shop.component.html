@@ -1,42 +1,80 @@
 <div class="grid grid-nogutter p-4">
-    <div class="h-8rem w-8rem relative border-2 border-round">
-        <img class="absolute top-0 left-0 w-full h-full overflow-hidden" [src]="item().image">
+  <div class="h-8rem w-8rem relative border-2 border-round">
+    @if (quantity(); as quantity) {
+    <div class="z-2 absolute top-0 left-0 p-2">
+      <p-badge [value]="quantity" />
     </div>
-    <div class="col-12 mt-2 md:mt-0 md:px-2 md:col flex flex-column lg:justify-content-between">
-        <div>
-            <h3 class="m-0">{{item().name}}</h3>
-            <div class="flex flex-column gap-1">
-                <i>{{item().type | jfudaliItemTranslate}}</i>
-                @if(item().bodySlot){
-                    <small>({{item().bodySlot! | jfudaliBodySlotTranslate}})</small>
-                }
-            </div>
-        </div>
-        <div>
-            @if(item().type === itemType.Weapon){
-                <span><b>Obrażenia: </b><i>{{item().damage}}</i></span>
-            }
-            @else {
-                <span><b>Pancerz: </b><i>{{item().armor}}</i></span>
-            }
-        </div>
+    }
+    <img
+      class="absolute top-0 left-0 w-full h-full overflow-hidden"
+      [src]="item().image" />
+  </div>
+  <div
+    class="col-12 mt-2 md:mt-0 md:px-2 md:col flex flex-column lg:justify-content-between">
+    <div>
+      <h3 class="m-0">{{ item().name }}</h3>
+      <div class="flex flex-column gap-1">
+        <i>{{ item().type | jfudaliItemTranslate }}</i>
+        @if(item().bodySlot){
+        <small>({{ item().bodySlot! | jfudaliBodySlotTranslate }})</small>
+        }
+      </div>
     </div>
-    <div class="col-12 mt-2 lg:mt-0 lg:col flex lg:flex-column lg:justify-content-end">
-        <button class="w-full pointer-events-auto" pButton icon="pi pi-shopping-cart" 
-        [loading]="status() === 'action-loading'"
-        [disabled]="disabledAction() !== null"
-        [pTooltip]="disabledAction() || ''" 
-        [tooltipDisabled]="disabledAction() === null"
-        tooltipPosition="top"
-        [severity]="mode() === 'buy' ? 'success' : 'warning'" 
-        [label]="label()" 
-        size="small" (click)="performAction($event)"></button>
+    <div>
+      @if(item().type === itemType.Weapon){
+      <span
+        ><b>Obrażenia: </b><i>{{ item().damage }}</i></span
+      >
+      } @else {
+      <span
+        ><b>Pancerz: </b><i>{{ item().armor }}</i></span
+      >
+      }
     </div>
+  </div>
+  <div
+    class="col-12 mt-2 lg:mt-0 lg:col flex lg:flex-column lg:justify-content-end">
+    <button
+      class="w-full pointer-events-auto"
+      pButton
+      icon="pi pi-shopping-cart"
+      [loading]="status() === 'action-loading'"
+      [disabled]="disabledAction() !== null"
+      [pTooltip]="disabledAction() || ''"
+      [tooltipDisabled]="disabledAction() === null"
+      tooltipPosition="top"
+      [severity]="mode() === 'buy' ? 'success' : 'warning'"
+      [label]="label()"
+      size="small"
+      (click)="performAction($event)"></button>
+  </div>
 </div>
-<p-overlayPanel #op >
-    <div class="flex flex-column gap-2">
-        <h3 class="text-center">Cena</h3>
-        <p-inputNumber inputId="price" [(ngModel)]="sellPrice" maxFractionDigits="2"/>
-        <button pButton severity="success" outlined icon="pi pi-shopping-cart" label="Zatwierdź"  (click)="sell()"></button>
-    </div>
+<p-overlayPanel #sellOp>
+  <div class="flex flex-column gap-2">
+    <h3 class="text-center">Cena</h3>
+    <p-inputNumber
+      inputId="price"
+      [(ngModel)]="sellPrice"
+      maxFractionDigits="2" />
+    <button
+      pButton
+      severity="success"
+      outlined
+      icon="pi pi-shopping-cart"
+      label="Zatwierdź"
+      (click)="sell()"></button>
+  </div>
+</p-overlayPanel>
+<p-overlayPanel #buyOp>
+  <div class="flex flex-column">
+    <h3 class="text-center">Potwierdzenie</h3>
+    <p>Czy jesteś pewny zakupu?</p>
+    <button
+      pButton
+      severity="success"
+      outlined
+      icon="pi pi-shopping-bag"
+      label="Zatwierdź"
+      (click)="buy()"></button>
+  </div>
 </p-overlayPanel>

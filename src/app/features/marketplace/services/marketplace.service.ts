@@ -17,6 +17,8 @@ import { SellData } from '../interfaces/sell-data';
 import { MessageService } from 'primeng/api';
 import { ItemMapper } from '../../../shared/utils/item-mapper';
 import { DirectListing } from 'thirdweb/extensions/marketplace';
+import { ItemsService } from '../../../shared/services/items.service';
+import { WalletService } from '../../../shared/services/wallet.service';
 
 export interface MarketplaceState {
   items: Signal<MarketplaceItem[]>;
@@ -25,18 +27,28 @@ export interface MarketplaceState {
 
 @Injectable({ providedIn: 'root' })
 export class MarketplaceService {
+  private _itemsService = inject(ItemsService);
   private _thirdwebService = inject(ThirdwebService);
+  private _walletService = inject(WalletService);
   private _messageService = inject(MessageService);
   getListings$ = new Subject<void>();
   sell$ = new Subject<SellData>();
   buy$ = new Subject<MarketplaceItem>();
   private error$ = new Subject<Error>();
   private onSell$ = this.sell$.pipe(
-    switchMap(sellData => this._thirdwebService.createListing(sellData)),
-    catchError(err => {
-      console.log(err);
-      return of(undefined);
-    }),
+    switchMap(sellData =>
+      this._thirdwebService
+        .createListing(this._walletService.state.account(), sellData)
+        .pipe(
+          catchError(err => {
+            console.log(err);
+            this.error$.next(err);
+            return of(undefined);
+          })
+        )
+    ),
+    filter(res => res !== undefined),
+    tap(() => this._itemsService.getOwnedItems$.next()),
     tap(() =>
       this._messageService.add({
         severity: 'success',
@@ -47,15 +59,24 @@ export class MarketplaceService {
     shareReplay(1)
   );
   private onBuy$ = this.buy$.pipe(
-    switchMap(item => this._thirdwebService.buyFromListing(item)),
-    catchError(err => {
-      return of(undefined);
-    }),
+    switchMap(item =>
+      this._thirdwebService
+        .buyFromListing(this._walletService.state.account(), item)
+        .pipe(
+          catchError(err => {
+            console.log(err);
+            this.error$.next(err);
+            return of(undefined);
+          })
+        )
+    ),
+    filter(res => res !== undefined),
+    tap(() => this._itemsService.getOwnedItems$.next()),
     tap(() =>
       this._messageService.add({
         severity: 'success',
         summary: 'Sukces',
-        detail: 'Udało się kupić przedmit',
+        detail: 'Udało się kupić przedmiot',
       })
     ),
     shareReplay(1)
@@ -85,7 +106,7 @@ export class MarketplaceService {
       map(() => 'completed' as const)
     ),
     this.error$.pipe(map(() => 'error' as const))
-  ).pipe(shareReplay(1));
+  );
   private items = toSignal(this.listings$, {
     initialValue: [] as MarketplaceItem[],
   });

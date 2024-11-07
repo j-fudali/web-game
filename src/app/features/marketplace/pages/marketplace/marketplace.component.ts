@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {  Component, OnInit, computed, inject } from '@angular/core';
+import { Component, OnInit, computed, inject } from '@angular/core';
 import { DataViewModule, DataViewPageEvent } from 'primeng/dataview';
 import { DividerModule } from 'primeng/divider';
 import { ItemsService } from '../../../../shared/services/items.service';
@@ -16,6 +16,7 @@ import { RouterModule } from '@angular/router';
 import { MarketplaceItem } from '../../interfaces/marketplace-item';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { merge } from 'rxjs';
+import { WalletService } from '../../../../shared/services/wallet.service';
 @Component({
   selector: 'jfudali-marketplace',
   standalone: true,
@@ -29,44 +30,44 @@ import { merge } from 'rxjs';
     TabViewModule,
     SkeletonModule,
     AlreadyInSellPipe,
-    RouterModule
+    RouterModule,
   ],
   templateUrl: './marketplace.component.html',
   styleUrl: './marketplace.component.scss',
-  providers: [MarketplaceService]
+  providers: [MarketplaceService],
 })
-export class MarketplaceComponent implements OnInit{
-  private _itemsService = inject(ItemsService)
-  private _thirdwebService = inject(ThirdwebService)
-  private _marketplaceService = inject(MarketplaceService)
-  walletData = this._thirdwebService.state.data
+export class MarketplaceComponent implements OnInit {
+  private _itemsService = inject(ItemsService);
+  private _walletService = inject(WalletService);
+  private _marketplaceService = inject(MarketplaceService);
+  walletData = this._walletService.state.wallet;
   ownedItemsStatus = toSignal(
     merge(
-      toObservable(this._itemsService.state.status), 
+      toObservable(this._itemsService.state.status),
       toObservable(this._marketplaceService.state.status)
-    ), { initialValue: 'loading'} 
-  )
-  ownedItems = this._itemsService.state.onwedItems
-  ownedItemsSize = computed(() => this.ownedItems().length)
-  marketplaceStatus = this._marketplaceService.state.status
-  itemsToBuy = this._marketplaceService.state.items
-  userAddress = computed(() => this.walletData()?.account?.address!)
+    ),
+    { initialValue: 'loading' }
+  );
+  ownedItems = this._itemsService.state.onwedItems;
+  ownedItemsSize = computed(() => this.ownedItems().length);
+  marketplaceStatus = this._marketplaceService.state.status;
+  itemsToBuy = this._marketplaceService.state.items;
+  userAddress = computed(() => this.walletData()?.account?.address!);
   ngOnInit(): void {
-      this._marketplaceService.getListings$.next()
+    this._itemsService.getOwnedItems$.next();
+    this._marketplaceService.getListings$.next();
   }
-  performAction(mode: 'sell' | 'buy',data: MarketplaceItem | SellData){
-    if(mode === 'sell'){
-      this.sell(data as SellData)
+  performAction(mode: 'sell' | 'buy', data: MarketplaceItem | SellData) {
+    if (mode === 'sell') {
+      this.sell(data as SellData);
+    } else {
+      this.buy(data as MarketplaceItem);
     }
-    else{
-      this.buy(data as MarketplaceItem)
-    }
   }
-  buy(item: MarketplaceItem){
-    this._marketplaceService.buy$.next(item)
+  buy(item: MarketplaceItem) {
+    this._marketplaceService.buy$.next(item);
   }
-  sell(sellData: SellData){
-    this._marketplaceService.sell$.next(sellData)
+  sell(sellData: SellData) {
+    this._marketplaceService.sell$.next(sellData);
   }
- 
 }

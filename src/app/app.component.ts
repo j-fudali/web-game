@@ -14,8 +14,8 @@ import { ToastModule } from 'primeng/toast';
 import { SidebarModule } from 'primeng/sidebar';
 import { MenuModule } from 'primeng/menu';
 import { ButtonModule } from 'primeng/button';
-import { ThirdwebService } from './shared/services/thirdweb.service';
 import { PlayerCharacterService } from './shared/services/player-character.service';
+import { WalletService } from './shared/services/wallet.service';
 @Component({
   selector: 'jfudali-root',
   standalone: true,
@@ -41,12 +41,12 @@ export class AppComponent implements OnInit {
   private _playerCharacterService = inject(PlayerCharacterService);
   private _authService = inject(AuthService);
   private primengConfig = inject(PrimeNGConfig);
-  private _thirdwebService = inject(ThirdwebService);
+  private _walletService = inject(WalletService);
   isLoggedIn = this._authService.state.isLogged;
   error = this._authService.state.error;
   status = this._authService.state.status;
-  walletDataState = this._thirdwebService.state;
-  connect$ = this._thirdwebService.connect$;
+  walletDataState = this._walletService.state;
+  connect$ = this._walletService.connect$;
   sidebarVisible = false;
   navigationsList = computed(() => [
     {
@@ -81,7 +81,7 @@ export class AppComponent implements OnInit {
     this._authService.signOut$.next();
   }
   disconnectWallet() {
-    this._thirdwebService.disconnect$.next();
+    this._walletService.disconnect$.next();
     this.signOut();
   }
 }

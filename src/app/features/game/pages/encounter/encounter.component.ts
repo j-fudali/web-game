@@ -53,10 +53,10 @@ export class EncounterComponent implements OnInit {
   availableItems = this._equipmentService.state.avaliableItems;
   itemsStatus = this._itemsService.state.status;
   equippedWeapon = computed(() =>
-    this.equippedItems().find((item) => item.type === 'weapon')
+    this.equippedItems().find(item => item.type === 'weapon')
   );
   equippedArmorSum = computed(() => {
-    const armors = this.equippedItems().filter((item) => item.type === 'armor');
+    const armors = this.equippedItems().filter(item => item.type === 'armor');
     if (armors.length === 0) return 0;
     return armors
       .map(({ armor }) => (armor ? armor : 0))
@@ -68,7 +68,7 @@ export class EncounterComponent implements OnInit {
   decisions = computed(
     () => (this.randomEncounter() as DecisionEncounter).decisions
   );
-  effect = this._randomEncounterService.state.effect
+  effect = this._randomEncounterService.state.effect;
 
   enemy = computed(() => (this.randomEncounter() as EnemyEncounter).enemy);
   encounterStatus = this._randomEncounterService.state.status;
@@ -81,7 +81,6 @@ export class EncounterComponent implements OnInit {
     this.loadEncounter();
   }
   loadEncounter() {
-    this.selectedDecision = undefined;
     this._randomEncounterService.loadRandomEncounter$.next();
   }
   simulateFight() {
@@ -107,9 +106,12 @@ export class EncounterComponent implements OnInit {
     );
   }
 
-  selectDecision(decision: Decision){
+  selectDecision(decision: Decision) {
     this.selectedDecision = decision;
-    this._randomEncounterService.selectDecision$.next({encounterId: this.randomEncounter()!.id, decision: decision.text})
-    this.selectedDecision = undefined
+    this._randomEncounterService.selectDecision$.next({
+      encounterId: this.randomEncounter()!.id,
+      decision: decision.text,
+    });
+    this.selectedDecision = undefined;
   }
 }

@@ -1,33 +1,62 @@
 <div class="flex flex-column align-items-center">
-    <div class="w-full sm:w-10 md:w-full flex flex-column md:flex-row gap-4 md:gap-2 py-4 px-2">
-        <h1 class="m-0 text-center md:px-4 md:align-self-center">Marketplace</h1>
-        <p-tabView class="w-full">
-            <p-tabPanel header="Kup">
-                <ng-container *ngTemplateOutlet="itemsView; context: {mode: 'buy', label: 'Kup', items: itemsToBuy, status: marketplaceStatus}"></ng-container>
-            </p-tabPanel>
-            <p-tabPanel header="Sprzedaj">
-                <ng-container *ngTemplateOutlet="itemsView; context: {mode: 'sell', label: 'Sprzedaj', items: ownedItems, status: ownedItemsStatus}"></ng-container>
-            </p-tabPanel>
-        </p-tabView>
-    </div>
+  <div
+    class="w-full sm:w-10 md:w-full flex flex-column md:flex-row gap-4 md:gap-2 py-4 px-2">
+    <h1 class="m-0 text-center md:px-4 md:align-self-center">Marketplace</h1>
+    <p-tabView class="w-full">
+      <p-tabPanel header="Kup">
+        <ng-container
+          *ngTemplateOutlet="
+            itemsView;
+            context: {
+              mode: 'buy',
+              label: 'Kup',
+              items: itemsToBuy,
+              status: marketplaceStatus
+            }
+          "></ng-container>
+      </p-tabPanel>
+      <p-tabPanel header="Sprzedaj">
+        <ng-container
+          *ngTemplateOutlet="
+            itemsView;
+            context: {
+              mode: 'sell',
+              label: 'Sprzedaj',
+              items: ownedItems,
+              status: ownedItemsStatus
+            }
+          "></ng-container>
+      </p-tabPanel>
+    </p-tabView>
+  </div>
 </div>
-<ng-template #itemsView let-mode="mode" let-label="label" let-items="items" let-status="status">
-    <p-dataView layout="list" [lazy]="true"  [loading]="status() === 'loading'"  [value]="items()">
-        <ng-template pTemplate="list">
-            <div class="h-24rem md:h-30rem grid grid-nogutter overflow-y-auto">
-                @for (item of items(); track i; let i = $index) {
-                    <div class="col-12" [class.border-top-1]="i !== 0">
-                        <jfudali-item-in-shop 
-                        [status]="status()"
-                        [walletData]="walletData()!"
-                        [itemsToBuy]="itemsToBuy()"
-                        [mode]="mode" 
-                        [item]="item" 
-                        [actionLabel]="label"
-                        (onAction)="performAction(mode, $event)"/>
-                    </div>
-                }
-            </div>
-        </ng-template>
-    </p-dataView>
+<ng-template
+  #itemsView
+  let-mode="mode"
+  let-label="label"
+  let-items="items"
+  let-status="status">
+  <p-dataView
+    layout="list"
+    [lazy]="true"
+    [loading]="status() === 'loading'"
+    [value]="items()"
+    emptyMessage="Brak przedmiotów">
+    <ng-template pTemplate="list">
+      <div class="grid grid-nogutter h-24rem md:h-30rem overflow-y-auto">
+        @for (item of items(); track i; let i = $index) {
+        <div class="col-12" [class.border-top-1]="i !== 0">
+          <jfudali-item-in-shop
+            [status]="status()"
+            [walletData]="walletData()!"
+            [itemsToBuy]="itemsToBuy()"
+            [mode]="mode"
+            [item]="item"
+            [actionLabel]="label"
+            (onAction)="performAction(mode, $event)" />
+        </div>
+        }
+      </div>
+    </ng-template>
+  </p-dataView>
 </ng-template>

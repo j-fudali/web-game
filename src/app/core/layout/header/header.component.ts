@@ -12,7 +12,7 @@ import { MenubarModule } from 'primeng/menubar';
 import { MenuItem } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { ButtonGroupModule } from 'primeng/buttongroup';
-import { WalletDataState } from '../../../shared/services/thirdweb.service';
+import { WalletDataState } from '../../../shared/services/wallet.service';
 @Component({
   selector: 'jfudali-header',
   standalone: true,

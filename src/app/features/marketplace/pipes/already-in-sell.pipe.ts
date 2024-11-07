@@ -7,9 +7,15 @@ import { OwnedItem } from '../../../shared/interfaces/owned-item';
   standalone: true,
 })
 export class AlreadyInSellPipe implements PipeTransform {
-
-  transform(itemsToBuy: MarketplaceItem[], item: OwnedItem, creatorAddress: string): boolean {
-    return itemsToBuy.find(i => i.tokenId === item.tokenId && i.creatorAddress === creatorAddress) ? true: false;
+  transform(
+    itemsToBuy: MarketplaceItem[],
+    item: OwnedItem,
+    creatorAddress: string
+  ): boolean {
+    return itemsToBuy.filter(i => {
+      return i.tokenId === item.tokenId && i.creatorAddress === creatorAddress;
+    }).length === Number(item.quantity)
+      ? true
+      : false;
   }
-
 }

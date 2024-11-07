@@ -1,12 +1,10 @@
 import { Injectable, Signal, inject } from '@angular/core';
 import { PlayerCharacter } from '../interfaces/player-character';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
+  BehaviorSubject,
   Observable,
   Subject,
-  catchError,
   concatMap,
   endWith,
   filter,
@@ -14,12 +12,10 @@ import {
   interval,
   map,
   merge,
-  of,
   shareReplay,
   switchMap,
   takeUntil,
   tap,
-  throwError,
   withLatestFrom,
 } from 'rxjs';
 import { OwnedItem } from '../interfaces/owned-item';
@@ -36,6 +32,9 @@ import { ThirdwebService } from './thirdweb.service';
 import { RestData } from '../interfaces/rest-data';
 import { AuthService } from './auth.service';
 import { PlayerCharacterApiService } from '../api/player-character/player-character-api.service';
+import { WalletService } from './wallet.service';
+import { GetRestDialogComponent } from '../../features/game/components/get-rest-dialog/get-rest-dialog.component';
+import { DialogService } from 'primeng/dynamicdialog';
 export type PlayerCharacterStatus =
   | 'completed'
   | 'loading'
@@ -49,9 +48,11 @@ export interface PlayerCharacterState {
 
 @Injectable({ providedIn: 'root' })
 export class PlayerCharacterService {
+  private dialog = inject(DialogService);
   private _playerCharacterApiService = inject(PlayerCharacterApiService);
   private _messageService = inject(MessageService);
   private _thirdwebService = inject(ThirdwebService);
+  private _walletService = inject(WalletService);
   private _authService = inject(AuthService);
   private router = inject(Router);
   createCharacter$ = new Subject<CreateCharacter>();
@@ -85,6 +86,7 @@ export class PlayerCharacterService {
       forkJoin([
         this._playerCharacterApiService.createCharacter(newCharacter),
         this._thirdwebService.claimStartingWeapon(
+          this._walletService.state.account(),
           BigInt(newCharacter.equippedItems[0])
         ),
       ])
@@ -105,7 +107,8 @@ export class PlayerCharacterService {
     map(item => ({
       ...this.state.playerCharacter()!,
       equippedItems: [...this.playerCharacter()!.equippedItems, item.tokenId],
-    }))
+    })),
+    shareReplay(1)
   );
   private onUnequip$: Observable<PlayerCharacter> = this.unequipItem$.pipe(
     map(item => ({
@@ -113,7 +116,8 @@ export class PlayerCharacterService {
       equippedItems: this.state
         .playerCharacter()!
         .equippedItems.filter(i => i != item.tokenId),
-    }))
+    })),
+    shareReplay(1)
   );
   private onDealDamage$: Observable<PlayerCharacter> =
     this.dealDamageToPlayerCharacter$.pipe(
@@ -140,7 +144,7 @@ export class PlayerCharacterService {
       map(energy => restoreEnergy(this.playerCharacter()!, energy)),
       shareReplay(1)
     );
-  private playerCharacter$ = merge(
+  playerCharacter$ = merge(
     this.onCreateCharacter$,
     this.fetchedPlayerCharacter$,
     this.onEquip$,
@@ -150,7 +154,7 @@ export class PlayerCharacterService {
     this.onRestoreEnergy$,
     this.onReduceEnergyByTen$
   );
-  stopCondtionTriggers$ = merge(
+  private stopCondtionTriggers$ = merge(
     this.playerCharacter$.pipe(
       filter(
         pc =>
@@ -164,14 +168,7 @@ export class PlayerCharacterService {
       )
     ),
     this.stopRest$,
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd),
-      filter(event => {
-        const url = (event as NavigationEnd).urlAfterRedirects;
-        return url == '/game/play' || url == '/marketplace';
-      })
-    )
-
+    this.router.events.pipe(filter(event => event instanceof NavigationEnd))
     // fromEvent(window, 'beforeunload')
   );
   // private initialRest$ = this.http.get<RestData>(this.baseUrl + '/rest').pipe(
@@ -188,7 +185,7 @@ export class PlayerCharacterService {
   //   catchError((err: HttpErrorResponse) => of(undefined))
   // );
   private onRest$: Observable<'resting' | 'rested'> = this.rest$.pipe(
-    switchMap(() => this._playerCharacterApiService.rest()),
+    concatMap(() => this._playerCharacterApiService.rest()),
     filter(res => res !== undefined),
     concatMap(restData =>
       interval(1000).pipe(
@@ -203,9 +200,8 @@ export class PlayerCharacterService {
     ),
     shareReplay(1)
   );
-  private onStopRest$ = this.stopCondtionTriggers$.pipe(
-    withLatestFrom(this.onRest$),
-    filter(([_, state]) => state === 'resting'),
+  private onStopRest$ = this.onRest$.pipe(
+    filter(state => state === 'rested'),
     switchMap(() => this._playerCharacterApiService.stopRest()),
     filter(res => res !== undefined),
     tap(() =>
@@ -213,7 +209,8 @@ export class PlayerCharacterService {
         detail: 'Zakończono odpoczynek',
         severity: 'info',
       })
-    )
+    ),
+    shareReplay(1)
   );
   private status$: Observable<PlayerCharacterStatus> = merge(
     merge(this.equipItem$, this.createCharacter$).pipe(
@@ -235,4 +232,21 @@ export class PlayerCharacterService {
     playerCharacter: this.playerCharacter,
     status: this.status,
   };
+  checkIfRestIsNeed(): boolean {
+    const pc = this.playerCharacter()!;
+    if (
+      pc.statistics.health.actualValue === 0 ||
+      pc.statistics.energy.actualValue - 10 < 0
+    ) {
+      this.router.navigate(['/game']);
+      const ref = this.dialog.open(GetRestDialogComponent, {
+        header: 'Odpoczynek',
+      });
+      ref.onClose.subscribe(rest => {
+        if (rest) this.rest$.next();
+      });
+      return true;
+    }
+    return false;
+  }
 }

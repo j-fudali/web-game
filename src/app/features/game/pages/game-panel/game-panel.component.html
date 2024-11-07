@@ -1,18 +1,50 @@
-<div class="grid grid-nogutter gap-2 p-3 justify-content-center align-items-stretch">
-    <div class="col-12 md:col-8 flex gap-2">
-        <a routerLink="play" pButton label="Graj" class="w-6"></a>
-        @if(playerCharacterStatus() === 'resting'){
-            <button pButton label="Zakończ" class="w-6" severity="success" (click)="stopRest()"></button>
-        }
-        @else{
-            <button [disabled]="disabledRest()" pButton label="Odpocznij" class="w-6" severity="warning" (click)="rest()"></button>
-        }
-    </div>
-    <jfudali-player-character class="col-12 md:col-8" [playerCharacter]="playerCharacter()!" />
-    <jfudali-items-slots #slots class="col-12 md:col-8 lg:col-4" (replaceOnDrop)="replaceItem($event)"
-        (equipOnDrop)="equip()" (onCmUnequip)="equipment.drop()" [(draggedItem)]="draggedItem"
-        [avaliableItems]="avaliableItems()" [equippedItems]="equippedItems()" [status]="status()" />
-    <jfudali-equipment #equipment class="col-12 md:col-8 lg:col-4" (unequipOnDrop)="unequip()"
-        (onCmEquipItem)="slots.drop()" [(draggedItem)]="draggedItem" [avaliableItems]="avaliableItems()"
-        [equippedItems]="equippedItems()" [status]="status()" [orientation]="equipmentOrientation" />
+<div
+  class="grid grid-nogutter gap-2 p-3 justify-content-center align-items-stretch">
+  <div class="col-12 md:col-8 flex gap-2">
+    <button
+      [disabled]="playerCharacterStatus() !== 'completed'"
+      routerLink="play"
+      pButton
+      label="Graj"
+      class="w-6"></button>
+    @if(playerCharacterStatus() === 'resting'){
+    <button
+      pButton
+      label="Zakończ"
+      class="w-6"
+      severity="success"
+      (click)="stopRest()"></button>
+    } @else{
+    <button
+      [disabled]="disabledRest()"
+      pButton
+      label="Odpocznij"
+      class="w-6"
+      severity="warning"
+      (click)="rest()"></button>
+    }
+  </div>
+  <jfudali-player-character
+    class="col-12 md:col-8"
+    [playerCharacter]="playerCharacter()!" />
+  <jfudali-items-slots
+    #slots
+    class="col-12 md:col-8 lg:col-4"
+    (replaceOnDrop)="replaceItem($event)"
+    (equipOnDrop)="equip()"
+    (onCmUnequip)="equipment.drop()"
+    [(draggedItem)]="draggedItem"
+    [avaliableItems]="avaliableItems()"
+    [equippedItems]="equippedItems()"
+    [status]="status()" />
+  <jfudali-equipment
+    #equipment
+    class="col-12 md:col-8 lg:col-4"
+    (unequipOnDrop)="unequip()"
+    (onCmEquipItem)="slots.drop()"
+    [(draggedItem)]="draggedItem"
+    [avaliableItems]="avaliableItems()"
+    [equippedItems]="equippedItems()"
+    [status]="status()"
+    [orientation]="equipmentOrientation" />
 </div>

@@ -15,7 +15,7 @@ import { PASSWORD_PATTERN } from '../../../../shared/constants/config.constants'
 import { SignUpCredentials } from '../../../../shared/interfaces/sign-up-credentials';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { passwordMatch } from '../../../../shared/validators/passwordMatch.validator';
-import { ThirdwebService } from '../../../../shared/services/thirdweb.service';
+import { WalletService } from '../../../../shared/services/wallet.service';
 @Component({
   selector: 'jfudali-sign-up',
   standalone: true,
@@ -34,7 +34,7 @@ import { ThirdwebService } from '../../../../shared/services/thirdweb.service';
 export class SignUpComponent {
   private fb = inject(FormBuilder);
   private _auth = inject(AuthService);
-  private _thirdwebService = inject(ThirdwebService);
+  private _walletService = inject(WalletService);
   signUpForm = this.fb.group(
     {
       email: ['', [Validators.required, Validators.email]],
@@ -63,7 +63,7 @@ export class SignUpComponent {
     if (this.signUpForm.valid) {
       this._auth.signUp$.next({
         ...this.signUpForm.value,
-        cryptoWallet: this._thirdwebService.state.data()?.account.address,
+        cryptoWallet: this._walletService.state.account()?.address,
       } as SignUpCredentials);
     }
   }

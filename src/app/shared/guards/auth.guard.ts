@@ -3,10 +3,10 @@ import { CanDeactivateFn, Router, type CanActivateFn } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ConnectWalletDialogComponent } from '../components/connect-wallet-dialog/connect-wallet-dialog.component';
-import { defaultIfEmpty, filter, map, of, switchMap, take, tap } from 'rxjs';
+import { defaultIfEmpty, filter, map, switchMap, take, tap } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { StartComponent } from '../../features/home/pages/start/start.component';
-import { ThirdwebService } from '../services/thirdweb.service';
+import { WalletService } from '../services/wallet.service';
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
@@ -19,13 +19,13 @@ export const alreadyLoggedIn: CanActivateFn = (route, state) => {
   return authService.getToken() != null ? router.parseUrl('/game') : true;
 };
 export const walletConnected: CanActivateFn = (route, state) => {
-  const thirdwebService = inject(ThirdwebService);
+  const walletService = inject(WalletService);
   const authServuce = inject(AuthService);
-  const status$ = toObservable(thirdwebService.state.status);
+  const status$ = toObservable(walletService.state.status);
   const router = inject(Router);
   return status$.pipe(
-    filter((s) => s !== 'loading'),
-    map((status) => {
+    filter(s => s !== 'loading'),
+    map(status => {
       if (status === 'connected') {
         return true;
       }
@@ -35,10 +35,10 @@ export const walletConnected: CanActivateFn = (route, state) => {
   );
 };
 export const forceWalletConnected: CanDeactivateFn<StartComponent> = () => {
-  const thirdwebService = inject(ThirdwebService);
+  const walletService = inject(WalletService);
   const dialogService = inject(DialogService);
-  const status$ = toObservable(thirdwebService.state.status);
-  if (thirdwebService.state.status() === 'disconnected') {
+  const status$ = toObservable(walletService.state.status);
+  if (walletService.state.status() === 'disconnected') {
     const ref = dialogService.open(ConnectWalletDialogComponent, {
       header: 'Połącz portfel',
       contentStyle: { overflow: 'auto' },
@@ -47,10 +47,10 @@ export const forceWalletConnected: CanDeactivateFn<StartComponent> = () => {
       closable: true,
     });
     return ref.onClose.pipe(
-      filter((connecting) => connecting === true),
-      tap(() => thirdwebService.connect$.next()),
+      filter(connecting => connecting === true),
+      tap(() => walletService.connect$.next()),
       switchMap(() => status$),
-      map((status) => (status == 'connected' ? true : false)),
+      map(status => (status == 'connected' ? true : false)),
       take(1),
       defaultIfEmpty(false)
     );

@@ -9,7 +9,8 @@ import { OwnedItem } from '../interfaces/owned-item';
 
 export class ItemMapper {
   public static convertNftToItem(nft: NFT): Item {
-    const { tokenId, name, image, attributes } = nft.metadata;
+    const tokenId = nft.id;
+    const { name, image, attributes } = nft.metadata;
     const mappedAttributes = Object.entries(attributes!).map(
       ([k, v]) => v as Trait
     );
