@@ -1,4 +1,8 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpParams,
+} from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { PlayerCharacter } from '../../interfaces/player-character';
 import { environment } from '../../../../environments/environment.development';
@@ -15,12 +19,11 @@ export class PlayerCharacterApiService {
   private BASE_URL = environment.url + '/player-character';
   private http = inject(HttpClient);
   private logger = inject(LoggerService);
-  private _authService = inject(AuthService);
   private ALREADY_HAS_CHARACTER_ERROR = 'Posiadasz już postać';
   private CANNOT_CREATE_CHARACTER_ERROR = 'Posiadasz już postać';
-  private CHARACTER_NOT_FOUND_ERROR = 'Nieznaleziono postaci';
+  private CHARACTER_LOAD_ERROR = 'Błąd pobierania postaci';
   private REST_ERROR = 'Błąd włączania trybu odpoczynku';
-  private STOP_REST_ERROR = 'Błąd włączania trybu odpoczynku';
+  private STOP_REST_ERROR = 'Błąd wyłączania trybu odpoczynku';
   createCharacter({
     name,
     image,
@@ -46,11 +49,10 @@ export class PlayerCharacterApiService {
   getPlayerCharacter() {
     return this.http.get<PlayerCharacter>(this.BASE_URL).pipe(
       catchError((err: HttpErrorResponse) => {
-        if (err.status == 404) {
-          this.logger.showErrorMessage(this.CHARACTER_NOT_FOUND_ERROR);
-          this._authService.signOut$.next();
+        if (err.status != 404) {
+          this.logger.showErrorMessage(this.CHARACTER_LOAD_ERROR);
         }
-        return of(undefined);
+        return throwError(() => err);
       })
     );
   }
@@ -62,12 +64,16 @@ export class PlayerCharacterApiService {
       })
     );
   }
-  stopRest() {
-    return this.http.delete(this.BASE_URL + '/rest/stop').pipe(
-      catchError((err: HttpErrorResponse) => {
-        this.logger.showErrorMessage(this.STOP_REST_ERROR);
-        return of(undefined);
+  stopRest(endTime: Date) {
+    return this.http
+      .delete(this.BASE_URL + '/rest/stop', {
+        params: new HttpParams().set('endTime', endTime.toISOString()),
       })
-    );
+      .pipe(
+        catchError((err: HttpErrorResponse) => {
+          this.logger.showErrorMessage(this.STOP_REST_ERROR);
+          return of(undefined);
+        })
+      );
   }
 }

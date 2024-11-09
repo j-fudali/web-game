@@ -32,7 +32,6 @@ export interface AuthState {
 export class AuthService {
   private _authApiService = inject(AuthApiService);
   private _cookies = inject(CookieService);
-  private url = environment.url + '/auth';
   private router = inject(Router);
   private error$ = new Subject<Error>();
   login$ = new Subject<LoginCredentials>();
@@ -109,6 +108,7 @@ export class AuthService {
   getToken() {
     return this._cookies.get('token') || null;
   }
+  getRole() {}
   private setToken(token: string) {
     const date = new Date();
     date.setDate(date.getDate() + 1);

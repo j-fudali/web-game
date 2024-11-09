@@ -32,6 +32,7 @@ import { SellData } from '../../features/marketplace/interfaces/sell-data';
 import { Hex } from 'thirdweb/dist/types/utils/encoding/hex';
 import { MarketplaceItem } from '../../features/marketplace/interfaces/marketplace-item';
 import { LoggerService } from './logger.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
@@ -255,8 +256,9 @@ export class ThirdwebService {
   }
   autoConnect() {
     return from(this.metamask.autoConnect({ client: this.client })).pipe(
-      catchError((err: RPCError) => {
-        this.logger.showErrorMessage(this.getErrorMessage(err));
+      catchError((err: Error) => {
+        if (err.message.includes('no accounts available')) return of(undefined);
+        this.logger.showErrorMessage(this.getErrorMessage(err as RPCError));
         return throwError(() => err);
       })
     );

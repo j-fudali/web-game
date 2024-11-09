@@ -41,7 +41,6 @@ export class MarketplaceService {
         .createListing(this._walletService.state.account(), sellData)
         .pipe(
           catchError(err => {
-            console.log(err);
             this.error$.next(err);
             return of(undefined);
           })
@@ -64,7 +63,6 @@ export class MarketplaceService {
         .buyFromListing(this._walletService.state.account(), item)
         .pipe(
           catchError(err => {
-            console.log(err);
             this.error$.next(err);
             return of(undefined);
           })

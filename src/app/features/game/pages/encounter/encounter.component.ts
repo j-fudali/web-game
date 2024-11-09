@@ -70,7 +70,7 @@ export class EncounterComponent implements OnInit {
   );
   effect = this._randomEncounterService.state.effect;
 
-  enemy = computed(() => (this.randomEncounter() as EnemyEncounter).enemy);
+  enemy = this._randomEncounterService.state.enemy;
   encounterStatus = this._randomEncounterService.state.status;
   encounterError = this._randomEncounterService.state.error;
 

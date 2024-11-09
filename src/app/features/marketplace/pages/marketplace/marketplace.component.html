@@ -1,7 +1,7 @@
 <div class="flex flex-column align-items-center">
   <div
     class="w-full sm:w-10 md:w-full flex flex-column md:flex-row gap-4 md:gap-2 py-4 px-2">
-    <h1 class="m-0 text-center md:px-4 md:align-self-center">Marketplace</h1>
+    <h1 class="m-0 text-center md:px-4">Marketplace</h1>
     <p-tabView class="w-full">
       <p-tabPanel header="Kup">
         <ng-container
@@ -41,9 +41,11 @@
     [lazy]="true"
     [loading]="status() === 'loading'"
     [value]="items()"
-    emptyMessage="Brak przedmiotów">
+    [emptyMessage]="''">
     <ng-template pTemplate="list">
-      <div class="grid grid-nogutter h-24rem md:h-30rem overflow-y-auto">
+      <div
+        class="grid grid-nogutter overflow-y-auto"
+        [ngClass]="items().length > 0 ? 'h-24rem md:h-30rem' : ''">
         @for (item of items(); track i; let i = $index) {
         <div class="col-12" [class.border-top-1]="i !== 0">
           <jfudali-item-in-shop

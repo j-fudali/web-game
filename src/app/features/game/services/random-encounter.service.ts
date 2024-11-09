@@ -1,27 +1,17 @@
-import {
-  HttpClient,
-  HttpErrorResponse,
-  HttpParams,
-} from '@angular/common/http';
 import { Injectable, Signal, inject } from '@angular/core';
 import {
   EncounterOnDraw,
   EnemyEncounter,
-  EnemyEncounterDto,
 } from '../../../shared/interfaces/encounter';
 
-import { environment } from '../../../../environments/environment';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { PlayerCharacterService } from '../../../shared/services/player-character.service';
-import { Statistics } from '../../../shared/interfaces/statistics';
 import { Enemy } from '../../../shared/interfaces/enemy';
 import { dealDamage } from '../../../shared/utils/functions';
 import { Effect } from '../../../shared/interfaces/effect';
 import { SelectDecision } from '../interfaces/select-decision';
 import { DialogService } from 'primeng/dynamicdialog';
 import { EffectDisplayDialogComponent } from '../components/effect-display-dialog/effect-display-dialog.component';
-import { Router } from '@angular/router';
-import { GetRestDialogComponent } from '../components/get-rest-dialog/get-rest-dialog.component';
 import { PlayerCharacter } from '../../../shared/interfaces/player-character';
 import { WalletService } from '../../../shared/services/wallet.service';
 import {
@@ -30,7 +20,6 @@ import {
   filter,
   tap,
   shareReplay,
-  withLatestFrom,
   map,
   EMPTY,
   of,
@@ -38,17 +27,11 @@ import {
   merge,
   catchError,
   combineLatest,
-  iif,
-  Observable,
-  startWith,
-  combineLatestWith,
-  skip,
-  skipUntil,
-  skipWhile,
   take,
 } from 'rxjs';
 import { EncounterApiService } from '../../../shared/api/encounters/encounter-api.service';
 export interface EncountersState {
+  enemy: Signal<Enemy | undefined>;
   randomEncounter: Signal<EncounterOnDraw | undefined>;
   effect: Signal<Effect | undefined>;
   status: Signal<'completed' | 'loading' | 'effect-loaded' | 'error'>;
@@ -98,7 +81,11 @@ export class RandomEncounterService {
     }),
     shareReplay(1)
   );
-
+  private onDealDamageToEnemy$ = this.dealDamageToEnemy$.pipe(
+    map(damage => {
+      return dealDamage(this.state.enemy()!, damage) as Enemy;
+    })
+  );
   private onLoadRandomEncounter$ = this.loadRandomEncounter$.pipe(
     concatMap(() =>
       combineLatest([this.pcStatus$, this.pc$]).pipe(
@@ -107,10 +94,10 @@ export class RandomEncounterService {
         take(1)
       )
     ),
-    switchMap(pc =>
+    concatMap(pc =>
       !this._playerCharacterService.checkIfRestIsNeed() ? of(pc) : EMPTY
     ),
-    switchMap(({ level }) =>
+    concatMap(({ level }) =>
       this._encountersApiService.loadRandomEncounter(level).pipe(
         catchError(err => {
           this.error$.next(err);
@@ -118,21 +105,18 @@ export class RandomEncounterService {
         })
       )
     ),
+    tap(console.log),
     tap(() => this._playerCharacterService.reduceEnergyByTen$.next()),
     shareReplay(1)
   );
-  private randomEncounter$ = merge(
-    this.onLoadRandomEncounter$,
-    this.dealDamageToEnemy$.pipe(
-      map(damage => {
-        const enemyEncounter = this.randomEncounter() as EnemyEncounter;
-        return {
-          ...enemyEncounter,
-          enemy: dealDamage(enemyEncounter.enemy, damage) as Enemy,
-        } as EncounterOnDraw;
-      })
-    )
+  private enemy$ = merge(
+    this.onLoadRandomEncounter$.pipe(
+      map(encounter => encounter as EnemyEncounter),
+      map(encounter => encounter.enemy)
+    ),
+    this.onDealDamageToEnemy$
   );
+
   private status$ = merge(
     this.loadRandomEncounter$.pipe(map(() => 'loading' as const)),
     merge(this.onLoadRandomEncounter$, this.onDecisionSelect$).pipe(
@@ -141,9 +125,10 @@ export class RandomEncounterService {
     ),
     this.error$.pipe(map(() => 'error' as const))
   );
-  private randomEncounter = toSignal(this.randomEncounter$, {
+  private randomEncounter = toSignal(this.onLoadRandomEncounter$, {
     initialValue: undefined,
   });
+  private enemy = toSignal(this.enemy$, { initialValue: undefined });
   private status = toSignal(this.status$, { initialValue: 'loading' });
   private error = toSignal(this.error$.pipe(map(err => err.message)), {
     initialValue: undefined,
@@ -152,6 +137,7 @@ export class RandomEncounterService {
     initialValue: undefined,
   });
   state: EncountersState = {
+    enemy: this.enemy,
     randomEncounter: this.randomEncounter,
     effect: this.effect,
     status: this.status,

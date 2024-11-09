@@ -3,8 +3,10 @@ import { PlayerCharacter } from '../interfaces/player-character';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
   BehaviorSubject,
+  EMPTY,
   Observable,
   Subject,
+  catchError,
   concatMap,
   endWith,
   filter,
@@ -12,7 +14,10 @@ import {
   interval,
   map,
   merge,
+  mergeMap,
+  of,
   shareReplay,
+  startWith,
   switchMap,
   takeUntil,
   tap,
@@ -35,6 +40,7 @@ import { PlayerCharacterApiService } from '../api/player-character/player-charac
 import { WalletService } from './wallet.service';
 import { GetRestDialogComponent } from '../../features/game/components/get-rest-dialog/get-rest-dialog.component';
 import { DialogService } from 'primeng/dynamicdialog';
+import { HttpErrorResponse } from '@angular/common/http';
 export type PlayerCharacterStatus =
   | 'completed'
   | 'loading'
@@ -68,16 +74,27 @@ export class PlayerCharacterService {
     this._authService.state.isLogged
   ).pipe(
     filter(isLogged => isLogged === true),
-    switchMap(() => this._playerCharacterApiService.getPlayerCharacter()),
+    switchMap(() =>
+      this._playerCharacterApiService.getPlayerCharacter().pipe(
+        catchError((err: HttpErrorResponse) => {
+          if (err.status == 404) {
+            this.router.navigate(['/game/create-character']);
+            return of(null);
+          }
+          return of(undefined);
+        })
+      )
+    ),
     filter(res => res !== undefined),
-    map(
-      pc =>
-        ({
-          ...pc,
-          equippedItems: (pc as PlayerCharacter).equippedItems.map(i =>
-            BigInt(i)
-          ),
-        } as PlayerCharacter)
+    map(pc =>
+      pc
+        ? ({
+            ...pc,
+            equippedItems: (pc as PlayerCharacter).equippedItems.map(i =>
+              BigInt(i)
+            ),
+          } as PlayerCharacter)
+        : null
     ),
     shareReplay(1)
   );
@@ -153,20 +170,22 @@ export class PlayerCharacterService {
     this.onRestoreHealth$,
     this.onRestoreEnergy$,
     this.onReduceEnergyByTen$
+  ).pipe(shareReplay(1));
+  private playerCharacterFullStatistics$ = this.playerCharacter$.pipe(
+    filter(
+      pc =>
+        pc?.statistics?.energy.actualValue ===
+        pc?.statistics?.energy.maximumValue
+    ),
+    filter(
+      pc =>
+        pc?.statistics?.health.actualValue ===
+        pc?.statistics?.health.maximumValue
+    ),
+    map(() => undefined)
   );
   private stopCondtionTriggers$ = merge(
-    this.playerCharacter$.pipe(
-      filter(
-        pc =>
-          pc?.statistics?.energy.actualValue ===
-          pc?.statistics?.energy.maximumValue
-      ),
-      filter(
-        pc =>
-          pc?.statistics?.health.actualValue ===
-          pc?.statistics?.health.maximumValue
-      )
-    ),
+    this.playerCharacterFullStatistics$,
     this.stopRest$,
     this.router.events.pipe(filter(event => event instanceof NavigationEnd))
     // fromEvent(window, 'beforeunload')
@@ -185,7 +204,7 @@ export class PlayerCharacterService {
   //   catchError((err: HttpErrorResponse) => of(undefined))
   // );
   private onRest$: Observable<'resting' | 'rested'> = this.rest$.pipe(
-    concatMap(() => this._playerCharacterApiService.rest()),
+    switchMap(() => this._playerCharacterApiService.rest()),
     filter(res => res !== undefined),
     concatMap(restData =>
       interval(1000).pipe(
@@ -202,7 +221,7 @@ export class PlayerCharacterService {
   );
   private onStopRest$ = this.onRest$.pipe(
     filter(state => state === 'rested'),
-    switchMap(() => this._playerCharacterApiService.stopRest()),
+    switchMap(() => this._playerCharacterApiService.stopRest(new Date())),
     filter(res => res !== undefined),
     tap(() =>
       this._messageService.add({
@@ -221,7 +240,7 @@ export class PlayerCharacterService {
     this.onRest$,
     this.onStopRest$.pipe(map(() => 'completed' as const))
   );
-  private playerCharacter = toSignal<PlayerCharacter | undefined>(
+  private playerCharacter = toSignal<PlayerCharacter | null | undefined>(
     this.playerCharacter$,
     {
       initialValue: undefined,
