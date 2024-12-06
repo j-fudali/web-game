@@ -73,7 +73,7 @@ export class PlayerCharacterService {
   private fetchedPlayerCharacter$ = toObservable(
     this._authService.state.isLogged
   ).pipe(
-    filter(isLogged => isLogged === true),
+    filter(isLogged => isLogged === true && !this._authService.checkIsAdmin()),
     switchMap(() =>
       this._playerCharacterApiService.getPlayerCharacter().pipe(
         catchError((err: HttpErrorResponse) => {
@@ -232,13 +232,13 @@ export class PlayerCharacterService {
     shareReplay(1)
   );
   private status$: Observable<PlayerCharacterStatus> = merge(
-    merge(this.equipItem$, this.createCharacter$).pipe(
-      map(() => 'loading' as const)
-    ),
+    this.createCharacter$.pipe(map(() => 'loading' as const)),
     this.fetchedPlayerCharacter$.pipe(map(pc => (pc ? 'completed' : 'empty'))),
     this.rest$.pipe(map(() => 'resting' as const)),
     this.onRest$,
-    this.onStopRest$.pipe(map(() => 'completed' as const))
+    merge(this.onEquip$, this.onUnequip$, this.onStopRest$).pipe(
+      map(() => 'completed' as const)
+    )
   );
   private playerCharacter = toSignal<PlayerCharacter | null | undefined>(
     this.playerCharacter$,

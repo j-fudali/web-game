@@ -5,6 +5,8 @@ import {
   forceWalletConnected,
   walletConnected,
 } from './shared/guards/auth.guard';
+import { isAdminGuard } from './shared/guards/is-admin.guard';
+import { isPlayerGuard } from './shared/guards/is-player.guard';
 
 export const routes: Routes = [
   {
@@ -35,12 +37,18 @@ export const routes: Routes = [
   {
     path: 'game',
     loadChildren: () => import('./features/game/game-shell.routes'),
-    canActivate: [authGuard, walletConnected],
+    canActivate: [authGuard, walletConnected, isPlayerGuard],
   },
   {
     path: 'marketplace',
-    loadChildren: () => import('./features/marketplace/marketplace-shell.routes'),
-    canActivate: [walletConnected]
+    loadChildren: () =>
+      import('./features/marketplace/marketplace-shell.routes'),
+    canActivate: [walletConnected],
+  },
+  {
+    path: 'admin',
+    loadChildren: () => import('./features/admin-panel/admin-panel.routes'),
+    canActivate: [authGuard, walletConnected, isAdminGuard],
   },
   {
     path: '',

@@ -62,6 +62,7 @@ export class MarketplaceService {
       this._thirdwebService
         .buyFromListing(this._walletService.state.account(), item)
         .pipe(
+          tap(() => this._walletService.loseGearcoins$.next()),
           catchError(err => {
             this.error$.next(err);
             return of(undefined);

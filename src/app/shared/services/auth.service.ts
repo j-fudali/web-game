@@ -19,8 +19,10 @@ import {
 } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthApiService } from '../api/auth/auth-api.service';
+import { JwtPayload, jwtDecode } from 'jwt-decode';
 
 export interface AuthState {
+  isAdmin: Signal<boolean | null>;
   isLogged: Signal<boolean>;
   status: Signal<'success' | 'error' | 'loading' | null>;
   error: Signal<string | null>;
@@ -73,12 +75,18 @@ export class AuthService {
     shareReplay(1)
   );
   onSignOut$ = this.signOut$.pipe(
-    switchMap(() => of(this.router.navigate(['/']))),
+    tap(() => this.router.navigate(['/'])),
     tap(() => this._cookies.delete('token'))
   );
   private isLogged$ = merge(
     merge(this.onLogin$, this.onSignUp$).pipe(map(() => true)),
     this.onSignOut$.pipe(map(() => false))
+  );
+  private isAdmin$ = this.isLogged$.pipe(
+    map(isLogged => {
+      if (!isLogged) return null;
+      return this.checkIsAdmin();
+    })
   );
   private status$ = merge(
     merge(this.login$, this.signUp$, this.signOut$).pipe(
@@ -97,10 +105,14 @@ export class AuthService {
   private isLogged = toSignal(this.isLogged$, {
     initialValue: this.getToken() ? true : false,
   });
+  private isAdmin = toSignal(this.isAdmin$, {
+    initialValue: this.checkIsAdmin(),
+  });
   private status = toSignal(this.status$, {
     initialValue: null,
   });
   state: AuthState = {
+    isAdmin: this.isAdmin,
     isLogged: this.isLogged,
     status: this.status,
     error: this.error,
@@ -108,7 +120,13 @@ export class AuthService {
   getToken() {
     return this._cookies.get('token') || null;
   }
-  getRole() {}
+  checkIsAdmin(): boolean | null {
+    const token = this.getToken();
+    if (!token) return null;
+    return (
+      jwtDecode<JwtPayload & { role: string }>(token)['role'] === 'ROLE_ADMIN'
+    );
+  }
   private setToken(token: string) {
     const date = new Date();
     date.setDate(date.getDate() + 1);

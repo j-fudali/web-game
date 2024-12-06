@@ -19,20 +19,13 @@ import {
   createListing,
   getAllValidListings,
 } from 'thirdweb/extensions/marketplace';
-import {
-  claimTo,
-  getNFTs,
-  getOwnedNFTs,
-  isApprovedForAll,
-  setApprovalForAll,
-} from 'thirdweb/extensions/erc1155';
+import { claimTo, getNFTs, getOwnedNFTs } from 'thirdweb/extensions/erc1155';
 import { catchError, from, map, of, switchMap, throwError } from 'rxjs';
 import { RPCError } from '../interfaces/rpc-error';
 import { SellData } from '../../features/marketplace/interfaces/sell-data';
 import { Hex } from 'thirdweb/dist/types/utils/encoding/hex';
 import { MarketplaceItem } from '../../features/marketplace/interfaces/marketplace-item';
 import { LoggerService } from './logger.service';
-import { HttpErrorResponse } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
@@ -49,6 +42,7 @@ export class ThirdwebService {
   private chain = polygonAmoy;
   private client = createThirdwebClient({
     clientId: environment.clientId,
+    secretKey: environment.secretKey,
   });
   private gearcoin = getContract({
     client: this.client,
@@ -233,6 +227,7 @@ export class ThirdwebService {
     });
     return from(sendAndConfirmTransaction({ transaction, account })).pipe(
       catchError((err: RPCError) => {
+        console.log(err);
         this.logger.showErrorMessage(this.getErrorMessage(err));
         return throwError(() => err);
       })

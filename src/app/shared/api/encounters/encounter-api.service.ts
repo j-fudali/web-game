@@ -4,9 +4,13 @@ import {
   HttpClient,
 } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { map, catchError, of, throwError } from 'rxjs';
+import { map, catchError, of, throwError, Observable } from 'rxjs';
 import { Effect } from '../../interfaces/effect';
-import { EncounterOnDraw, EnemyEncounterDto } from '../../interfaces/encounter';
+import {
+  Encounter,
+  EncounterOnDraw,
+  EnemyEncounterDto,
+} from '../../interfaces/encounter';
 import { Enemy } from '../../interfaces/enemy';
 import { Statistics } from '../../interfaces/statistics';
 import { environment } from '../../../../environments/environment';
@@ -64,5 +68,13 @@ export class EncounterApiService {
           return throwError(() => err);
         })
       );
+  }
+  getEncounters(): Observable<Encounter[]> {
+    return this.http.get<Encounter[]>(this.BASE_URL).pipe(
+      catchError((err: HttpErrorResponse) => {
+        this.logger.showErrorMessage(this.SELECT_DECISION_ERROR);
+        return throwError(() => err);
+      })
+    );
   }
 }

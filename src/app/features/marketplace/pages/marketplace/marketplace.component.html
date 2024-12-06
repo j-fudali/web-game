@@ -57,6 +57,9 @@
             [actionLabel]="label"
             (onAction)="performAction(mode, $event)" />
         </div>
+        } @if(status() === 'loading'){
+        <div class="h-24 md:h-30rem"></div>
+
         }
       </div>
     </ng-template>

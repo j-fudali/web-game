@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnInit, computed, effect, inject } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  OnInit,
+  computed,
+  effect,
+  inject,
+} from '@angular/core';
 import { PlayerCharacterComponent } from '../../components/player-character/player-character.component';
 import { EquipmentComponent } from '../../components/equipment/equipment.component';
 import { ItemsSlotsComponent } from '../../components/items-slots/items-slots.component';
@@ -40,17 +47,21 @@ export class GamePanelComponent {
   private _itemsService = inject(ItemsService);
   private _playerCharacterService = inject(PlayerCharacterService);
   private _messageService = inject(MessageService);
-  private _equipmentService = inject(EquipmentService)
+  private _equipmentService = inject(EquipmentService);
   playerCharacter = this._playerCharacterService.state.playerCharacter;
-  playerCharacterStatus = this._playerCharacterService.state.status
+  playerCharacterStatus = this._playerCharacterService.state.status;
   equipmentSaveStatus = this._equipmentService.state.status;
   avaliableItems = this._equipmentService.state.avaliableItems;
   equippedItems = this._equipmentService.state.equippedItems;
   status = this._itemsService.state.status;
   draggedItem: OwnedItem | null = null;
-  disabledRest = computed(() => 
-    this.playerCharacter()?.statistics?.health?.actualValue === this.playerCharacter()?.statistics?.health?.maximumValue && 
-    this.playerCharacter()?.statistics.energy.actualValue === this.playerCharacter()?.statistics.energy.maximumValue)
+  disabledRest = computed(
+    () =>
+      this.playerCharacter()?.statistics?.health?.actualValue ===
+        this.playerCharacter()?.statistics?.health?.maximumValue &&
+      this.playerCharacter()?.statistics.energy.actualValue ===
+        this.playerCharacter()?.statistics.energy.maximumValue
+  );
   constructor() {
     effect(() => {
       if (this.equipmentSaveStatus()) {
@@ -68,14 +79,15 @@ export class GamePanelComponent {
       }
     });
   }
-  rest(){
-    this._playerCharacterService.rest$.next()
+  rest() {
+    this._playerCharacterService.rest$.next();
   }
-  stopRest(){
-    this._playerCharacterService.stopRest$.next()
+  stopRest() {
+    this._playerCharacterService.stopRest$.next();
   }
   equip() {
-    if (this.draggedItem) this._playerCharacterService.equipItem$.next(this.draggedItem);
+    if (this.draggedItem)
+      this._playerCharacterService.equipItem$.next(this.draggedItem);
   }
   unequip() {
     if (this.draggedItem)
@@ -84,6 +96,7 @@ export class GamePanelComponent {
 
   replaceItem(item: OwnedItem) {
     this._playerCharacterService.unequipItem$.next(item);
-    if (this.draggedItem) this._playerCharacterService.equipItem$.next(this.draggedItem);
+    if (this.draggedItem)
+      this._playerCharacterService.equipItem$.next(this.draggedItem);
   }
 }

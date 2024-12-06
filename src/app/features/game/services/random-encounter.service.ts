@@ -105,7 +105,6 @@ export class RandomEncounterService {
         })
       )
     ),
-    tap(console.log),
     tap(() => this._playerCharacterService.reduceEnergyByTen$.next()),
     shareReplay(1)
   );

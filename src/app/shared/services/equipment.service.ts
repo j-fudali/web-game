@@ -8,11 +8,13 @@ import {
   map,
   catchError,
   of,
+  Subject,
 } from 'rxjs';
 import { PlayerCharacterService } from './player-character.service';
 import { OwnedItem } from '../interfaces/owned-item';
 import { ItemsService } from './items.service';
 import { ItemsApiService } from '../api/items/items-api.service';
+import { Router } from '@angular/router';
 
 export interface EquipmentState {
   avaliableItems: Signal<OwnedItem[]>;
@@ -46,7 +48,7 @@ export class EquipmentService {
       this._playerService.equipItem$,
       this._playerService.unequipItem$
     ).pipe(
-      debounceTime(3000),
+      debounceTime(2000),
       switchMap(() =>
         this._itemsApiService.equipItems(
           this.equippedItems().map(i => i.tokenId)

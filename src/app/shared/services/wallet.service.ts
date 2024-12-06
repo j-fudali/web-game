@@ -1,4 +1,4 @@
-import { Injectable, Signal, inject } from '@angular/core';
+import { Injectable, Signal, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   Observable,
@@ -13,6 +13,7 @@ import {
   of,
   tap,
   withLatestFrom,
+  retry,
 } from 'rxjs';
 import { WalletData } from '../interfaces/wallet-data';
 import { ThirdwebService } from './thirdweb.service';
@@ -37,11 +38,12 @@ export class WalletService {
   private DISCONNECT_ERROR = 'Błąd rozłączenia z portfelem kryptowalut';
   private logger = inject(LoggerService);
   private _thirdwebService = inject(ThirdwebService);
+
   disconnect$ = new Subject<void>();
   connect$ = new Subject<void>();
   error$ = new Subject<Error>();
   gainGearcoins$ = new Subject<number>();
-  loseGearcoins$ = new Subject<number>();
+  loseGearcoins$ = new Subject<void>();
   private isDiconnected$ = new BehaviorSubject<string | null>(
     localStorage.getItem('isDisconnected')
   );
@@ -99,27 +101,19 @@ export class WalletService {
     switchMap(([coinsAmount, account]) =>
       this._thirdwebService.claimGearcoin(account, coinsAmount).pipe(
         catchError((err: RPCError) => {
-          if (err.code === 4001) {
-            of(true);
-          }
           this.error$.next(err);
           return of(undefined);
         })
       )
     ),
-    filter(res => res !== undefined),
-    withLatestFrom(this.account$),
-    map(([_, account]) => account),
     shareReplay(1)
-  );
-  private onLoseGearcoins$ = this.loseGearcoins$.pipe(
-    withLatestFrom(this.account$),
-    map(([coins, account]) => account)
   );
   private walletData$: Observable<WalletData | undefined> = merge(
     this.account$,
-    this.onGainGearcoins$,
-    this.onLoseGearcoins$
+    merge(this.loseGearcoins$, this.onGainGearcoins$).pipe(
+      withLatestFrom(this.account$),
+      map(([_, account]) => account)
+    )
   ).pipe(
     switchMap(account =>
       this._thirdwebService.getBalance(account).pipe(

@@ -29,7 +29,6 @@ export class FightService {
   fightStart$ = new Subject<{ damage: number; armor: number }>();
 
   private onFightStart$ = this.fightStart$.pipe(
-    tap(console.log),
     switchMap(({ damage, armor }) =>
       this.fightApiService.simulateFight(damage, armor)
     ),
