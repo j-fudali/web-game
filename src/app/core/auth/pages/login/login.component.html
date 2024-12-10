@@ -1,29 +1,42 @@
-<div class="h-screen w-full flex justify-content-center align-items-center px-4">
-    <p-card class="w-full md:w-6" header="Zaloguj się">
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-            <div class="field">
-                <label for="email">E-mail</label>
-                <input pInputText type="text" id="email" name="email" class="w-full" formControlName="email">
-                @if(email.invalid && (email.dirty || email.touched)){
-                <small class="p-error" severity="error">
-                    @if(email.hasError('required')){
-                    Pole jest wymagane
-                    }
-                    @else {
-                    Pole musi być e-mailem
-                    }
-                </small>
-                }
-            </div>
-            <div class="field">
-                <label for="password">Hasło</label>
-                <input pInputText type="password" id="password" name="password" class="w-full"
-                    formControlName="password">
-                @if(password.hasError('required') && (password.dirty || password.touched)){
-                <small class="p-error" severity="error">Pole jest wymagane</small>
-                }
-            </div>
-            <p-button type="submit" severity="success" label="Zaloguj" [loading]="status() === 'loading'"></p-button>
-        </form>
-    </p-card>
+<div
+  class="h-screen w-full flex justify-content-center align-items-center px-4">
+  <p-card class="w-full md:w-6" header="Zaloguj się">
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="field">
+        <label for="email">E-mail</label>
+        <input
+          pInputText
+          type="text"
+          id="email"
+          name="email"
+          class="w-full"
+          formControlName="email" />
+        @if(email.invalid && (email.dirty || email.touched)){
+        <small class="p-error" severity="error">
+          @if(email.hasError('required')){ Pole jest wymagane } @else { Pole
+          musi być e-mailem }
+        </small>
+        }
+      </div>
+      <div class="field">
+        <label for="password">Hasło</label>
+        <input
+          pInputText
+          type="password"
+          id="password"
+          name="password"
+          class="w-full"
+          formControlName="password" />
+        @if(password.hasError('required') && (password.dirty ||
+        password.touched)){
+        <small class="p-error" severity="error">Pole jest wymagane</small>
+        }
+      </div>
+      <p-button
+        type="submit"
+        severity="success"
+        label="Zaloguj"
+        [loading]="status() === 'loading'"></p-button>
+    </form>
+  </p-card>
 </div>

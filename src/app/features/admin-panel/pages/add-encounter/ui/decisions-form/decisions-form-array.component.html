@@ -1,0 +1,51 @@
+<div class="flex flex-column">
+  <span class="text-xl inline-block w-full">Decyzje</span>
+  <p-divider />
+  <div
+    class="max-h-full flex flex-column gap-1 px-2 h-auto lg:h-screen overflow-y-auto overflow-x-hidden">
+    <div class="py-2 flex justify-content-center">
+      <button
+        (click)="addDecisionFormGroup()"
+        pButton
+        severity="secondary"
+        icon="pi pi-plus"></button>
+    </div>
+    @for (decision of formArray().controls; track decision; let i = $index; let
+    last = $last) {
+    <div [formGroup]="decision" class="relative formgrid grid">
+      <div class="field col-12">
+        <label for="text">Tekst decyzji</label>
+        <input
+          class="w-full"
+          pInputText
+          type="text"
+          name="text"
+          id="text"
+          formControlName="text" />
+        <small>To widzi gracz w trakcie wybory</small>
+        @if (decision.get('text')?.hasError('required') &&
+        (decision.get('text')?.dirty || decision.get('text')?.touched)) {
+        <small class="p-error inline-block w-full" severity="error"
+          >Pole jest wymagane</small
+        >
+        }
+      </div>
+      <jfudali-effect-form-group
+        [formGroup]="decision.controls.effect"
+        formGroupName="effect" />
+      <button
+        class="mx-auto"
+        (click)="removeDecision(i)"
+        pButton
+        severity="danger"
+        size="small"
+        rounded
+        icon="pi pi-trash"></button>
+    </div>
+    @if (!last) {
+    <p-divider />
+    } }@empty {
+    <span class="w-full inline-block text-center">Brak decyzji</span>
+    }
+  </div>
+</div>

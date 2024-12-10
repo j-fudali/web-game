@@ -4,7 +4,7 @@ import {
   HttpClient,
 } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { map, catchError, of, throwError, Observable } from 'rxjs';
+import { map, catchError, of, throwError, Observable, tap } from 'rxjs';
 import { Effect } from '../../interfaces/effect';
 import {
   Encounter,
@@ -15,6 +15,7 @@ import { Enemy } from '../../interfaces/enemy';
 import { Statistics } from '../../interfaces/statistics';
 import { environment } from '../../../../environments/environment';
 import { LoggerService } from '../../services/logger.service';
+import { NewEncounterDto } from './model/new-encounter.dto';
 
 @Injectable({
   providedIn: 'root',
@@ -25,6 +26,8 @@ export class EncounterApiService {
   private http = inject(HttpClient);
   private LOAD_RANDOM_ENCOUNTER_ERROR = 'Błąd podczas ładowania wyzwania';
   private SELECT_DECISION_ERROR = 'Błąd wyboru decyzji';
+  private NEW_ENCOUNTER_ERROR = 'Błąd dodawania wyzwania';
+  private NEW_ENCOUNTER_SUCCESS = 'Udało się dodać nowe wyzwanie';
   loadRandomEncounter(level: number) {
     return this.http
       .get<EncounterOnDraw>(this.BASE_URL + '/random', {
@@ -73,6 +76,15 @@ export class EncounterApiService {
     return this.http.get<Encounter[]>(this.BASE_URL).pipe(
       catchError((err: HttpErrorResponse) => {
         this.logger.showErrorMessage(this.SELECT_DECISION_ERROR);
+        return throwError(() => err);
+      })
+    );
+  }
+  createEncounters(newEncounter: NewEncounterDto) {
+    return this.http.post(this.BASE_URL, newEncounter).pipe(
+      tap(() => this.logger.showSuccessMessage(this.NEW_ENCOUNTER_SUCCESS)),
+      catchError(err => {
+        this.logger.showErrorMessage(this.NEW_ENCOUNTER_ERROR);
         return throwError(() => err);
       })
     );

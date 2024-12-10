@@ -1,0 +1,75 @@
+<div class="flex align-items-center gap-2">
+  <button
+    (click)="submit()"
+    [loading]="status() === 'loading'"
+    [disabled]="form.invalid"
+    pButton
+    severity="success"
+    label="Dodaj"></button>
+  <jfudali-section-title class="flex-1" title="Dodaj wyzwanie" />
+</div>
+<form [formGroup]="form" class="relative flex flex-column md:flex-row gap-2">
+  <div class="w-12 md:w-6">
+    <span class="text-xl inline-block w-full">Szczegóły</span>
+    <p-divider />
+    <div class="field">
+      <label for="title"> Tytuł </label>
+      <input pInputText type="text" class="w-full" formControlName="title" />
+      @if(title.hasError('required') && (title.dirty || title.touched)){
+      <small class="p-error inline-block w-full" severity="error"
+        >Pole jest wymagane</small
+      >
+      }
+    </div>
+    <div class="field">
+      <label for="description"> Opis </label>
+      <textarea
+        pInputTextarea
+        [autoResize]="true"
+        class="w-full"
+        formControlName="description"
+        rows="10"></textarea>
+      @if(description.hasError('required')&& (description.dirty ||
+      description.touched)){
+      <small class="p-error inline-block w-full" severity="error"
+        >Pole jest wymagane</small
+      >
+      }
+    </div>
+    <div class="field">
+      <label for="difficulty"> Trudność </label>
+      <p-inputNumber
+        min="1"
+        step="1"
+        class="w-full"
+        styleClass="w-full"
+        formControlName="difficulty" />
+      @if(difficulty.invalid && (difficulty.dirty || difficulty.touched) ){
+      @if(difficulty.hasError('required') ){
+      <small class="p-error inline-block w-full" severity="error"
+        >Pole jest wymagane</small
+      >
+
+      } @else if (difficulty.hasError('min')) {
+      <small class="p-error inline-block w-full" severity="error"
+        >Min. wartość to 1</small
+      >
+
+      } @else {
+      <small class="p-error inline-block w-full" severity="error"
+        >Max. wartość to 20</small
+      >
+      } }
+    </div>
+    @if (addEnemy) {
+    <div class="field">
+      <label for="enemy">Przeciwnik</label>
+      <p-dropdown id="enemy" />
+    </div>
+    }
+  </div>
+  <jfudali-decisions-form
+    [formArray]="decisions"
+    formArrayName="decisions"
+    class="w-12 md:w-6" />
+</form>

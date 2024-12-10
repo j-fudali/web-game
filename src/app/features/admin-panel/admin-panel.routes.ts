@@ -1,7 +1,7 @@
 import { Route } from '@angular/router';
 import { AdminPanelComponent } from './admin-panel.component';
 import { EncountersListComponent } from './pages/encounters-list/encounters-list.component';
-import { AddEncounterComponent } from './pages/encounters-list/add-encounter/add-encounter.component';
+import { AddEncounterComponent } from './pages/add-encounter/add-encounter.component';
 
 export default [
   {
@@ -20,6 +20,11 @@ export default [
             component: AddEncounterComponent,
           },
         ],
+      },
+      {
+        path: '',
+        redirectTo: 'encounters',
+        pathMatch: 'full',
       },
     ],
   },

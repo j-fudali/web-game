@@ -1,12 +1,8 @@
-<div class="h-full p-4 flex flex-column gap-2">
-  <div class="p-2 border-1 border-round surface-border">
-    <span class="text-2xl font-light">Panel administratora</span>
+<div class="flex flex-column gap-2 p-2">
+  <div class="flex flex-column align-items-center px-2">
+    <p-menubar class="w-full" [model]="navigation"> </p-menubar>
   </div>
-  <div
-    class="flex-1 p-2 flex gap-2 w-full border-1 surface-border border-round">
-    <p-panelMenu class="w-4" [model]="navigation"> </p-panelMenu>
-    <div class="flex-1">
-      <router-outlet />
-    </div>
+  <div class="flex-1 px-2">
+    <router-outlet />
   </div>
 </div>

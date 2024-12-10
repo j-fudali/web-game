@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MenuItem } from 'primeng/api';
-import { PanelModule } from 'primeng/panel';
-import { PanelMenuModule } from 'primeng/panelmenu';
+import { MenuModule } from 'primeng/menu';
+import { MenubarModule } from 'primeng/menubar';
 @Component({
   selector: 'jfudali-admin-panel',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, PanelMenuModule],
+  imports: [CommonModule, RouterOutlet, MenubarModule],
   templateUrl: './admin-panel.component.html',
   styleUrl: './admin-panel.component.scss',
 })
@@ -16,8 +16,12 @@ export class AdminPanelComponent {
   navigation: MenuItem[] = [
     {
       label: 'Wyzywania',
-      routerLink: '/admin/encounters',
       items: [
+        {
+          label: 'Lista',
+          icon: 'pi pi-list',
+          routerLink: '/admin/encounters',
+        },
         {
           label: 'Dodaj',
           icon: 'pi pi-plus',
@@ -27,8 +31,11 @@ export class AdminPanelComponent {
     },
     {
       label: 'Przeciwnicy',
-      // routerLink: '/admin/encounters',
       items: [
+        {
+          label: 'Lista',
+          // routerLink: '/admin/encounters',
+        },
         {
           label: 'Dodaj',
           // routerLink: '/admin/encounters/add',

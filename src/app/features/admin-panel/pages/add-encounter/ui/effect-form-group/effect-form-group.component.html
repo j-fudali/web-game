@@ -1,0 +1,50 @@
+<form [formGroup]="formGroup" class="formgrid grid grid-nogutter col-12">
+  <div class="field col-12">
+    <label for="text">Tekst efektu</label>
+    <input
+      class="w-full"
+      pInputText
+      type="text"
+      name="text"
+      id="text"
+      formControlName="text" />
+    <small>To widzi gracz po dokonaniu wyboru</small>
+    @if (formGroup.get('text')?.hasError('required') &&
+    (formGroup.get('text')?.dirty || formGroup.get('text')?.touched)) {
+    <small class="p-error inline-block w-full" severity="error"
+      >Pole jest wymagane</small
+    >
+
+    }
+  </div>
+  <div class="col-12 lg:col-6">
+    <div class="field mr-0 lg:mr-1">
+      <label for="healthAmount">Życie</label>
+      <p-inputNumber
+        class="w-full"
+        styleClass="w-full"
+        id="healthAmount"
+        name="goldAmount"
+        formControlName="healthAmount" />
+    </div>
+  </div>
+  <div class="col-12 lg:col-6">
+    <div class="field ml-0 lg:ml-1">
+      <label for="goldAmount">Złoto</label>
+      <p-inputNumber
+        class="w-full"
+        styleClass="w-full"
+        id="goldAmount"
+        name="goldAmount"
+        formControlName="goldAmount" />
+    </div>
+  </div>
+  @if(formGroup.hasError('bothNull') && (formGroup.get('healthAmount')?.dirty ||
+  formGroup.get('healthAmount')?.touched || formGroup.get('goldAmount')?.dirty
+  ||formGroup.get('goldAmount')?.touched)){
+  <small class="p-error inline-block w-full" severity="error"
+    >Jedno pole musi być niepuste: punkty życia lub złoto</small
+  >
+
+  }
+</form>
