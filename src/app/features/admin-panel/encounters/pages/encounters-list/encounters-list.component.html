@@ -1,0 +1,27 @@
+<jfudali-section-title title="Lista wyzwań" />
+<div class="w-12 md:w-10 lg:w-6 mx-auto">
+  <p-dataView
+    [lazy]="true"
+    [rows]="pageSize()"
+    [paginator]="true"
+    [value]="encounters()"
+    [loading]="status() === 'loading'"
+    [totalRecords]="totalElements()">
+    <ng-template pTemplate="list" let-encounters>
+      <div
+        [style]="{ height: '70vh' }"
+        class="grid grid-nogutter overflow-y-auto">
+        @for (encounter of encounters; track encounter) {
+        <div
+          class="col-12 p-2 cursor-pointer border-surface border-bottom-1 hover:surface-100 transition-colors transition-duration-100"
+          [routerLink]="['/admin/encounters', encounter.id]">
+          <div class="w-full flex justify-content-between gap-2 py-2">
+            <span class="text-xl inline-block"> {{ encounter.title }}</span>
+            <span class="inline-block">Poziom: {{ encounter.difficulty }}</span>
+          </div>
+        </div>
+        }
+      </div>
+    </ng-template>
+  </p-dataView>
+</div>

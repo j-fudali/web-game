@@ -1,8 +1,9 @@
-import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
-import { healthOrGoldAmountNotNull } from '../validators/healthOrGoldAmountNotNull';
+import { FormGroup, FormControl, Validators, FormArray } from '@angular/forms';
+import { healthOrGoldAmountNotNull } from '../pages/add-encounter/validators/healthOrGoldAmountNotNull';
+import { Decision } from '../../../../shared/interfaces/decision';
 
-export class AddEncounterFormGroupGenerator {
-  public static getAddEncounterFormGroup(): FormGroup {
+export class EncounterFormGroupGenerator {
+  public static getEncounterFormGroup(): FormGroup {
     return new FormGroup({
       title: new FormControl('', {
         nonNullable: true,
@@ -22,21 +23,23 @@ export class AddEncounterFormGroupGenerator {
       }),
       decisions: new FormArray(
         [
-          AddEncounterFormGroupGenerator.getDecisionFormGroup(),
-          AddEncounterFormGroupGenerator.getDecisionFormGroup(),
+          EncounterFormGroupGenerator.getDecisionFormGroup(),
+          EncounterFormGroupGenerator.getDecisionFormGroup(),
         ],
         [Validators.required, Validators.minLength(2)]
       ),
     });
   }
-  public static getDecisionFormGroup(): FormGroup {
-    return new FormGroup({
+  public static getDecisionFormGroup(decision?: Decision): FormGroup {
+    const group = new FormGroup({
       text: new FormControl('', {
         nonNullable: true,
         validators: [Validators.required],
       }),
       effect: this.getEffectFormGroup(),
     });
+    if (decision) group.patchValue(decision);
+    return group;
   }
   private static getEffectFormGroup(): FormGroup {
     return new FormGroup(
@@ -46,7 +49,7 @@ export class AddEncounterFormGroupGenerator {
           validators: [Validators.required],
         }),
         healthAmount: new FormControl(null),
-        goldAmount: new FormControl(null),
+        goldAmount: new FormControl(null, Validators.min(1)),
       },
       { validators: [healthOrGoldAmountNotNull(), Validators.minLength(2)] }
     );

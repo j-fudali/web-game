@@ -5,6 +5,7 @@
     class="max-h-full flex flex-column gap-1 px-2 h-auto lg:h-screen overflow-y-auto overflow-x-hidden">
     <div class="py-2 flex justify-content-center">
       <button
+        [disabled]="formArray().parent?.disabled"
         (click)="addDecisionFormGroup()"
         pButton
         severity="secondary"
@@ -35,6 +36,7 @@
         formGroupName="effect" />
       <button
         class="mx-auto"
+        [disabled]="formArray().parent?.disabled"
         (click)="removeDecision(i)"
         pButton
         severity="danger"

@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  effect,
   forwardRef,
   input,
 } from '@angular/core';
@@ -13,10 +14,10 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { DividerModule } from 'primeng/divider';
-import { AddEncounterFormGroupGenerator } from '../../utils/add-encounter-form-group.generator';
 import { EffectFormGroupComponent } from '../effect-form-group/effect-form-group.component';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
+import { EncounterFormGroupGenerator } from '../../../../utils/encounter-form-group.generator';
 
 @Component({
   selector: 'jfudali-decisions-form',
@@ -38,7 +39,6 @@ import { InputTextModule } from 'primeng/inputtext';
   ],
   templateUrl: './decisions-form-array.component.html',
   styleUrl: './decisions-form-array.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DecisionsFormArrayComponent {
   formArray =
@@ -49,7 +49,7 @@ export class DecisionsFormArrayComponent {
   addDecisionFormGroup() {
     this.formArray().insert(
       0,
-      AddEncounterFormGroupGenerator.getDecisionFormGroup()
+      EncounterFormGroupGenerator.getDecisionFormGroup()
     );
   }
   removeDecision(index: number) {

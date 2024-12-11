@@ -25,13 +25,6 @@ import { InputTextModule } from 'primeng/inputtext';
   ],
   templateUrl: './effect-form-group.component.html',
   styleUrl: './effect-form-group.component.scss',
-  // providers: [
-  //   {
-  //     provide: NG_VALUE_ACCESSOR,
-  //     multi: true,
-  //     useExisting: forwardRef(() => EffectFormGroupComponent),
-  //   },
-  // ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EffectFormGroupComponent {

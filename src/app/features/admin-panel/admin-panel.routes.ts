@@ -1,7 +1,8 @@
 import { Route } from '@angular/router';
 import { AdminPanelComponent } from './admin-panel.component';
-import { EncountersListComponent } from './pages/encounters-list/encounters-list.component';
-import { AddEncounterComponent } from './pages/add-encounter/add-encounter.component';
+import { AddEncounterComponent } from './encounters/pages/add-encounter/add-encounter.component';
+import { EncountersListComponent } from './encounters/pages/encounters-list/encounters-list.component';
+import { EncounterDetailsComponent } from './encounters/pages/encounter-details/encounter-details.component';
 
 export default [
   {
@@ -12,12 +13,16 @@ export default [
         path: 'encounters',
         children: [
           {
-            path: '',
-            component: EncountersListComponent,
-          },
-          {
             path: 'add',
             component: AddEncounterComponent,
+          },
+          {
+            path: ':id',
+            component: EncounterDetailsComponent,
+          },
+          {
+            path: '',
+            component: EncountersListComponent,
           },
         ],
       },

@@ -1,0 +1,25 @@
+@if (status() === 'loading') {
+<p-progressBar mode="indeterminate" [style]="{ height: '6px' }" />
+
+}
+<div class="flex align-items-center gap-2">
+  <button
+    pButton
+    severity="danger"
+    label="Usuń"
+    [loading]="status() === 'delete-loading'"
+    (click)="deleteEncounter($event)"></button>
+  <p-confirmPopup />
+  <button
+    pButton
+    [loading]="status() === 'update-loading'"
+    (click)="executeAction()"
+    [disabled]="editMode ? form.invalid : false"
+    [severity]="editMode ? 'secondary' : 'success'"
+    [label]="editMode ? 'Zatwierdź' : 'Aktualizuj'"></button>
+  @if(editMode){
+  <button pButton severity="danger" label="Anuluj" (click)="cancel()"></button>
+  }
+  <jfudali-section-title class="flex-1" title="Uaktualnij wyzwanie" />
+</div>
+<jfudali-encounter-form [form]="form" />

@@ -1,0 +1,11 @@
+<div class="flex align-items-center gap-2">
+  <button
+    (click)="submit()"
+    [loading]="status() === 'loading'"
+    [disabled]="form.invalid"
+    pButton
+    severity="success"
+    label="Dodaj"></button>
+  <jfudali-section-title class="flex-1" title="Dodaj wyzwanie" />
+</div>
+<jfudali-encounter-form [form]="form" />

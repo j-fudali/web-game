@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { EncounterApiService } from '../../../../../shared/api/encounters/encounter-api.service';
+import { EncounterApiService } from '../../../../../../shared/api/encounters/encounter-api.service';
 import {
   catchError,
   filter,
@@ -11,7 +11,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
-import { NewEncounterDto } from '../../../../../shared/api/encounters/model/new-encounter.dto';
+import { NewEncounterDto } from '../../../../../../shared/api/encounters/model/new-encounter.dto';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable()

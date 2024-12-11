@@ -16,6 +16,8 @@ import { Statistics } from '../../interfaces/statistics';
 import { environment } from '../../../../environments/environment';
 import { LoggerService } from '../../services/logger.service';
 import { NewEncounterDto } from './model/new-encounter.dto';
+import { GetEncountersResponse } from './model/get-encounters-response';
+import { UpdateEncounterDto } from './model/update-encounter.dto';
 
 @Injectable({
   providedIn: 'root',
@@ -26,8 +28,13 @@ export class EncounterApiService {
   private http = inject(HttpClient);
   private LOAD_RANDOM_ENCOUNTER_ERROR = 'Błąd podczas ładowania wyzwania';
   private SELECT_DECISION_ERROR = 'Błąd wyboru decyzji';
+  private ENCOUNTERS_LIST_ERROR = 'Błąd pobrania wyzwań';
   private NEW_ENCOUNTER_ERROR = 'Błąd dodawania wyzwania';
   private NEW_ENCOUNTER_SUCCESS = 'Udało się dodać nowe wyzwanie';
+  private UPDATE_ENCOUNTER_ERROR = 'Błąd aktualizacji wyzwania';
+  private UPDATE_ENCOUNTER_SUCCESS = 'Udało się zaktualizować wyzwanie';
+  private DELETE_ENCOUNTER_ERROR = 'Błąd usuwania wyzwania';
+  private DELETE_ENCOUNTER_SUCCESS = 'Udało się usunąć wyzwanie';
   loadRandomEncounter(level: number) {
     return this.http
       .get<EncounterOnDraw>(this.BASE_URL + '/random', {
@@ -72,19 +79,40 @@ export class EncounterApiService {
         })
       );
   }
-  getEncounters(): Observable<Encounter[]> {
-    return this.http.get<Encounter[]>(this.BASE_URL).pipe(
+  getEncounters() {
+    return this.http.get<GetEncountersResponse>(this.BASE_URL).pipe(
       catchError((err: HttpErrorResponse) => {
-        this.logger.showErrorMessage(this.SELECT_DECISION_ERROR);
+        this.logger.showErrorMessage(this.ENCOUNTERS_LIST_ERROR);
         return throwError(() => err);
       })
     );
+  }
+  getEncounter(id: string) {
+    return this.http.get<Encounter>(this.BASE_URL + '/' + id);
   }
   createEncounters(newEncounter: NewEncounterDto) {
     return this.http.post(this.BASE_URL, newEncounter).pipe(
       tap(() => this.logger.showSuccessMessage(this.NEW_ENCOUNTER_SUCCESS)),
       catchError(err => {
         this.logger.showErrorMessage(this.NEW_ENCOUNTER_ERROR);
+        return throwError(() => err);
+      })
+    );
+  }
+  updateEncounter(id: string, updateEncounter: UpdateEncounterDto) {
+    return this.http.patch(this.BASE_URL + '/' + id, updateEncounter).pipe(
+      tap(() => this.logger.showSuccessMessage(this.UPDATE_ENCOUNTER_SUCCESS)),
+      catchError(err => {
+        this.logger.showErrorMessage(this.UPDATE_ENCOUNTER_ERROR);
+        return throwError(() => err);
+      })
+    );
+  }
+  deleteEncounter(id: string) {
+    return this.http.delete(this.BASE_URL + '/' + id).pipe(
+      tap(() => this.logger.showSuccessMessage(this.DELETE_ENCOUNTER_SUCCESS)),
+      catchError(err => {
+        this.logger.showErrorMessage(this.DELETE_ENCOUNTER_ERROR);
         return throwError(() => err);
       })
     );

@@ -26,6 +26,10 @@
         id="healthAmount"
         name="goldAmount"
         formControlName="healthAmount" />
+      <small
+        >Wartość dodatnia - dodaj pkt. życia, wartość ujemna - odejmij pkt.
+        życia</small
+      >
     </div>
   </div>
   <div class="col-12 lg:col-6">
@@ -37,6 +41,12 @@
         id="goldAmount"
         name="goldAmount"
         formControlName="goldAmount" />
+      <small>Tylko wartość dodatnia</small>
+      @if (formGroup.get('goldAmount')?.hasError('min')) {
+      <small class="p-error inline-block w-full" severity="error"
+        >Wartość pola musi być dodatnia</small
+      >
+      }
     </div>
   </div>
   @if(formGroup.hasError('bothNull') && (formGroup.get('healthAmount')?.dirty ||
