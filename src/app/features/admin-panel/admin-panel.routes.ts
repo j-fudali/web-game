@@ -3,6 +3,9 @@ import { AdminPanelComponent } from './admin-panel.component';
 import { AddEncounterComponent } from './encounters/pages/add-encounter/add-encounter.component';
 import { EncountersListComponent } from './encounters/pages/encounters-list/encounters-list.component';
 import { EncounterDetailsComponent } from './encounters/pages/encounter-details/encounter-details.component';
+import { AddEnemyComponent } from './enemies/pages/add-enemy/add-enemy.component';
+import { EnemyDetailsComponent } from './enemies/pages/enemy-details/enemy-details.component';
+import { EnemiesListComponent } from './enemies/pages/enemies-list/enemies-list.component';
 
 export default [
   {
@@ -23,6 +26,23 @@ export default [
           {
             path: '',
             component: EncountersListComponent,
+          },
+        ],
+      },
+      {
+        path: 'enemies',
+        children: [
+          {
+            path: 'add',
+            component: AddEnemyComponent,
+          },
+          {
+            path: ':id',
+            component: EnemyDetailsComponent,
+          },
+          {
+            path: '',
+            component: EnemiesListComponent,
           },
         ],
       },

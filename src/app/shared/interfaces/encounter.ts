@@ -1,5 +1,6 @@
+import { EnemyDto } from '../api/enemies/model/enemy.dto';
 import { Decision } from './decision';
-import { Enemy, EnemyDto, EnemyOnEncounterDraw } from './enemy';
+import { Enemy } from './enemy';
 import { PublicUser } from './public-user';
 
 interface BaseEncounter {

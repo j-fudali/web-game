@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { DataViewModule } from 'primeng/dataview';
+import { DataViewModule, DataViewPageEvent } from 'primeng/dataview';
 import { EncountersListService } from './services/encounters-list.service';
 import { RouterLink } from '@angular/router';
 import { DividerModule } from 'primeng/divider';
@@ -27,4 +27,8 @@ export class EncountersListComponent {
   pageSize = this.encountersListService.pageSize;
   totalElements = this.encountersListService.totalElements;
   status = this.encountersListService.status;
+
+  changePage(event: DataViewPageEvent) {
+    this.encountersListService.getEncounteres$.next(event.first / event.rows);
+  }
 }

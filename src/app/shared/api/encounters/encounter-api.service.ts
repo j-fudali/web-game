@@ -79,13 +79,17 @@ export class EncounterApiService {
         })
       );
   }
-  getEncounters() {
-    return this.http.get<GetEncountersResponse>(this.BASE_URL).pipe(
-      catchError((err: HttpErrorResponse) => {
-        this.logger.showErrorMessage(this.ENCOUNTERS_LIST_ERROR);
-        return throwError(() => err);
+  getEncounters(page: number) {
+    return this.http
+      .get<GetEncountersResponse>(this.BASE_URL, {
+        params: new HttpParams().set('page', page + 1),
       })
-    );
+      .pipe(
+        catchError((err: HttpErrorResponse) => {
+          this.logger.showErrorMessage(this.ENCOUNTERS_LIST_ERROR);
+          return throwError(() => err);
+        })
+      );
   }
   getEncounter(id: string) {
     return this.http.get<Encounter>(this.BASE_URL + '/' + id);

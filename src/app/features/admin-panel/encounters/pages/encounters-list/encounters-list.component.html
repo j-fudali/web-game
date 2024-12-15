@@ -6,18 +6,28 @@
     [paginator]="true"
     [value]="encounters()"
     [loading]="status() === 'loading'"
-    [totalRecords]="totalElements()">
+    [totalRecords]="totalElements()"
+    (onPage)="changePage($event)">
     <ng-template pTemplate="list" let-encounters>
       <div
         [style]="{ height: '70vh' }"
-        class="grid grid-nogutter overflow-y-auto">
+        class="grid grid-nogutter align-items-start overflow-y-auto">
         @for (encounter of encounters; track encounter) {
         <div
           class="col-12 p-2 cursor-pointer border-surface border-bottom-1 hover:surface-100 transition-colors transition-duration-100"
           [routerLink]="['/admin/encounters', encounter.id]">
           <div class="w-full flex justify-content-between gap-2 py-2">
-            <span class="text-xl inline-block"> {{ encounter.title }}</span>
-            <span class="inline-block">Poziom: {{ encounter.difficulty }}</span>
+            <div class="flex flex-column gap-1 justify-content-between">
+              <span class="text-xl inline-block"> {{ encounter.title }}</span>
+              <span class="inline-block"
+                >Poziom: {{ encounter.difficulty }}</span
+              >
+            </div>
+            <div class="flex flex-column gap-1 text-right">
+              <span class="text-lg">Akualizacja</span>
+              <span>{{ encounter.modifiedBy.email }}</span>
+              <span class="text-sm">{{ encounter.lastModified | date }}</span>
+            </div>
           </div>
         </div>
         }

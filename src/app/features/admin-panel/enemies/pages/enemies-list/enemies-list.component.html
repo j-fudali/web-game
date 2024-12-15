@@ -1,0 +1,37 @@
+<jfudali-section-title title="Lista przeciwników" />
+<div class="w-12 md:w-10 lg:w-6 mx-auto">
+  <p-dataView
+    [lazy]="true"
+    [rows]="pageSize()"
+    [paginator]="true"
+    [value]="enemies()"
+    [loading]="status() === 'loading'"
+    [totalRecords]="totalElements()"
+    (onPage)="changePage($event)">
+    <ng-template pTemplate="list" let-enemies>
+      <div
+        [style]="{ height: '70vh' }"
+        class="grid grid-nogutter overflow-y-auto">
+        @for (enemy of enemies; track enemy) {
+
+        <div
+          [routerLink]="['/admin/enemies', enemy.id]"
+          class="col-12 p-2 flex align-items-center justify-content-between cursor-pointer border-surface border-bottom-1 hover:surface-100 transition-colors transition-duration-100">
+          <div class="flex align-items-center gap-2">
+            <p-avatar shape="circle" [image]="enemy.image" size="xlarge" />
+            <div class="flex flex-column gap-1">
+              <span class="text-lg">{{ enemy.name }}</span>
+              <span>Poziom: {{ enemy.level }}</span>
+            </div>
+          </div>
+          <div class="flex flex-column gap-1 text-right">
+            <span class="text-lg">Aktualizacja</span>
+            <span>{{ enemy.modifiedBy.email }}</span>
+            <span class="text-sm">{{ enemy.lastModified | date }}</span>
+          </div>
+        </div>
+        }
+      </div>
+    </ng-template>
+  </p-dataView>
+</div>

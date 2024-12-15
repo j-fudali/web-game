@@ -1,0 +1,14 @@
+<div class="flex gap-2 align-items-center">
+  <button
+    pButton
+    severity="success"
+    label="Dodaj"
+    (click)="submit()"
+    [loading]="status() === 'loading'"
+    [disabled]="form.invalid"></button>
+  <jfudali-section-title class="flex-1" title="Dodaj przeciwnika" />
+</div>
+<jfudali-enemy-form
+  [form]="form"
+  (onImageSelect)="selectImage($event)"
+  (onWeaponImageSelect)="selectWeaponImage($event)" />

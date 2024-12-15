@@ -45,25 +45,13 @@ export class EncounterDetailsComponent implements OnInit {
       const encounter = this.encounter() as DecisionEncounter;
       if (encounter) {
         if (!this.isSet) {
-          this.setInitialValues(encounter);
-          if (!this.editMode) this.form.disable();
+          this.setInitialFormValues(encounter);
           this.isSet = true;
         }
       }
     });
   }
-  setInitialValues(encounter: DecisionEncounter) {
-    this.form.patchValue(encounter);
-    const decisions = this.form.get('decisions') as FormArray;
-    if (encounter.decisions && encounter.decisions.length > 0) {
-      if (decisions.length > 0) decisions.clear();
-      encounter.decisions.forEach(d => {
-        this.decisions.push(
-          EncounterFormGroupGenerator.getDecisionFormGroup(d)
-        );
-      });
-    }
-  }
+
   ngOnInit(): void {
     this.encounterDetailsService.getEncounter$.next(this.id());
   }
@@ -90,7 +78,7 @@ export class EncounterDetailsComponent implements OnInit {
   cancel() {
     this.editMode = false;
     const encounter = this.encounter() as DecisionEncounter;
-    if (encounter) this.setInitialValues(encounter);
+    if (encounter) this.setInitialFormValues(encounter);
     this.form.disable();
   }
   submit() {
@@ -100,5 +88,17 @@ export class EncounterDetailsComponent implements OnInit {
     });
     this.editMode = false;
     this.form.disable();
+  }
+  private setInitialFormValues(encounter: DecisionEncounter) {
+    this.form.patchValue(encounter);
+    const decisions = this.form.get('decisions') as FormArray;
+    if (encounter.decisions && encounter.decisions.length > 0) {
+      if (decisions.length > 0) decisions.clear();
+      encounter.decisions.forEach(d => {
+        this.decisions.push(
+          EncounterFormGroupGenerator.getDecisionFormGroup(d)
+        );
+      });
+    }
   }
 }

@@ -4,6 +4,7 @@
   "newProjectRoot": "projects",
   "projects": {
     "web-game": {
+      "i18n": { "sourceLocale": "pl" },
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {

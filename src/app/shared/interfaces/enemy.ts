@@ -1,5 +1,4 @@
-import { Character } from './character';
-import { PublicUser } from './public-user';
+import { EnemyDto } from '../api/enemies/model/enemy.dto';
 import { Statistics } from './statistics';
 
 export interface EnemyWeapon {
@@ -7,16 +6,7 @@ export interface EnemyWeapon {
   image: string;
   damage: number;
 }
-export interface EnemyDto extends Character {
-  id: string;
-  description: string;
-  weapon: EnemyWeapon;
-  armor: number;
-  maxHealth: number;
-  maxPowerPoints: number;
-  modifiedBy: PublicUser;
-  lastModified: Date;
-}
+
 export type Enemy = Omit<EnemyDto, 'maxHealth' | 'maxPowerPoints'> & {
   statistics: Statistics;
 };

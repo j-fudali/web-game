@@ -1,15 +1,35 @@
 import { Injectable, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map, shareReplay, tap } from 'rxjs';
+import {
+  catchError,
+  EMPTY,
+  map,
+  merge,
+  shareReplay,
+  startWith,
+  Subject,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { EncounterApiService } from '../../../../../../shared/api/encounters/encounter-api.service';
 
 @Injectable()
 export class EncountersListService {
   private encountersService = inject(EncounterApiService);
-  private encounters$ = this.encountersService
-    .getEncounters()
-    .pipe(shareReplay(1));
-  private status$ = this.encounters$.pipe(map(() => 'completed'));
+
+  getEncounteres$ = new Subject<number>();
+  private encounters$ = this.getEncounteres$.pipe(
+    startWith(0),
+    switchMap(page =>
+      this.encountersService.getEncounters(page).pipe(catchError(() => EMPTY))
+    ),
+    shareReplay(1)
+  );
+
+  private status$ = merge(
+    this.getEncounteres$.pipe(map(() => 'loading' as const)),
+    this.encounters$.pipe(map(() => 'completed'))
+  );
   encounters = toSignal(this.encounters$.pipe(map(res => res.content)), {
     initialValue: [],
   });

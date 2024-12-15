@@ -75,8 +75,8 @@ export class AuthService {
     shareReplay(1)
   );
   onSignOut$ = this.signOut$.pipe(
-    tap(() => this.router.navigate(['/'])),
-    tap(() => this._cookies.delete('token'))
+    tap(() => this._cookies.delete('token')),
+    tap(() => this.router.navigate(['/']))
   );
   private isLogged$ = merge(
     merge(this.onLogin$, this.onSignUp$).pipe(map(() => true)),

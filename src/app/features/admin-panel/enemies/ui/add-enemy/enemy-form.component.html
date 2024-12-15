@@ -1,0 +1,119 @@
+<form
+  [formGroup]="form()"
+  class="flex flex-column md:flex-row gap-2 md:gap-4 md:align-items-start">
+  <div class="w-12 md:w-6 formgrid grid grid-nogutter">
+    <jfudali-sub-section-title class="col-12" title="Szczegóły" />
+    <div class="field col-12">
+      @if(imageSrc()){
+      <div class="flex justify-content-center w-full mb-2">
+        <p-image width="250" preview="true" [src]="this.imageSrc()" />
+      </div>
+      }
+      <p-fileUpload
+        [disabled]="form().disabled"
+        [showUploadButton]="false"
+        [chooseLabel]="chooseLabel"
+        [cancelLabel]="cancelLabel"
+        [invalidFileSizeMessageSummary]="fileSizeErrorSummary"
+        [invalidFileSizeMessageDetail]="fileSizeErrorDetail"
+        (onSelect)="setImage($event)"
+        (onClear)="clearImage()"
+        accept="image/*"
+        [maxFileSize]="maxFileSize" />
+    </div>
+    <div class="field col-12">
+      <label for="name">Nazwa</label>
+      <input
+        class="w-full"
+        pInputText
+        type="text"
+        id="name"
+        formControlName="name" />
+    </div>
+    <div class="field col-12">
+      <label for="description">Opis</label>
+      <textarea
+        autoResize="true"
+        rows="10"
+        pInputTextarea
+        type="text"
+        id="description"
+        class="w-full"
+        formControlName="description"></textarea>
+    </div>
+    <div class="field col-12 lg:col-6 p-1">
+      <label for="level">Poziom</label>
+      <p-inputNumber
+        class="w-full"
+        styleClass="w-full"
+        id="level"
+        formControlName="level" />
+    </div>
+    <div class="field col-12 lg:col-6 p-1">
+      <label for="maxHealth">Maks. poziom zdrowia</label>
+      <p-inputNumber
+        class="w-full"
+        styleClass="w-full"
+        id="maxHealth"
+        formControlName="maxHealth" />
+    </div>
+    <div class="field col-12 lg:col-6 p-1">
+      <label for="maxPowerPoints">Maks. poziom pkt. mocy</label>
+      <p-inputNumber
+        class="w-full"
+        styleClass="w-full"
+        id="maxPowerPoints"
+        formControlName="maxPowerPoints" />
+    </div>
+    <div class="field col-12 lg:col-6 p-1">
+      <label for="damage">Pancerz</label>
+      <p-inputNumber
+        id="armor"
+        class="w-full"
+        styleClass="w-full"
+        formControlName="armor" />
+    </div>
+  </div>
+  <div class="w-12 md:w-6 formgrid grid grid-nogutter">
+    <jfudali-sub-section-title class="col-12" title="Broń" />
+    <div class="field col-12">
+      @if(weaponImageSrc()){
+      <div class="flex justify-content-center w-full mb-2">
+        <p-image
+          [previewImageSizes]="'medium'"
+          width="250"
+          preview="true"
+          [src]="this.weaponImageSrc()" />
+      </div>
+      }
+      <p-fileUpload
+        [disabled]="form().disabled"
+        [chooseLabel]="chooseLabel"
+        [showUploadButton]="false"
+        [cancelLabel]="cancelLabel"
+        [invalidFileSizeMessageSummary]="fileSizeErrorSummary"
+        [invalidFileSizeMessageDetail]="fileSizeErrorDetail"
+        (onSelect)="setWeaponImage($event)"
+        (onClear)="clearWeaponImage()"
+        accept="image/*"
+        [maxFileSize]="maxFileSize" />
+    </div>
+    <div class="field col-12">
+      <label for="weaponName">Nazwa broni</label>
+      <input
+        pInputText
+        type="text"
+        id="weaponName"
+        class="w-full"
+        formControlName="weaponName" />
+    </div>
+    <div class="field col-12">
+      <label for="damage">Obrażenia</label>
+      <p-inputNumber
+        id="damage"
+        class="w-full"
+        styleClass="w-full"
+        formControlName="damage" />
+    </div>
+  </div>
+</form>

@@ -34,11 +34,11 @@ export class AdminPanelComponent {
       items: [
         {
           label: 'Lista',
-          // routerLink: '/admin/encounters',
+          routerLink: '/admin/enemies/',
         },
         {
           label: 'Dodaj',
-          // routerLink: '/admin/encounters/add',
+          routerLink: '/admin/enemies/add',
         },
       ],
     },
