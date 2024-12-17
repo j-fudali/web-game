@@ -12,7 +12,7 @@ export interface StartingItemsState {
 }
 export interface Trait {
   trait_type: 'classType' | 'damage' | 'armor' | 'type' | 'bodySlot';
-  value: string;
+  value: unknown;
 }
 export type Attributes = Omit<Item, 'name' | 'image'>;
 @Injectable({

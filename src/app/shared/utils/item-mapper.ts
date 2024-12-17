@@ -8,13 +8,14 @@ import { IpfsConverter } from './ipfs-converter';
 import { OwnedItem } from '../interfaces/owned-item';
 
 export class ItemMapper {
-  public static convertNftToItem(nft: NFT): Item {
-    const tokenId = nft.id;
-    const { name, image, attributes } = nft.metadata;
-    const mappedAttributes = Object.entries(attributes!).map(
-      ([k, v]) => v as Trait
-    );
+  public static createTraits(attributes: Record<string, unknown>) {
+    return Object.entries(attributes!).map(([k, v]) => v as Trait);
+  }
+  private static mapAttributes(
+    attributes: Record<string, unknown>
+  ): Partial<Attributes> {
     const result: Partial<Attributes> = {};
+    const mappedAttributes = this.createTraits(attributes);
     mappedAttributes.forEach(trait => {
       switch (trait.trait_type) {
         case 'classType':
@@ -36,6 +37,14 @@ export class ItemMapper {
           break;
       }
     });
+    return result;
+  }
+  public static convertNftToItem(nft: NFT): Item {
+    const tokenId = nft.id;
+    const { name, image, attributes, properties } = nft.metadata;
+    let result = {};
+    if (attributes) result = this.mapAttributes(attributes);
+    if (properties) result = this.mapAttributes(properties);
     return {
       ...result,
       name,

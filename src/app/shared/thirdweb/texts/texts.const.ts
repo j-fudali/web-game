@@ -12,4 +12,5 @@ export class Texts {
   public static SET_CONDITIONS_ERROR =
     'Błąd ustawiania warunków dla pozyskania NFT';
   public static UPLOAD_IMAGE_ERROR = 'Błąd wgrywania zdjęcia';
+  public static GET_ITEMS_ERROR = 'Błąd pobierania przedmiotów';
 }

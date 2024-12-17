@@ -44,6 +44,7 @@ export class AdminPanelComponent {
     {
       label: 'Przedmioty',
       items: [
+        { label: 'Lista', routerLink: '/admin/items' },
         {
           label: 'Dodaj',
           routerLink: '/admin/items/add',

@@ -1,3 +1,4 @@
+import { PAGE_SIZE } from './../constants/config.const';
 import { Injectable, inject } from '@angular/core';
 import {
   parseEventLogs,
@@ -25,18 +26,8 @@ import {
   setClaimConditions,
   tokensLazyMintedEvent,
 } from 'thirdweb/extensions/erc1155';
-import {
-  catchError,
-  EMPTY,
-  from,
-  map,
-  of,
-  switchMap,
-  tap,
-  throwError,
-} from 'rxjs';
+import { catchError, from, map, of, switchMap, tap, throwError } from 'rxjs';
 import { upload } from 'thirdweb/storage';
-
 import { RPCError } from '../interfaces/rpc-error';
 import { SellData } from '../../features/marketplace/interfaces/sell-data';
 import { Hex } from 'thirdweb/dist/types/utils/encoding/hex';
@@ -45,6 +36,8 @@ import { LoggerService } from '../services/logger.service';
 import { NewItem } from './model/new-item.model';
 import { Contracts } from './const/contracts.const';
 import { Texts } from './texts/texts.const';
+import { count } from 'thirdweb/extensions/thirdweb';
+import { Trait } from '../../features/game/services/starting-items.service';
 
 @Injectable({
   providedIn: 'root',
@@ -54,6 +47,20 @@ export class ThirdwebService {
   private texts = Texts;
   private contracts = Contracts;
 
+  getAllItems(page: number) {
+    return from(
+      getNFTs({
+        contract: this.contracts.ITEMS,
+        start: page * PAGE_SIZE,
+        count: PAGE_SIZE,
+      })
+    ).pipe(
+      catchError(err => {
+        this.logger.showErrorMessage(this.texts.GET_ITEMS_ERROR);
+        return throwError(() => err);
+      })
+    );
+  }
   createItem(account: Account, item: NewItem) {
     return this.uploadImage(this.contracts.CLIENT, item.image).pipe(
       switchMap(image =>
@@ -305,13 +312,16 @@ export class ThirdwebService {
     );
   }
   private getNewItemTransaction(item: NewItem, image: string) {
-    const properties: Record<string, unknown> = {
-      classType: item.classType,
-      type: item.type,
-    };
-    if (item.damage) properties['damage'] = item.damage;
-    if (item.armor) properties['armor'] = item.armor;
-    if (item.armor && item.bodySlot) properties['bodySlot'] = item.bodySlot;
+    const properties: Array<Record<string, unknown>> = [
+      { trait_type: 'classType', value: item.classType },
+      { trait_type: 'type', value: item.type },
+    ];
+
+    if (item.damage)
+      properties.push({ trait_type: 'damage', value: item.damage });
+    if (item.armor) properties.push({ trait_type: 'armor', value: item.armor });
+    if (item.armor && item.bodySlot)
+      properties.push({ trait_type: 'bodySlot', value: item.bodySlot });
     return lazyMint({
       contract: this.contracts.ITEMS,
       nfts: [

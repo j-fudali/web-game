@@ -41,15 +41,18 @@ export class AddItemComponent {
     { initialValue: false }
   );
   constructor() {
-    effect(() => {
-      if (this.status() === 'success') {
-        this.image = undefined;
-        this.imageSrc = undefined;
-        this.attachDamage();
-        this.itemForm().clear();
-        this.form.reset();
-      }
-    });
+    effect(
+      () => {
+        if (this.status() === 'success') {
+          this.image = undefined;
+          this.imageSrc = undefined;
+          this.attachDamage();
+          this.itemForm().clear();
+          this.form.reset();
+        }
+      },
+      { allowSignalWrites: true }
+    );
   }
   attachArmor() {
     ItemsFormGroupGenerator.attachArmorToFormGroup(this.form);

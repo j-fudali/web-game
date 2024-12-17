@@ -14,7 +14,7 @@
         class="grid grid-nogutter align-items-start overflow-y-auto">
         @for (encounter of encounters; track encounter) {
         <div
-          class="col-12 p-2 cursor-pointer border-surface border-bottom-1 hover:surface-100 transition-colors transition-duration-100"
+          class="col-12 p-2 cursor-pointer surface-border border-bottom-1 hover:surface-100 transition-colors transition-duration-100"
           [routerLink]="['/admin/encounters', encounter.id]">
           <div class="w-full flex justify-content-between gap-2 py-2">
             <div class="flex flex-column gap-1 justify-content-between">

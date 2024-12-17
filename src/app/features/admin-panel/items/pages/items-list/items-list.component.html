@@ -1,0 +1,49 @@
+<jfudali-section-title title="Lista przedmioty" />
+<div class="w-12 md:w-10 lg:w-6 mx-auto">
+  <p-dataView
+    [lazy]="true"
+    [loading]="status() === 'loading'"
+    [rows]="rows"
+    [value]="items()"
+    [emptyMessage]="texts.ITEMS_LIST_EMPTY_MESSAGE">
+    <ng-template pTemplate="list" let-items>
+      <div
+        class="grid grid-nogutter overflow-y-auto align-content-start align-items-start"
+        [style]="{ height: '70vh' }">
+        @for (item of items; track item) {
+        <div
+          [routerLink]="['/admin/items', item.tokenId]"
+          class="cursor-pointer col-12 p-2 flex gap-2 align-items-center border-bottom-1 surface-border">
+          <p-avatar [image]="item.image" shape="circle" size="xlarge" />
+          <div class="flex flex-column gap-1">
+            <span class="text-lg">{{ item.name }}</span>
+            <span class="text-xs font-italic"
+              >({{ item.type | jfudaliItemTranslate }} -
+              {{ item.bodySlot | jfudaliBodySlotTranslate }})</span
+            >
+            <span class="text-sm"
+              >{{ texts.ITEMS_LIST_ITEM_VALUE }}:
+              {{ item.damage || item.armor }}</span
+            >
+          </div>
+        </div>
+        }
+      </div>
+    </ng-template>
+  </p-dataView>
+  @if(items(); as items){ @if (items.length > 0) {
+  <div class="flex gap-1 w-full justify-content-center my-2">
+    <button
+      pButton
+      icon="pi pi-arrow-left"
+      (click)="prevPage()"
+      [disabled]="page === 0"></button>
+    <button
+      pButton
+      icon="pi pi-arrow-right"
+      (click)="nextPage()"
+      [disabled]="(items.length || 0) < 10"></button>
+  </div>
+
+  } }
+</div>

@@ -4,4 +4,6 @@ export class Texts {
   public static FILE_SIZE_ERROR_SUMMARY: string = 'Błąd';
   public static FILE_SIZE_ERROR_DETAILS: string =
     'Maks. rozmiar pliku wynosi 50MB';
+  public static ITEMS_LIST_ITEM_VALUE = 'Wartość';
+  public static ITEMS_LIST_EMPTY_MESSAGE = 'Brak przedmiotów';
 }
