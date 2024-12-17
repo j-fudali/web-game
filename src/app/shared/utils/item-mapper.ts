@@ -11,6 +11,24 @@ export class ItemMapper {
   public static createTraits(attributes: Record<string, unknown>) {
     return Object.entries(attributes!).map(([k, v]) => v as Trait);
   }
+
+  public static convertNftToItem(nft: NFT): Item {
+    const tokenId = nft.id;
+    const { name, description, image, attributes, properties } = nft.metadata;
+    let result = {};
+    if (attributes) result = this.mapAttributes(attributes);
+    if (properties) result = this.mapAttributes(properties);
+    return {
+      ...result,
+      name,
+      description,
+      tokenId,
+      image: image ? IpfsConverter.convertIpfs(image) : undefined,
+    } as Item;
+  }
+  public static convertItemToOwnedItem(item: Item, quantity: bigint) {
+    return { quantity, ...item } as OwnedItem;
+  }
   private static mapAttributes(
     attributes: Record<string, unknown>
   ): Partial<Attributes> {
@@ -38,21 +56,5 @@ export class ItemMapper {
       }
     });
     return result;
-  }
-  public static convertNftToItem(nft: NFT): Item {
-    const tokenId = nft.id;
-    const { name, image, attributes, properties } = nft.metadata;
-    let result = {};
-    if (attributes) result = this.mapAttributes(attributes);
-    if (properties) result = this.mapAttributes(properties);
-    return {
-      ...result,
-      name,
-      tokenId,
-      image: image ? IpfsConverter.convertIpfs(image) : undefined,
-    } as Item;
-  }
-  public static convertItemToOwnedItem(item: Item, quantity: bigint) {
-    return { quantity, ...item } as OwnedItem;
   }
 }

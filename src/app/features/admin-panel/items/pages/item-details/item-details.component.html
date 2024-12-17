@@ -1,0 +1,20 @@
+<div class="flex align-items-center gap-2">
+  <button
+    pButton
+    [loading]="status() === 'update-loading'"
+    (click)="executeAction()"
+    [disabled]="editMode ? form.invalid : false"
+    [severity]="editMode ? 'secondary' : 'success'"
+    [label]="editMode ? 'Zatwierdź' : 'Aktualizuj'"></button>
+  @if(editMode){
+  <button pButton severity="danger" label="Anuluj" (click)="cancel()"></button>
+  }
+  <jfudali-section-title class="flex-1" title="Aktualizuj przedmiot" />
+</div>
+<jfudali-item-form
+  [form]="form"
+  [disablePicker]="!editMode"
+  [(imageSrc)]="imageSrc"
+  [(image)]="image"
+  [isArmor]="isArmor()">
+</jfudali-item-form>

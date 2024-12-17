@@ -8,6 +8,7 @@ import { EnemyDetailsComponent } from './enemies/pages/enemy-details/enemy-detai
 import { EnemiesListComponent } from './enemies/pages/enemies-list/enemies-list.component';
 import { AddItemComponent } from './items/pages/add-item/add-item.component';
 import { ItemsListComponent } from './items/pages/items-list/items-list.component';
+import { ItemDetailsComponent } from './items/pages/item-details/item-details.component';
 
 export default [
   {
@@ -55,6 +56,7 @@ export default [
             path: 'add',
             component: AddItemComponent,
           },
+          { path: ':id', component: ItemDetailsComponent },
           {
             path: '',
             component: ItemsListComponent,

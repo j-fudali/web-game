@@ -20,11 +20,14 @@ import {
 } from 'thirdweb/extensions/marketplace';
 import {
   claimTo,
+  getClaimConditions,
+  getNFT,
   getNFTs,
   getOwnedNFTs,
   lazyMint,
   setClaimConditions,
   tokensLazyMintedEvent,
+  updateMetadata,
 } from 'thirdweb/extensions/erc1155';
 import { catchError, from, map, of, switchMap, tap, throwError } from 'rxjs';
 import { upload } from 'thirdweb/storage';
@@ -36,8 +39,9 @@ import { LoggerService } from '../services/logger.service';
 import { NewItem } from './model/new-item.model';
 import { Contracts } from './const/contracts.const';
 import { Texts } from './texts/texts.const';
-import { count } from 'thirdweb/extensions/thirdweb';
-import { Trait } from '../../features/game/services/starting-items.service';
+import { ClaimCondition } from 'thirdweb/dist/types/utils/extensions/drops/types';
+import { UpdateItem } from './model/update-item.model';
+import { ItemMapper } from '../utils/item-mapper';
 
 @Injectable({
   providedIn: 'root',
@@ -47,6 +51,70 @@ export class ThirdwebService {
   private texts = Texts;
   private contracts = Contracts;
 
+  getClaimConditionMaxClaimableSupply(id: number) {
+    return from(
+      getClaimConditions({
+        contract: this.contracts.ITEMS,
+        tokenId: BigInt(id),
+      })
+    ).pipe(
+      catchError(err => {
+        this.logger.showErrorMessage(
+          this.texts.GET_CLAIM_CONDITION_MAX_CLAIMABLE_SUPPLY
+        );
+        return throwError(() => err);
+      })
+    );
+  }
+  updateClaimCondition(
+    account: Account,
+    claimCondition: ClaimCondition,
+    maxSupplyToClaim: number
+  ) {
+    return from(
+      sendAndConfirmTransaction({
+        account,
+        transaction: setClaimConditions({
+          contract: this.contracts.ITEMS,
+          tokenId: 0n,
+          phases: [
+            { ...claimCondition, maxClaimableSupply: BigInt(maxSupplyToClaim) },
+          ],
+        }),
+      })
+    ).pipe(
+      catchError(err => {
+        this.logger.showErrorMessage(this.texts.UPDATE_CLAIM_CONDITION);
+        return throwError(() => err);
+      })
+    );
+  }
+
+  updateItem(account: Account, id: bigint, item: UpdateItem) {
+    console.log(item);
+    if (item.newImage) {
+      return this.uploadImage(this.contracts.CLIENT, item.newImage).pipe(
+        switchMap(image =>
+          this.getUpdateItemTransaction(account, id, item, image)
+        )
+      );
+    }
+    return this.getUpdateItemTransaction(account, id, item);
+  }
+
+  getItemById(id: number) {
+    return from(
+      getNFT({
+        contract: this.contracts.ITEMS,
+        tokenId: BigInt(id),
+      })
+    ).pipe(
+      catchError(err => {
+        this.logger.showErrorMessage(this.texts.GET_ITEM_ERROR);
+        return throwError(() => err);
+      })
+    );
+  }
   getAllItems(page: number) {
     return from(
       getNFTs({
@@ -265,6 +333,38 @@ export class ThirdwebService {
       })
     );
   }
+  private getUpdateItemTransaction(
+    account: Account,
+    id: bigint,
+    item: UpdateItem,
+    newImage?: string
+  ) {
+    const properties = this.mapItemProperties(item);
+    return from(
+      sendAndConfirmTransaction({
+        account,
+        transaction: updateMetadata({
+          contract: this.contracts.ITEMS,
+          targetTokenId: id,
+          newMetadata: newImage
+            ? {
+                name: item.name,
+                description: item.description,
+                image: newImage,
+                properties,
+              }
+            : { name: item.name, description: item.description, properties },
+        }),
+      })
+    ).pipe(
+      tap(() => this.logger.showSuccessMessage(this.texts.UPDATE_ITEM_SUCCESS)),
+      catchError(err => {
+        console.log(err);
+        this.logger.showErrorMessage(this.texts.UPDATE_ITEM_ERROR);
+        return throwError(() => err);
+      })
+    );
+  }
   private setClaimConditions(
     account: Account,
     tokenId: bigint,
@@ -312,6 +412,19 @@ export class ThirdwebService {
     );
   }
   private getNewItemTransaction(item: NewItem, image: string) {
+    return lazyMint({
+      contract: this.contracts.ITEMS,
+      nfts: [
+        {
+          name: item.name,
+          description: item.description,
+          image,
+          properties: this.mapItemProperties(item),
+        },
+      ],
+    });
+  }
+  private mapItemProperties(item: Partial<NewItem>) {
     const properties: Array<Record<string, unknown>> = [
       { trait_type: 'classType', value: item.classType },
       { trait_type: 'type', value: item.type },
@@ -322,17 +435,7 @@ export class ThirdwebService {
     if (item.armor) properties.push({ trait_type: 'armor', value: item.armor });
     if (item.armor && item.bodySlot)
       properties.push({ trait_type: 'bodySlot', value: item.bodySlot });
-    return lazyMint({
-      contract: this.contracts.ITEMS,
-      nfts: [
-        {
-          name: item.name,
-          description: item.description,
-          image,
-          properties,
-        },
-      ],
-    });
+    return properties;
   }
   private getErrorMessage(err: RPCError) {
     switch (err.code) {

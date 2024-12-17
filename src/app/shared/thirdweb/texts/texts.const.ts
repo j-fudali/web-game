@@ -13,4 +13,11 @@ export class Texts {
     'Błąd ustawiania warunków dla pozyskania NFT';
   public static UPLOAD_IMAGE_ERROR = 'Błąd wgrywania zdjęcia';
   public static GET_ITEMS_ERROR = 'Błąd pobierania przedmiotów';
+  public static GET_ITEM_ERROR = 'Błąd pobierania przedmiotu';
+  public static UPDATE_ITEM_ERROR = 'Błąd aktualizacji przedmiotu';
+  public static UPDATE_ITEM_SUCCESS = 'Błąd aktualizacji przedmiotu';
+  public static GET_CLAIM_CONDITION_MAX_CLAIMABLE_SUPPLY =
+    'Błąd pobierania warunku pozyskania NFT';
+  public static UPDATE_CLAIM_CONDITION =
+    'Błąd aktualizacji warunku pozyskania NFT';
 }

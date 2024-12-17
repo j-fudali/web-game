@@ -5,8 +5,8 @@ import { Item } from '../../../../shared/interfaces/item';
 import { BodySlot } from '../../../../shared/enums/body-slot.enum';
 
 export class ItemsFormGroupGenerator {
-  public static getItemFormGroup(initialData?: Item): FormGroup {
-    const group = new FormGroup({
+  public static getItemFormGroup(): FormGroup {
+    return new FormGroup({
       name: new FormControl('', {
         nonNullable: true,
         validators: [Validators.required],
@@ -32,15 +32,6 @@ export class ItemsFormGroupGenerator {
         validators: [Validators.required, Validators.min(1)],
       }),
     });
-    if (initialData) {
-      if (initialData.damage) {
-        this.attachDamageToFormGroup(group);
-      } else {
-        this.attachArmorToFormGroup(group);
-      }
-      group.patchValue(initialData);
-    }
-    return group;
   }
   public static attachArmorToFormGroup(group: FormGroup) {
     group.removeControl('damage');
