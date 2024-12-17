@@ -10,7 +10,7 @@ import {
 } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { OwnedItem } from '../interfaces/owned-item';
-import { ThirdwebService } from './thirdweb.service';
+import { ThirdwebService } from '../thirdweb/thirdweb.service';
 import { ItemMapper } from '../utils/item-mapper';
 import { NFT } from 'thirdweb';
 import { WalletService } from './wallet.service';

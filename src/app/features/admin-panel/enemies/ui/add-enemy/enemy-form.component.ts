@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, input, model, output } from '@angular/core';
+import { Component, input, model, output, viewChild } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import {
   FileSelectEvent,
-  FileUploadEvent,
+  FileUpload,
   FileUploadModule,
 } from 'primeng/fileupload';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -13,6 +13,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { SubSectionTitleComponent } from '../../../ui/sub-section-title/sub-section-title.component';
 import { ImageModule } from 'primeng/image';
+import { MAX_FILE_SIZE } from '../../../../../shared/constants/config.const';
+import { Texts } from '../../../texts/texts.const';
 @Component({
   selector: 'jfudali-enemy-form',
   standalone: true,
@@ -32,16 +34,15 @@ import { ImageModule } from 'primeng/image';
   styleUrl: './enemy-form.component.scss',
 })
 export class EnemyFormComponent {
+  enemyImagePicker = viewChild.required<FileUpload>('enemyImagePicker');
+  weaponImagePicker = viewChild.required<FileUpload>('weaponImagePicker');
   imageSrc = model<string>();
   weaponImageSrc = model<string>();
   form = input.required<FormGroup>();
   onImageSelect = output<File>();
   onWeaponImageSelect = output<File>();
-  maxFileSize = 50 * 1024 * 1024;
-  chooseLabel: string | undefined = 'Wybierz';
-  cancelLabel: string | undefined = 'Anuluj';
-  fileSizeErrorSummary: string = 'Błąd';
-  fileSizeErrorDetail: string = 'Maks. rozmiar pliku wynosi 50MB';
+  maxFileSize = MAX_FILE_SIZE;
+  texts = Texts;
   private initImage: string | undefined;
   private initWeaponImage: string | undefined;
   setImage(event: FileSelectEvent) {
@@ -61,5 +62,9 @@ export class EnemyFormComponent {
   }
   clearWeaponImage() {
     this.weaponImageSrc.set(this.initWeaponImage);
+  }
+  clear() {
+    this.enemyImagePicker().clear();
+    this.weaponImagePicker().clear();
   }
 }

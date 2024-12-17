@@ -1,0 +1,102 @@
+<form [formGroup]="form()" class="formgrid grid">
+  <div
+    class="col-12 field flex flex-column md:flex-row gap-2 align-items-center">
+    @if (imageSrc()) {
+    <p-image width="250" [src]="imageSrc()" [preview]="true" />
+    }
+    <p-fileUpload
+      #imagePicker
+      accept="image/*"
+      [showUploadButton]="false"
+      [chooseLabel]="texts.CHOOSE_LABEL"
+      [cancelLabel]="texts.CANCEL_LABEL"
+      [invalidFileSizeMessageSummary]="texts.FILE_SIZE_ERROR_SUMMARY"
+      [invalidFileSizeMessageDetail]="texts.FILE_SIZE_ERROR_DETAILS"
+      (onSelect)="selectImage($event)"
+      (onClear)="clearImage()"
+      (onRemove)="clearImage()" />
+  </div>
+  <div class="col-12 md:col-6 grid formgrid grid-nogutter">
+    <div class="col-12 field">
+      <label for="name">Nazwa</label>
+      <input
+        class="w-full"
+        type="text"
+        name="name"
+        id="name"
+        pInputText
+        formControlName="name" />
+    </div>
+    <div class="col-12 field">
+      <label for="amountToClaim">Ilość w grze</label>
+      <p-inputNumber
+        class="w-full"
+        styleClass="w-full"
+        formControlName="amountToClaim" />
+    </div>
+    <div class="col-12 field">
+      <label for="description">Opis</label>
+      <textarea
+        class="w-full"
+        id="description"
+        pInputTextarea
+        rows="10"
+        autoResize="true"
+        formControlName="description"></textarea>
+    </div>
+  </div>
+  <div class="col-12 md:col-6 flex flex-column gap-2">
+    <div class="w-12 flex flex-column md:flex-row gap-2">
+      <div class="field w-12 md:w-6">
+        <label for="classType">Typ klasy</label>
+        <p-dropdown
+          class="w-full"
+          styleClass="w-full"
+          [options]="consts.CLASS_TYPES"
+          optionLabel="name"
+          optionValue="value"
+          formControlName="classType" />
+      </div>
+      <div class="field w-12 md:w-6">
+        <label for="type">Rodzaj</label>
+        <p-dropdown
+          class="w-full"
+          styleClass="w-full"
+          [options]="consts.ITEM_TYPES"
+          optionLabel="name"
+          optionValue="value"
+          formControlName="type" />
+      </div>
+    </div>
+    @if(isArmor()){
+    <div class="field w-12">
+      <label for="bodySlot">Część ciała</label>
+      <p-dropdown
+        class="w-full"
+        styleClass="w-full"
+        [options]="consts.BODY_SLOTS"
+        optionLabel="name"
+        optionValue="value"
+        formControlName="bodySlot" />
+    </div>
+    }
+    <div class="field w-12">
+      <label for="value">{{ isArmor() ? 'Pancerz' : 'Obrażenia' }}</label>
+      @if(isArmor()){
+
+      <p-inputNumber
+        id="value"
+        class="w-full"
+        styleClass="w-full"
+        formControlName="armor" />
+      }@else {
+      <p-inputNumber
+        id="value"
+        class="w-full"
+        styleClass="w-full"
+        formControlName="damage" />
+
+      }
+    </div>
+  </div>
+</form>

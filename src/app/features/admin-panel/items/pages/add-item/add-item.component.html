@@ -1,0 +1,17 @@
+<div class="flex gap-2 align-items-center">
+  <button
+    pButton
+    [disabled]="form.invalid || !image"
+    [loading]="status() === 'loading'"
+    severity="success"
+    label="Dodaj"
+    (click)="submit()"></button>
+  <jfudali-section-title class="flex-1" title="Dodaj przedmiot" />
+</div>
+<jfudali-item-form
+  #itemForm
+  [form]="form"
+  [isArmor]="isArmor()"
+  [(image)]="image"
+  [(imageSrc)]="imageSrc">
+</jfudali-item-form>

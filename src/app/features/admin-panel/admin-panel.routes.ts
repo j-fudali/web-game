@@ -6,6 +6,7 @@ import { EncounterDetailsComponent } from './encounters/pages/encounter-details/
 import { AddEnemyComponent } from './enemies/pages/add-enemy/add-enemy.component';
 import { EnemyDetailsComponent } from './enemies/pages/enemy-details/enemy-details.component';
 import { EnemiesListComponent } from './enemies/pages/enemies-list/enemies-list.component';
+import { AddItemComponent } from './items/pages/add-item/add-item.component';
 
 export default [
   {
@@ -43,6 +44,15 @@ export default [
           {
             path: '',
             component: EnemiesListComponent,
+          },
+        ],
+      },
+      {
+        path: 'items',
+        children: [
+          {
+            path: 'add',
+            component: AddItemComponent,
           },
         ],
       },

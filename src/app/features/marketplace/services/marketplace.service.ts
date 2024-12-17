@@ -1,5 +1,5 @@
 import { Injectable, Signal, inject } from '@angular/core';
-import { ThirdwebService } from '../../../shared/services/thirdweb.service';
+import { ThirdwebService } from '../../../shared/thirdweb/thirdweb.service';
 import {
   Subject,
   catchError,

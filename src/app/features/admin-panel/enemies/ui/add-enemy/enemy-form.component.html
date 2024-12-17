@@ -10,14 +10,16 @@
       </div>
       }
       <p-fileUpload
+        #enemyImagePicker
         [disabled]="form().disabled"
         [showUploadButton]="false"
-        [chooseLabel]="chooseLabel"
-        [cancelLabel]="cancelLabel"
-        [invalidFileSizeMessageSummary]="fileSizeErrorSummary"
-        [invalidFileSizeMessageDetail]="fileSizeErrorDetail"
+        [chooseLabel]="texts.CHOOSE_LABEL"
+        [cancelLabel]="texts.CANCEL_LABEL"
+        [invalidFileSizeMessageSummary]="texts.FILE_SIZE_ERROR_SUMMARY"
+        [invalidFileSizeMessageDetail]="texts.FILE_SIZE_ERROR_DETAILS"
         (onSelect)="setImage($event)"
         (onClear)="clearImage()"
+        (onRemove)="clearImage()"
         accept="image/*"
         [maxFileSize]="maxFileSize" />
     </div>
@@ -87,14 +89,16 @@
       </div>
       }
       <p-fileUpload
+        #weaponImagePicker
         [disabled]="form().disabled"
-        [chooseLabel]="chooseLabel"
+        [chooseLabel]="texts.CHOOSE_LABEL"
         [showUploadButton]="false"
-        [cancelLabel]="cancelLabel"
-        [invalidFileSizeMessageSummary]="fileSizeErrorSummary"
-        [invalidFileSizeMessageDetail]="fileSizeErrorDetail"
+        [cancelLabel]="texts.CANCEL_LABEL"
+        [invalidFileSizeMessageSummary]="texts.FILE_SIZE_ERROR_SUMMARY"
+        [invalidFileSizeMessageDetail]="texts.FILE_SIZE_ERROR_DETAILS"
         (onSelect)="setWeaponImage($event)"
         (onClear)="clearWeaponImage()"
+        (onRemove)="clearWeaponImage()"
         accept="image/*"
         [maxFileSize]="maxFileSize" />
     </div>

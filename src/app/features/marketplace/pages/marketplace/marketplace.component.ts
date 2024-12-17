@@ -9,7 +9,7 @@ import { ItemInShopComponent } from '../../components/item-in-shop/item-in-shop.
 import { TabViewModule } from 'primeng/tabview';
 import { MarketplaceService } from '../../services/marketplace.service';
 import { SkeletonModule } from 'primeng/skeleton';
-import { ThirdwebService } from '../../../../shared/services/thirdweb.service';
+import { ThirdwebService } from '../../../../shared/thirdweb/thirdweb.service';
 import { AlreadyInSellPipe } from '../../pipes/already-in-sell.pipe';
 import { SellData } from '../../interfaces/sell-data';
 import { RouterModule } from '@angular/router';

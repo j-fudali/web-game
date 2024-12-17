@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, effect, inject, viewChild } from '@angular/core';
 import { SectionTitleComponent } from '../../../ui/section-title/section-title.component';
 import { EnemyFormGroupGenerator } from '../../utils/enemy-form-group.generator';
 import { EnemyFormComponent } from '../../ui/add-enemy/enemy-form.component';
@@ -16,10 +16,19 @@ import { NewEnemyDto } from '../../../../../shared/api/enemies/model/new-enemy.d
 })
 export class AddEnemyComponent {
   private addEnemyService = inject(AddEnemyService);
+  enemyForm = viewChild.required<EnemyFormComponent>('enemyForm');
   status = this.addEnemyService.state.status;
   form = EnemyFormGroupGenerator.getFormGroup();
   image: File;
   weaponImage: File;
+  constructor() {
+    effect(() => {
+      if (this.status() === 'success') {
+        this.form.reset();
+        this.enemyForm().clear();
+      }
+    });
+  }
   selectImage(image: File) {
     this.image = image;
   }
@@ -33,7 +42,6 @@ export class AddEnemyComponent {
         image: this.image,
         weaponImage: this.weaponImage,
       });
-      this.form.reset();
     }
   }
 }

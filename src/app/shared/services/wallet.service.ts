@@ -16,7 +16,7 @@ import {
   retry,
 } from 'rxjs';
 import { WalletData } from '../interfaces/wallet-data';
-import { ThirdwebService } from './thirdweb.service';
+import { ThirdwebService } from '../thirdweb/thirdweb.service';
 import { Account } from 'thirdweb/wallets';
 import { RPCError } from '../interfaces/rpc-error';
 import { LoggerService } from './logger.service';

@@ -1,5 +1,11 @@
+import { resolveScheme } from 'thirdweb/storage';
+import { Contracts } from '../thirdweb/const/contracts.const';
+
 export class IpfsConverter {
   public static convertIpfs(image: string) {
-    return `http://ipfs.io/ipfs/${image.substring(7)}`;
+    return resolveScheme({
+      client: Contracts.CLIENT,
+      uri: image,
+    });
   }
 }

@@ -33,7 +33,7 @@ import {
   restoreEnergy,
   restoreHealth,
 } from '../utils/functions';
-import { ThirdwebService } from './thirdweb.service';
+import { ThirdwebService } from '../thirdweb/thirdweb.service';
 import { RestData } from '../interfaces/rest-data';
 import { AuthService } from './auth.service';
 import { PlayerCharacterApiService } from '../api/player-character/player-character-api.service';

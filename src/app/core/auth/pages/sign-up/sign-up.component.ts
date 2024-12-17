@@ -11,7 +11,7 @@ import { CardModule } from 'primeng/card';
 import { MessageModule } from 'primeng/message';
 import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
-import { PASSWORD_PATTERN } from '../../../../shared/constants/config.constants';
+import { PASSWORD_PATTERN } from '../../../../shared/constants/config.const';
 import { SignUpCredentials } from '../../../../shared/interfaces/sign-up-credentials';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { passwordMatch } from '../../../../shared/validators/passwordMatch.validator';

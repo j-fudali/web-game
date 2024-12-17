@@ -1,3 +1,6 @@
 export enum ClassType {
-    Warrior = 'warrior' , Wizzard = 'wizard' , Rouge = 'rouge'
+  Warrior = 'warrior',
+  Wizard = 'wizard',
+  Rouge = 'rouge',
+  Any = 'any',
 }

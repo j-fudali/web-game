@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MenuItem } from 'primeng/api';
-import { MenuModule } from 'primeng/menu';
 import { MenubarModule } from 'primeng/menubar';
 @Component({
   selector: 'jfudali-admin-panel',
@@ -44,11 +43,10 @@ export class AdminPanelComponent {
     },
     {
       label: 'Przedmioty',
-      routerLink: '/admin/encounters',
       items: [
         {
           label: 'Dodaj',
-          routerLink: '/admin/encounters/add',
+          routerLink: '/admin/items/add',
         },
       ],
     },

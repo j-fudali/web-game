@@ -1,5 +1,3 @@
-import { StatisticValues } from './statistic-values';
-
 export interface CharacterClass {
   id: string;
   name: string;

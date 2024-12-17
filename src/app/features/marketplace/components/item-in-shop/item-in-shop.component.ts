@@ -8,7 +8,6 @@ import {
   viewChild,
 } from '@angular/core';
 import { ItemTranslatePipe } from '../../../../shared/pipes/item-translate.pipe';
-import { ClassType } from '../../../../shared/enums/class-type.enum';
 import { ItemType } from '../../../../shared/enums/item-type.enum';
 import { ButtonModule } from 'primeng/button';
 import { MarketplaceItem } from '../../interfaces/marketplace-item';
@@ -93,7 +92,6 @@ export class ItemInShopComponent {
   actionLabel = input.required<string>();
   onAction = output<MarketplaceItem | SellData>();
   itemType = ItemType;
-  classType = ClassType;
   showSellOverlay = false;
   sellPrice = 0.0;
   performAction(e: Event) {

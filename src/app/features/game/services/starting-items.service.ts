@@ -2,7 +2,7 @@ import { Injectable, Signal, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Subject, filter, map, merge, shareReplay } from 'rxjs';
 import { Item } from '../../../shared/interfaces/item';
-import { ThirdwebService } from '../../../shared/services/thirdweb.service';
+import { ThirdwebService } from '../../../shared/thirdweb/thirdweb.service';
 import { ItemMapper } from '../../../shared/utils/item-mapper';
 import { NFT } from 'thirdweb';
 

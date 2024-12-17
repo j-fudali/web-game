@@ -13,7 +13,7 @@ import { AvatarModule } from 'primeng/avatar';
 import { OverlayPanel, OverlayPanelModule } from 'primeng/overlaypanel';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
-import { metamaskIcon } from '../../../shared/constants/config.constants';
+import { METAMASK_ICON } from '../../../shared/constants/config.const';
 import { WalletDataState } from '../../../shared/services/wallet.service';
 @Component({
   selector: 'jfudali-connect-button',
@@ -32,7 +32,7 @@ import { WalletDataState } from '../../../shared/services/wallet.service';
 })
 export class ConnectButtonComponent {
   @ViewChild('op') overlayPanel: OverlayPanel | undefined;
-  metamaskIcon = metamaskIcon;
+  metamaskIcon = METAMASK_ICON;
   onMetamaskConnect = output<void>();
   onDisconnectWallet = output<void>();
   walletData = input.required<WalletDataState>();
