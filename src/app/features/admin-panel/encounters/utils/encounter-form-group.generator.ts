@@ -2,6 +2,7 @@ import { FormGroup, FormControl, Validators, FormArray } from '@angular/forms';
 import { healthOrGoldAmountNotNull } from '../pages/add-encounter/validators/healthOrGoldAmountNotNull';
 import { Decision } from '../../../../shared/interfaces/decision';
 import { EnemyDto } from '../../../../shared/api/enemies/model/enemy.dto';
+import { uniqueDecision } from './unique-decision.validator';
 
 export class EncounterFormGroupGenerator {
   public static getEncounterFormGroup(): FormGroup {
@@ -22,13 +23,6 @@ export class EncounterFormGroupGenerator {
           Validators.max(20),
         ],
       }),
-      decisions: new FormArray(
-        [
-          EncounterFormGroupGenerator.getDecisionFormGroup(),
-          EncounterFormGroupGenerator.getDecisionFormGroup(),
-        ],
-        [Validators.required, Validators.minLength(2)]
-      ),
     });
   }
   public static toggleEnemyFormControl(
@@ -36,30 +30,30 @@ export class EncounterFormGroupGenerator {
     isEnemyToSet: boolean
   ) {
     if (isEnemyToSet) {
-      group.removeControl('decisions');
-      group.addControl(
-        'enemy',
-        new FormControl<EnemyDto | undefined>(undefined, [Validators.required])
-      );
+      if (group.contains('decision')) group.removeControl('decisions');
+      group.addControl('enemyId', new FormControl(null, [Validators.required]));
     } else {
-      group.removeControl('enemy');
+      if (group.contains('enemyId')) group.removeControl('enemy');
       group.addControl(
         'decisions',
-        new FormControl([
-          this.getDecisionFormGroup(),
-          this.getDecisionFormGroup(),
-        ])
+        new FormArray(
+          [this.getDecisionFormGroup(), this.getDecisionFormGroup()],
+          { validators: [Validators.required, Validators.minLength(2)] }
+        )
       );
     }
   }
   public static getDecisionFormGroup(decision?: Decision): FormGroup {
-    const group = new FormGroup({
-      text: new FormControl('', {
-        nonNullable: true,
-        validators: [Validators.required],
-      }),
-      effect: this.getEffectFormGroup(),
-    });
+    const group = new FormGroup(
+      {
+        text: new FormControl('', {
+          nonNullable: true,
+          validators: [Validators.required],
+        }),
+        effect: this.getEffectFormGroup(),
+      },
+      [uniqueDecision()]
+    );
     if (decision) group.patchValue(decision);
     return group;
   }

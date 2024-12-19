@@ -1,10 +1,14 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
+  effect,
+  inject,
   input,
   output,
+  Signal,
 } from '@angular/core';
-import { DecisionsFormArrayComponent } from '../decisions-form/decisions-form-array.component';
+import { DecisionsFormArrayComponent } from '../../ui/decisions-form/decisions-form-array.component';
 import { CommonModule } from '@angular/common';
 import {
   FormArray,
@@ -18,9 +22,10 @@ import { DividerModule } from 'primeng/divider';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { InputTextModule } from 'primeng/inputtext';
 import { SubSectionTitleComponent } from '../../../../../shared/components/sub-section-title/sub-section-title.component';
-import { EnemyDto } from '../../../../../shared/api/enemies/model/enemy.dto';
 import { AvatarModule } from 'primeng/avatar';
 import { ScrollerOptions } from 'primeng/api';
+import { EncounterFormService } from './services/encounter-form.service';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 @Component({
   selector: 'jfudali-encounter-form',
@@ -36,18 +41,26 @@ import { ScrollerOptions } from 'primeng/api';
     InputTextModule,
     SubSectionTitleComponent,
     AvatarModule,
+    ProgressSpinnerModule,
   ],
+  providers: [EncounterFormService],
   templateUrl: './encounter-form.component.html',
   styleUrl: './encounter-form.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EncounterFormComponent {
+  private encounterFormService = inject(EncounterFormService);
+  last = this.encounterFormService.last;
+  page = this.encounterFormService.page;
+  enemies = this.encounterFormService.enemies;
+  status = this.encounterFormService.status;
   form = input.required<FormGroup>();
-  addEnemy = input<boolean>(false);
-  enemies = input<EnemyDto[]>();
-  loading = input<boolean>();
-  onScroll = output<void>();
-  options = input<ScrollerOptions>();
+  addEnemy = input.required<boolean | undefined>();
+  options: Signal<ScrollerOptions> = computed(() => ({
+    showLoader: true,
+    loading: this.status() === 'enemies-loading',
+    lazy: true,
+    onLazyLoad: this.loadEnemies.bind(this),
+  }));
   get title(): FormControl {
     return this.form().get('title') as FormControl;
   }
@@ -60,7 +73,11 @@ export class EncounterFormComponent {
   get decisions(): FormArray {
     return this.form().get('decisions') as FormArray<FormGroup>;
   }
-  get enemy(): FormControl {
-    return this.form().get('enemy') as FormControl;
+
+  loadEnemies() {
+    const last = this.last();
+    const page = this.page();
+    if (page && last === false)
+      this.encounterFormService.getEnemies$.next(page + 1);
   }
 }

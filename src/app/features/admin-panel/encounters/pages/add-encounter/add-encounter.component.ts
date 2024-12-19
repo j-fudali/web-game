@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, Signal } from '@angular/core';
+import { Component, computed, inject, OnInit, Signal } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DropdownModule } from 'primeng/dropdown';
 import { SectionTitleComponent } from '../../../../../shared/components/section-title/section-title.component';
@@ -9,7 +9,7 @@ import { ButtonModule } from 'primeng/button';
 import { AddEncounterService } from './services/add-encounter.service';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
-import { EncounterFormComponent } from '../../ui/encounter-form/encounter-form.component';
+import { EncounterFormComponent } from '../../features/encounter-form/encounter-form.component';
 import { EncounterFormGroupGenerator } from '../../utils/encounter-form-group.generator';
 import { ToggleButtonModule } from 'primeng/togglebutton';
 import { ScrollerOptions } from 'primeng/api';
@@ -36,20 +36,17 @@ import { EnemyDto } from '../../../../../shared/api/enemies/model/enemy.dto';
   templateUrl: './add-encounter.component.html',
   styleUrl: './add-encounter.component.scss',
 })
-export class AddEncounterComponent {
+export class AddEncounterComponent implements OnInit {
   private addEncouterService = inject(AddEncounterService);
   status = this.addEncouterService.status;
-  last = this.addEncouterService.last;
-  page = this.addEncouterService.page;
-  enemies = this.addEncouterService.enemies;
   form = EncounterFormGroupGenerator.getEncounterFormGroup();
   addEnemy = false;
-  options: Signal<ScrollerOptions> = computed(() => ({
-    showLoader: true,
-    loading: this.status() === 'enemies-loading',
-    lazy: true,
-    onLazyLoad: this.loadEnemies.bind(this),
-  }));
+  ngOnInit(): void {
+    EncounterFormGroupGenerator.toggleEnemyFormControl(
+      this.form,
+      this.addEnemy
+    );
+  }
   submit() {
     if (this.form.valid) {
       const enemyId = (
@@ -68,11 +65,5 @@ export class AddEncounterComponent {
       this.form,
       this.addEnemy
     );
-  }
-  loadEnemies() {
-    const last = this.last();
-    const page = this.page();
-    if (page && last === false)
-      this.addEncouterService.getEnemies$.next(page + 1);
   }
 }

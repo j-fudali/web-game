@@ -1,15 +1,28 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, inject, input, OnInit } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  OnInit,
+} from '@angular/core';
 import { EncounterDetailsService } from './services/encounter-details.service';
 import { SectionTitleComponent } from '../../../../../shared/components/section-title/section-title.component';
-import { EncounterFormComponent } from '../../ui/encounter-form/encounter-form.component';
+import { EncounterFormComponent } from '../../features/encounter-form/encounter-form.component';
 import { EncounterFormGroupGenerator } from '../../utils/encounter-form-group.generator';
 import { FormArray } from '@angular/forms';
-import { DecisionEncounter } from '../../../../../shared/interfaces/encounter';
+import {
+  DecisionEncounter,
+  Encounter,
+  EnemyEncounter,
+} from '../../../../../shared/interfaces/encounter';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmPopupModule } from 'primeng/confirmpopup';
 import { ConfirmationService } from 'primeng/api';
+import { EncounterDto } from '../../../../../shared/api/encounters/model/encounter.dto';
 
 @Component({
   selector: 'jfudali-encounter-details',
@@ -34,7 +47,10 @@ export class EncounterDetailsComponent implements OnInit {
   id = input.required<string>();
   encounter = this.encounterDetailsService.encounter;
   editMode = false;
-
+  isEnemyEncounter = computed(() => {
+    const encounter = this.encounter();
+    return encounter ? encounter.enemy !== null : undefined;
+  });
   isSet = false;
   get decisions() {
     return this.form.get('decisions') as FormArray;
@@ -42,10 +58,10 @@ export class EncounterDetailsComponent implements OnInit {
 
   constructor() {
     effect(() => {
-      const encounter = this.encounter() as DecisionEncounter;
+      const encounter = this.encounter();
       if (encounter) {
         if (!this.isSet) {
-          this.setInitialFormValues(encounter);
+          this.setInitialValues(encounter);
           this.isSet = true;
         }
       }
@@ -77,11 +93,12 @@ export class EncounterDetailsComponent implements OnInit {
   }
   cancel() {
     this.editMode = false;
-    const encounter = this.encounter() as DecisionEncounter;
-    if (encounter) this.setInitialFormValues(encounter);
+    const encounter = this.encounter();
+    if (encounter) this.setInitialValues(encounter);
     this.form.disable();
   }
   submit() {
+    console.log(this.form.value);
     this.encounterDetailsService.updateEncounter$.next({
       id: this.id(),
       data: this.form.value,
@@ -89,8 +106,18 @@ export class EncounterDetailsComponent implements OnInit {
     this.editMode = false;
     this.form.disable();
   }
-  private setInitialFormValues(encounter: DecisionEncounter) {
+
+  private setInitialValues(encounter: EncounterDto) {
     this.form.patchValue(encounter);
+    if (this.isEnemyEncounter()) {
+      this.setInitialFormValuesWithEnemy(encounter as EnemyEncounter);
+    } else {
+      this.setInitialFormValuesWithDecisions(encounter as DecisionEncounter);
+    }
+    this.form.disable();
+  }
+  private setInitialFormValuesWithDecisions(encounter: DecisionEncounter) {
+    EncounterFormGroupGenerator.toggleEnemyFormControl(this.form, false);
     const decisions = this.form.get('decisions') as FormArray;
     if (encounter.decisions && encounter.decisions.length > 0) {
       if (decisions.length > 0) decisions.clear();
@@ -100,5 +127,9 @@ export class EncounterDetailsComponent implements OnInit {
         );
       });
     }
+  }
+  private setInitialFormValuesWithEnemy(encounter: EnemyEncounter) {
+    EncounterFormGroupGenerator.toggleEnemyFormControl(this.form, true);
+    this.form.get('enemyId')?.setValue(encounter.enemy.id);
   }
 }

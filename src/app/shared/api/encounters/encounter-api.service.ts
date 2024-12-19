@@ -18,6 +18,7 @@ import { LoggerService } from '../../services/logger.service';
 import { NewEncounterDto } from './model/new-encounter.dto';
 import { GetEncountersResponse } from './model/get-encounters-response';
 import { UpdateEncounterDto } from './model/update-encounter.dto';
+import { EncounterDto } from './model/encounter.dto';
 
 @Injectable({
   providedIn: 'root',
@@ -92,7 +93,7 @@ export class EncounterApiService {
       );
   }
   getEncounter(id: string) {
-    return this.http.get<Encounter>(this.BASE_URL + '/' + id);
+    return this.http.get<EncounterDto>(this.BASE_URL + '/' + id);
   }
   createEncounters(newEncounter: NewEncounterDto) {
     return this.http.post(this.BASE_URL, newEncounter).pipe(

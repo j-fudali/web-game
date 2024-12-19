@@ -4,6 +4,6 @@ export interface UpdateEncounterDto {
   title?: string;
   description?: string;
   difficulity?: number;
-  decisions: NewDecisionDto[];
+  decisions?: NewDecisionDto[];
   enemyId?: string;
 }

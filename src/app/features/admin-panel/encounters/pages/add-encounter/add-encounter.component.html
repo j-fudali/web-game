@@ -16,10 +16,4 @@
     [(ngModel)]="addEnemy"
     (ngModelChange)="toggleEnemy()"></p-toggleButton>
 </div>
-<jfudali-encounter-form
-  [form]="form"
-  [addEnemy]="addEnemy"
-  [enemies]="enemies()"
-  (onScroll)="loadEnemies()"
-  [loading]="status() === 'loading'"
-  [options]="options()" />
+<jfudali-encounter-form [form]="form" [addEnemy]="addEnemy" />

@@ -44,17 +44,17 @@ import { SubSectionTitleComponent } from '../../../../../shared/components/sub-s
 })
 export class DecisionsFormArrayComponent {
   formArray =
-    input.required<
+    input<
       FormArray<FormGroup<{ text: FormControl<string>; effect: FormGroup }>>
     >();
 
   addDecisionFormGroup() {
-    this.formArray().insert(
+    this.formArray()?.insert(
       0,
       EncounterFormGroupGenerator.getDecisionFormGroup()
     );
   }
   removeDecision(index: number) {
-    this.formArray().removeAt(index);
+    this.formArray()?.removeAt(index);
   }
 }

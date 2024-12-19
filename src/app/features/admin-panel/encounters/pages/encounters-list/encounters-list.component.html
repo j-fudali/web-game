@@ -11,7 +11,7 @@
     <ng-template pTemplate="list" let-encounters>
       <div
         [style]="{ height: '70vh' }"
-        class="grid grid-nogutter align-items-start overflow-y-auto">
+        class="grid grid-nogutter align-content-start align-items-start overflow-y-auto">
         @for (encounter of encounters; track encounter) {
         <div
           class="col-12 p-2 cursor-pointer surface-border border-bottom-1 hover:surface-100 transition-colors transition-duration-100"
