@@ -2,26 +2,35 @@
 <p-progressBar mode="indeterminate" [style]="{ height: '6px' }" />
 
 }
-<div class="flex align-items-center gap-2">
-  <button
-    pButton
-    severity="danger"
-    label="Usuń"
-    [loading]="status() === 'delete-loading'"
-    (click)="deleteEnemy($event)"></button>
-  <p-confirmPopup />
-  <button
-    pButton
-    [loading]="status() === 'update-loading'"
-    (click)="executeAction()"
-    [disabled]="editMode ? form.invalid : false"
-    [severity]="editMode ? 'secondary' : 'success'"
-    [label]="editMode ? 'Zatwierdź' : 'Aktualizuj'"></button>
-  @if(editMode){
-  <button pButton severity="danger" label="Anuluj" (click)="cancel()"></button>
-  }
-  <jfudali-section-title class="flex-1" title="Aktualizuj przeciwnika" />
-</div>
+<jfudali-section-title class="flex-1" title="Aktualizuj przeciwnika">
+  <div start class="flex flex-wrap gap-2">
+    <button
+      size="small"
+      size="small"
+      pButton
+      severity="danger"
+      label="Usuń"
+      [loading]="status() === 'delete-loading'"
+      (click)="deleteEnemy($event)"></button>
+    <p-confirmPopup />
+    <button
+      size="small"
+      pButton
+      [loading]="status() === 'update-loading'"
+      (click)="executeAction()"
+      [disabled]="editMode ? form.invalid : false"
+      [severity]="editMode ? 'secondary' : 'success'"
+      [label]="editMode ? 'Zatwierdź' : 'Aktualizuj'"></button>
+    @if(editMode){
+    <button
+      size="small"
+      pButton
+      severity="danger"
+      label="Anuluj"
+      (click)="cancel()"></button>
+    }
+  </div>
+</jfudali-section-title>
 <jfudali-enemy-form
   [form]="form"
   [imageSrc]="initialImage"

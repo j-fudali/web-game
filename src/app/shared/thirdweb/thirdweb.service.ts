@@ -1,8 +1,11 @@
+import { AddPackContentsParams } from './../../../../node_modules/thirdweb/src/extensions/pack/__generated__/IPack/write/addPackContents';
 import { PAGE_SIZE } from './../constants/config.const';
 import { Injectable, inject } from '@angular/core';
 import {
   parseEventLogs,
+  prepareContractCall,
   sendAndConfirmTransaction,
+  sendTransaction,
   ThirdwebClient,
   toTokens,
 } from 'thirdweb';
@@ -16,7 +19,9 @@ import {
 import {
   buyFromListing,
   createListing,
+  getAllListings,
   getAllValidListings,
+  getListing,
 } from 'thirdweb/extensions/marketplace';
 import {
   claimTo,
@@ -29,6 +34,13 @@ import {
   tokensLazyMintedEvent,
   updateMetadata,
 } from 'thirdweb/extensions/erc1155';
+import {
+  createNewPack,
+  getPackContents,
+  openPack,
+  PACK_TOKEN_TYPE,
+} from 'thirdweb/extensions/pack';
+
 import { catchError, from, map, of, switchMap, tap, throwError } from 'rxjs';
 import { upload } from 'thirdweb/storage';
 import { RPCError } from '../interfaces/rpc-error';
@@ -41,7 +53,7 @@ import { Contracts } from './const/contracts.const';
 import { Texts } from './texts/texts.const';
 import { ClaimCondition } from 'thirdweb/dist/types/utils/extensions/drops/types';
 import { UpdateItem } from './model/update-item.model';
-import { ItemMapper } from '../utils/item-mapper';
+import { ThirdwebConstants } from './const/thirdweb.const';
 
 @Injectable({
   providedIn: 'root',
@@ -50,7 +62,127 @@ export class ThirdwebService {
   private logger = inject(LoggerService);
   private texts = Texts;
   private contracts = Contracts;
-
+  private const = ThirdwebConstants;
+  openPack(account: Account, id: bigint) {
+    return from(
+      sendAndConfirmTransaction({
+        account,
+        transaction: openPack({
+          contract: this.contracts.PACK_CONTRACT,
+          packId: id,
+          amountToOpen: BigInt(1),
+        }),
+      })
+    ).pipe(
+      switchMap(() =>
+        getPackContents({
+          contract: this.contracts.PACK_CONTRACT,
+          packId: id,
+        })
+      )
+    );
+  }
+  getOwnedPacks(account: Account) {
+    return from(
+      getOwnedNFTs({
+        contract: this.contracts.PACK_CONTRACT,
+        address: account.address,
+      })
+    ).pipe(
+      map(nfts => nfts.filter(nft => nft.id === this.const.LOOTBOX_TOKEN_ID)),
+      catchError(err => {
+        this.logger.showErrorMessage(this.texts.GET_OWNED_LOOTBOXES_ERROR);
+        return throwError(() => err);
+      })
+    );
+  }
+  buyPack(account: Account, value: bigint) {
+    return this.approveLootboxBuy(account, value).pipe(
+      switchMap(() =>
+        sendTransaction({
+          account,
+          transaction: buyFromListing({
+            contract: this.contracts.LOOTBOX_SHOP,
+            listingId: this.const.LOOTBOX_TOKEN_ID,
+            quantity: 1n,
+            recipient: account.address,
+          }),
+        })
+      ),
+      catchError(err => {
+        this.logger.showErrorMessage(this.texts.BUY_LOOTBOX_ERROR);
+        return throwError(() => err);
+      })
+    );
+  }
+  getPacks() {
+    return from(
+      getAllValidListings({
+        contract: this.contracts.LOOTBOX_SHOP,
+      })
+    ).pipe(
+      catchError(err => {
+        this.logger.showErrorMessage(this.texts.GET_LOOTBOXES_LISTINGS_ERROR);
+        return throwError(() => err);
+      })
+    );
+  }
+  addToPack(
+    account: Account,
+    id: bigint,
+    items: { id: bigint; amount: bigint }[]
+  ) {
+    const contents = items.map(i => ({
+      assetContract: this.contracts.ITEMS.address,
+      tokenType: PACK_TOKEN_TYPE.ERC1155,
+      tokenId: i.id,
+      totalAmount: i.amount,
+    }));
+    return from(
+      sendAndConfirmTransaction({
+        account,
+        transaction: prepareContractCall({
+          contract: this.contracts.PACK_CONTRACT,
+          method:
+            'function addPackContents(uint256 _packId, (address assetContract, uint8 tokenType, uint256 tokenId, uint256 totalAmount)[] _contents, uint256[] _numOfRewardUnits, address _recipient) payable returns (uint256 packTotalSupply, uint256 newSupplyAdded)',
+          params: [id, contents, [1n], account.address],
+        }),
+      })
+    ).pipe(
+      catchError(err => {
+        this.logger.showErrorMessage(this.texts.ADD_TO_PACK_ERROR);
+        return throwError(() => err);
+      })
+    );
+  }
+  // createNewPack({
+  //   contract: this.contracts.PACK_CONTRACT,
+  //   client: this.const.CLIENT,
+  //   recipient: account.address,
+  //   tokenOwner: account.address,
+  //   packMetadata: {
+  //     name: this.texts.LOOTBOX,
+  //     description: this.texts.LOOTBOX_DESCRIPTION,
+  //     image:
+  //       'https://d391b93f5f62d9c15f67142e43841acc.ipfscdn.io/ipfs/QmdqSVouUapGuU4nvDFdKmBa4aJJNVdLkiuaTdJkZCDZ7n/equipment.jpeg',
+  //   },
+  //   amountDistributedPerOpen: 1n,
+  //   openStartTimestamp: new Date(),
+  //   erc1155Rewards: [
+  //     {
+  //       contractAddress: this.contracts.ITEMS.address,
+  //       tokenId: 0n,
+  //       quantityPerReward: 1,
+  //       totalRewards: 1,
+  //     },
+  //     {
+  //       contractAddress: this.contracts.ITEMS.address,
+  //       tokenId: 1n,
+  //       quantityPerReward: 1,
+  //       totalRewards: 1,
+  //     },
+  //   ],
+  // }),
   getClaimConditionMaxClaimableSupply(id: number) {
     return from(
       getClaimConditions({
@@ -89,11 +221,9 @@ export class ThirdwebService {
       })
     );
   }
-
   updateItem(account: Account, id: bigint, item: UpdateItem) {
-    console.log(item);
     if (item.newImage) {
-      return this.uploadImage(this.contracts.CLIENT, item.newImage).pipe(
+      return this.uploadImage(this.const.CLIENT, item.newImage).pipe(
         switchMap(image =>
           this.getUpdateItemTransaction(account, id, item, image)
         )
@@ -130,7 +260,7 @@ export class ThirdwebService {
     );
   }
   createItem(account: Account, item: NewItem) {
-    return this.uploadImage(this.contracts.CLIENT, item.image).pipe(
+    return this.uploadImage(this.const.CLIENT, item.image).pipe(
       switchMap(image =>
         from(
           sendAndConfirmTransaction({
@@ -258,29 +388,11 @@ export class ThirdwebService {
       })
     ).pipe(map(result => result < item.balance.value));
   }
-  approve(account: Account, item: MarketplaceItem) {
-    return from(
-      decimals({
-        contract: this.contracts.GEARCOIN,
-      })
-    ).pipe(
-      switchMap(decimals =>
-        sendAndConfirmTransaction({
-          account,
-          transaction: approve({
-            contract: this.contracts.GEARCOIN,
-            spender: this.contracts.MARKETPLACE_CONTRACT.address as Hex,
-            amount: toTokens(item.balance.value, decimals),
-          }),
-        })
-      )
-    );
-  }
   getBalance({ address }: Account) {
     return from(
       getWalletBalance({
-        client: this.contracts.CLIENT,
-        chain: this.contracts.CHAIN,
+        client: this.const.CLIENT,
+        chain: this.const.CHAIN,
         address,
         tokenAddress: this.contracts.GEARCOIN.address,
       })
@@ -306,7 +418,7 @@ export class ThirdwebService {
   }
   connect() {
     return from(
-      this.contracts.METAMASK.connect({ client: this.contracts.CLIENT })
+      this.const.METAMASK.connect({ client: this.const.CLIENT })
     ).pipe(
       catchError((err: RPCError) => {
         this.logger.showErrorMessage(this.getErrorMessage(err));
@@ -315,7 +427,7 @@ export class ThirdwebService {
     );
   }
   disconnect() {
-    return from(this.contracts.METAMASK.disconnect()).pipe(
+    return from(this.const.METAMASK.disconnect()).pipe(
       catchError((err: RPCError) => {
         this.logger.showErrorMessage(this.getErrorMessage(err));
         return throwError(() => err);
@@ -324,13 +436,45 @@ export class ThirdwebService {
   }
   autoConnect() {
     return from(
-      this.contracts.METAMASK.autoConnect({ client: this.contracts.CLIENT })
+      this.const.METAMASK.autoConnect({ client: this.const.CLIENT })
     ).pipe(
       catchError((err: Error) => {
         if (err.message.includes('no accounts available')) return of(undefined);
         this.logger.showErrorMessage(this.getErrorMessage(err as RPCError));
         return throwError(() => err);
       })
+    );
+  }
+  private approve(account: Account, item: MarketplaceItem) {
+    return from(
+      decimals({
+        contract: this.contracts.GEARCOIN,
+      })
+    ).pipe(
+      switchMap(decimals =>
+        sendAndConfirmTransaction({
+          account,
+          transaction: approve({
+            contract: this.contracts.GEARCOIN,
+            spender: this.contracts.MARKETPLACE_CONTRACT.address as Hex,
+            amount: toTokens(item.balance.value, decimals),
+          }),
+        })
+      )
+    );
+  }
+  private approveLootboxBuy(account: Account, value: bigint) {
+    return from(decimals({ contract: this.contracts.GEARCOIN })).pipe(
+      switchMap(decimals =>
+        sendAndConfirmTransaction({
+          account,
+          transaction: approve({
+            contract: this.contracts.GEARCOIN,
+            spender: this.contracts.LOOTBOX_SHOP.address as Hex,
+            amount: toTokens(value, decimals),
+          }),
+        })
+      )
     );
   }
   private getUpdateItemTransaction(
@@ -359,7 +503,6 @@ export class ThirdwebService {
     ).pipe(
       tap(() => this.logger.showSuccessMessage(this.texts.UPDATE_ITEM_SUCCESS)),
       catchError(err => {
-        console.log(err);
         this.logger.showErrorMessage(this.texts.UPDATE_ITEM_ERROR);
         return throwError(() => err);
       })
@@ -379,7 +522,6 @@ export class ThirdwebService {
             name: 'Public phase',
           },
           startTime: new Date(),
-          maxClaimableSupply: maxSupply,
         },
       ],
     });

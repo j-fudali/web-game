@@ -1,7 +1,6 @@
 import { Injectable, Signal, inject } from '@angular/core';
 import { SignUpCredentials } from '../interfaces/sign-up-credentials';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { environment } from '../../../environments/environment.development';
+import { HttpErrorResponse } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
 import { LoginCredentials } from '../api/auth/model/login-credentials';
 import { TokenResponse } from '../api/auth/model/token-response';
@@ -75,7 +74,7 @@ export class AuthService {
     shareReplay(1)
   );
   onSignOut$ = this.signOut$.pipe(
-    tap(() => this._cookies.delete('token')),
+    tap(() => this._cookies.delete('token', '/')),
     tap(() => this.router.navigate(['/']))
   );
   private isLogged$ = merge(

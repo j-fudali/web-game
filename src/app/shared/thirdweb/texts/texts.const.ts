@@ -20,4 +20,12 @@ export class Texts {
     'Błąd pobierania warunku pozyskania NFT';
   public static UPDATE_CLAIM_CONDITION =
     'Błąd aktualizacji warunku pozyskania NFT';
+  public static LOOTBOX = 'Skrzynia';
+  public static LOOTBOX_DESCRIPTION = 'Skrzynia z losowym przedmiotem';
+  public static GET_LOOTBOXES_LISTINGS_ERROR =
+    'Błąd pobierania dostępnych skrzyń';
+  public static GET_OWNED_LOOTBOXES_ERROR =
+    'Błąd pobierania posiadanych skrzyń';
+  public static BUY_LOOTBOX_ERROR = 'Błąd kupowania skrzyni';
+  public static ADD_TO_PACK_ERROR = 'Błąd dodawania przedmiotów do puli';
 }

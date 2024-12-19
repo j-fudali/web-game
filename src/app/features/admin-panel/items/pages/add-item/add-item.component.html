@@ -1,13 +1,13 @@
-<div class="flex gap-2 align-items-center">
+<jfudali-section-title class="flex-1" title="Dodaj przedmiot">
   <button
+    start
     pButton
     [disabled]="form.invalid || !image"
     [loading]="status() === 'loading'"
     severity="success"
     label="Dodaj"
     (click)="submit()"></button>
-  <jfudali-section-title class="flex-1" title="Dodaj przedmiot" />
-</div>
+</jfudali-section-title>
 <jfudali-item-form
   #itemForm
   [disablePicker]="false"

@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { DropdownModule } from 'primeng/dropdown';
-import { SectionTitleComponent } from '../../../ui/section-title/section-title.component';
+import { SectionTitleComponent } from '../../../../../shared/components/section-title/section-title.component';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { DividerModule } from 'primeng/divider';
 import { ButtonModule } from 'primeng/button';

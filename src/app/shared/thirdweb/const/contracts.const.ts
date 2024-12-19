@@ -1,34 +1,31 @@
-import { createThirdwebClient, getContract } from 'thirdweb';
-import { polygonAmoy } from 'thirdweb/chains';
-import { createWallet } from 'thirdweb/wallets';
+import { getContract } from 'thirdweb';
 import { environment } from '../../../../environments/environment';
+import { ThirdwebConstants } from './thirdweb.const';
 
 export class Contracts {
-  public static CHAIN = polygonAmoy;
-
-  public static CLIENT = createThirdwebClient({
-    clientId: environment.clientId,
-    secretKey: environment.secretKey,
-  });
-  public static METAMASK = createWallet('io.metamask');
   public static GEARCOIN = getContract({
-    client: this.CLIENT,
-    chain: this.CHAIN,
+    client: ThirdwebConstants.CLIENT,
+    chain: ThirdwebConstants.CHAIN,
     address: environment.gearcoin,
   });
   public static ITEMS = getContract({
-    client: this.CLIENT,
-    chain: this.CHAIN,
+    client: ThirdwebConstants.CLIENT,
+    chain: ThirdwebConstants.CHAIN,
     address: environment.itemsAddress,
   });
   public static PACK_CONTRACT = getContract({
-    client: this.CLIENT,
-    chain: this.CHAIN,
+    client: ThirdwebConstants.CLIENT,
+    chain: ThirdwebConstants.CHAIN,
     address: environment.packContract,
   });
   public static MARKETPLACE_CONTRACT = getContract({
-    client: this.CLIENT,
-    chain: this.CHAIN,
+    client: ThirdwebConstants.CLIENT,
+    chain: ThirdwebConstants.CHAIN,
     address: environment.marketplace,
+  });
+  public static LOOTBOX_SHOP = getContract({
+    client: ThirdwebConstants.CLIENT,
+    chain: ThirdwebConstants.CHAIN,
+    address: environment.lootboxShop,
   });
 }

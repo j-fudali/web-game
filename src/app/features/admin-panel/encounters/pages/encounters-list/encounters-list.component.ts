@@ -4,7 +4,7 @@ import { DataViewModule, DataViewPageEvent } from 'primeng/dataview';
 import { EncountersListService } from './services/encounters-list.service';
 import { RouterLink } from '@angular/router';
 import { DividerModule } from 'primeng/divider';
-import { SectionTitleComponent } from '../../../ui/section-title/section-title.component';
+import { SectionTitleComponent } from '../../../../../shared/components/section-title/section-title.component';
 
 @Component({
   selector: 'jfudali-encounters-list',

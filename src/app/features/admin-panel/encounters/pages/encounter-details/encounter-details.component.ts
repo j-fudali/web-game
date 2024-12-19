@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, effect, inject, input, OnInit } from '@angular/core';
 import { EncounterDetailsService } from './services/encounter-details.service';
-import { SectionTitleComponent } from '../../../ui/section-title/section-title.component';
+import { SectionTitleComponent } from '../../../../../shared/components/section-title/section-title.component';
 import { EncounterFormComponent } from '../../ui/encounter-form/encounter-form.component';
 import { EncounterFormGroupGenerator } from '../../utils/encounter-form-group.generator';
 import { FormArray } from '@angular/forms';

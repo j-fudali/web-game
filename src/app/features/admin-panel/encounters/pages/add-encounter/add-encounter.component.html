@@ -1,11 +1,11 @@
-<div class="flex align-items-center gap-2">
+<jfudali-section-title class="flex-1" title="Dodaj wyzwanie">
   <button
+    start
     (click)="submit()"
     [loading]="status() === 'loading'"
     [disabled]="form.invalid"
     pButton
     severity="success"
     label="Dodaj"></button>
-  <jfudali-section-title class="flex-1" title="Dodaj wyzwanie" />
-</div>
+</jfudali-section-title>
 <jfudali-encounter-form [form]="form" />

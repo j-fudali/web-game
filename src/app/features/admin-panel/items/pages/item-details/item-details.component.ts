@@ -6,7 +6,7 @@ import {
   input,
   OnInit,
 } from '@angular/core';
-import { SectionTitleComponent } from '../../../ui/section-title/section-title.component';
+import { SectionTitleComponent } from '../../../../../shared/components/section-title/section-title.component';
 import { ItemFormComponent } from '../../ui/item-form/item-form.component';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ItemsFormGroupGenerator } from '../../utils/items-form-group.generator';

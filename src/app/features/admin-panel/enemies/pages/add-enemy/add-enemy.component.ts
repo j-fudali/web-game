@@ -1,7 +1,7 @@
 import { Component, effect, inject, viewChild } from '@angular/core';
-import { SectionTitleComponent } from '../../../ui/section-title/section-title.component';
+import { SectionTitleComponent } from '../../../../../shared/components/section-title/section-title.component';
 import { EnemyFormGroupGenerator } from '../../utils/enemy-form-group.generator';
-import { EnemyFormComponent } from '../../ui/add-enemy/enemy-form.component';
+import { EnemyFormComponent } from '../../ui/enemy-form/enemy-form.component';
 import { ButtonModule } from 'primeng/button';
 import { AddEnemyService } from './services/add-enemy.service';
 import { NewEnemyDto } from '../../../../../shared/api/enemies/model/new-enemy.dto';

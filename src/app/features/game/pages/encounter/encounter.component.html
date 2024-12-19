@@ -40,7 +40,7 @@
       (skip)="skip($event)"
       (dealDamageEnemy)="dealDamage($event, 'enemy')"
       (dealDamagePlayerCharacter)="dealDamage($event, 'player-character')"
-      (loadEncounter)="loadEncounter()"
+      (loadEncounter)="finishFight()"
       (simulateFight)="simulateFight()"
       [title]="randomEncounter()!.title"
       [description]="randomEncounter()!.description"

@@ -1,16 +1,23 @@
-<div class="flex align-items-center gap-2">
-  <button
-    pButton
-    [loading]="status() === 'update-loading'"
-    (click)="executeAction()"
-    [disabled]="editMode ? form.invalid : false"
-    [severity]="editMode ? 'secondary' : 'success'"
-    [label]="editMode ? 'Zatwierdź' : 'Aktualizuj'"></button>
-  @if(editMode){
-  <button pButton severity="danger" label="Anuluj" (click)="cancel()"></button>
-  }
-  <jfudali-section-title class="flex-1" title="Aktualizuj przedmiot" />
-</div>
+<jfudali-section-title class="flex-1" title="Aktualizuj przedmiot">
+  <div start class="flex flex-wrap gap-2">
+    <button
+      size="small"
+      pButton
+      [loading]="status() === 'update-loading'"
+      (click)="executeAction()"
+      [disabled]="editMode ? form.invalid : false"
+      [severity]="editMode ? 'secondary' : 'success'"
+      [label]="editMode ? 'Zatwierdź' : 'Aktualizuj'"></button>
+    @if(editMode){
+    <button
+      size="small"
+      pButton
+      severity="danger"
+      label="Anuluj"
+      (click)="cancel()"></button>
+    }
+  </div>
+</jfudali-section-title>
 <jfudali-item-form
   [form]="form"
   [disablePicker]="!editMode"

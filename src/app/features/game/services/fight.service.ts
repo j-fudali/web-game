@@ -1,17 +1,5 @@
 import { Injectable, Signal, inject } from '@angular/core';
-import { environment } from '../../../../environments/environment';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import {
-  Subject,
-  catchError,
-  filter,
-  map,
-  merge,
-  of,
-  shareReplay,
-  switchMap,
-  tap,
-} from 'rxjs';
+import { Subject, filter, map, merge, shareReplay, switchMap } from 'rxjs';
 import { Fight } from '../../../shared/interfaces/fight';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RandomEncounterService } from './random-encounter.service';

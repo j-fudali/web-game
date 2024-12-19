@@ -1,0 +1,31 @@
+<jfudali-section-title title="Sklep ze skrzyniami">
+  <button
+    end
+    size="small"
+    pButton
+    [routerLink]="['my-lootboxes']"
+    label="Moje skrzynie"></button>
+</jfudali-section-title>
+<div class="px-2 flex flex-column gap-1 align-items-center">
+  @if(status() === 'loading'){
+  <p-progressBar
+    class="w-full"
+    mode="indeterminate"
+    [style]="{ height: '6px' }" />
+
+  }@else { @if(status() === 'completed' && item() === undefined){
+  <span class="text-xl"
+    >Akutalnie brak skrzyń do otwarcia. Spróbuj ponownie później</span
+  >
+  }@else {
+  <jfudali-lootbox-card
+    [item]="item()"
+    [status]="status()"
+    [availablePacks]="availablePacks()"
+    [image]="image()"
+    [price]="price()"
+    (onButtonClick)="buyLootbox()"
+    [buttonLabel]="'Kup: ' + price()" />
+
+  } }
+</div>

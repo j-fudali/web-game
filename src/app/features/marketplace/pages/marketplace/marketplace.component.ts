@@ -17,6 +17,7 @@ import { MarketplaceItem } from '../../interfaces/marketplace-item';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { merge } from 'rxjs';
 import { WalletService } from '../../../../shared/services/wallet.service';
+import { SectionTitleComponent } from '../../../../shared/components/section-title/section-title.component';
 @Component({
   selector: 'jfudali-marketplace',
   standalone: true,
@@ -24,13 +25,12 @@ import { WalletService } from '../../../../shared/services/wallet.service';
     CommonModule,
     DataViewModule,
     DividerModule,
-    ItemComponent,
     ButtonModule,
     ItemInShopComponent,
     TabViewModule,
     SkeletonModule,
-    AlreadyInSellPipe,
     RouterModule,
+    SectionTitleComponent,
   ],
   templateUrl: './marketplace.component.html',
   styleUrl: './marketplace.component.scss',

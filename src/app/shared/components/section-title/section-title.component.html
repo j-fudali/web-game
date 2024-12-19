@@ -1,0 +1,7 @@
+<div class="px-2 flex gap-2 align-items-center">
+  <ng-content select="[start]"></ng-content>
+  <p-divider class="flex-1" [type]="'dotted'">
+    <span class="text-lg md:text-2xl font-light">{{ title() }}</span>
+  </p-divider>
+  <ng-content select="[end]"></ng-content>
+</div>

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
-import { SectionTitleComponent } from '../../../ui/section-title/section-title.component';
+import { SectionTitleComponent } from '../../../../../shared/components/section-title/section-title.component';
 import {
   DataViewLazyLoadEvent,
   DataViewModule,
@@ -16,6 +16,7 @@ import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { every } from 'rxjs';
 import { ButtonModule } from 'primeng/button';
 import { BodySlotTranslatePipe } from '../../../../../shared/pipes/body-slot-translate.pipe';
+import { ThirdwebService } from '../../../../../shared/thirdweb/thirdweb.service';
 
 @Component({
   selector: 'jfudali-items-list',

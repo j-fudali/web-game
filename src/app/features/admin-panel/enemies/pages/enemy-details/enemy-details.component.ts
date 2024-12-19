@@ -9,8 +9,8 @@ import {
   effect,
   OnInit,
 } from '@angular/core';
-import { SectionTitleComponent } from '../../../ui/section-title/section-title.component';
-import { EnemyFormComponent } from '../../ui/add-enemy/enemy-form.component';
+import { SectionTitleComponent } from '../../../../../shared/components/section-title/section-title.component';
+import { EnemyFormComponent } from '../../ui/enemy-form/enemy-form.component';
 import { ButtonModule } from 'primeng/button';
 import { EnemyDetailsService } from './services/enemy-details.service';
 import { ConfirmPopupModule } from 'primeng/confirmpopup';

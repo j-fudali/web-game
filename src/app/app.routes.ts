@@ -46,6 +46,11 @@ export const routes: Routes = [
     canActivate: [walletConnected],
   },
   {
+    path: 'lootboxes',
+    loadChildren: () => import('./features/lootboxes/lootboxes.routes'),
+    canActivate: [walletConnected],
+  },
+  {
     path: 'admin',
     loadChildren: () => import('./features/admin-panel/admin-panel.routes'),
     canActivate: [authGuard, walletConnected, isAdminGuard],

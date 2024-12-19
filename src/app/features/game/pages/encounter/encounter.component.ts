@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject } from '@angular/core';
 import { PlayerCharacterComponent } from '../../components/player-character/player-character.component';
 import { ItemsSlotsComponent } from '../../components/items-slots/items-slots.component';
 import { PlayerCharacterService } from '../../../../shared/services/player-character.service';
@@ -13,15 +13,14 @@ import { ButtonModule } from 'primeng/button';
 import { MessagesModule } from 'primeng/messages';
 import { RouterModule } from '@angular/router';
 import { Decision } from '../../../../shared/interfaces/decision';
-import { EnemyComponent } from '../../components/enemy/enemy.component';
 import { FightService } from '../../services/fight.service';
 import { FightComponent } from '../../components/fight/fight.component';
-import {
-  DecisionEncounter,
-  EnemyEncounter,
-} from '../../../../shared/interfaces/encounter';
-import { tap } from 'rxjs';
+import { DecisionEncounter } from '../../../../shared/interfaces/encounter';
 import { EquipmentService } from '../../../../shared/services/equipment.service';
+import { ThirdwebService } from '../../../../shared/thirdweb/thirdweb.service';
+import { WalletService } from '../../../../shared/services/wallet.service';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { pipe, switchMap } from 'rxjs';
 @Component({
   selector: 'jfudali-encounter',
   standalone: true,
@@ -33,7 +32,6 @@ import { EquipmentService } from '../../../../shared/services/equipment.service'
     MessagesModule,
     RouterModule,
     PlayerCharacterComponent,
-    ItemsSlotsComponent,
     EncounterDetailsComponent,
     EncounterDecisionsComponent,
     ProgressSpinnerModule,
@@ -89,7 +87,14 @@ export class EncounterComponent implements OnInit {
       armor: this.equippedArmorSum(),
     });
   }
-
+  selectDecision(decision: Decision) {
+    this.selectedDecision = decision;
+    this._randomEncounterService.selectDecision$.next({
+      encounterId: this.randomEncounter()!.id,
+      decision: decision.text,
+    });
+    this.selectedDecision = undefined;
+  }
   dealDamage(damage: number, target: 'player-character' | 'enemy') {
     if (target === 'enemy') {
       this._randomEncounterService.dealDamageToEnemy$.next(damage);
@@ -105,13 +110,10 @@ export class EncounterComponent implements OnInit {
       fightResult.enemyDamage
     );
   }
-
-  selectDecision(decision: Decision) {
-    this.selectedDecision = decision;
-    this._randomEncounterService.selectDecision$.next({
-      encounterId: this.randomEncounter()!.id,
-      decision: decision.text,
-    });
-    this.selectedDecision = undefined;
+  finishFight() {
+    const random = Math.floor(Math.random() * 100) + 1;
+    if (random < 100) {
+    }
+    this.loadEncounter();
   }
 }
