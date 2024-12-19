@@ -1,7 +1,6 @@
 <form [formGroup]="form()" class="relative flex flex-column md:flex-row gap-2">
   <div class="w-12 md:w-6">
-    <span class="text-xl inline-block w-full">Szczegóły</span>
-    <p-divider />
+    <jfudali-sub-section-title title="Szczegóły" />
     <div class="field">
       <label for="title"> Tytuł </label>
       <input pInputText type="text" class="w-full" formControlName="title" />
@@ -51,15 +50,53 @@
       >
       } }
     </div>
-    @if (addEnemy) {
-    <div class="field">
-      <label for="enemy">Przeciwnik</label>
-      <p-dropdown id="enemy" />
-    </div>
-    }
   </div>
+  @if (addEnemy()) {
+  <div class="flex flex-column w-12 md:w-6">
+    <jfudali-sub-section-title title="Przeciwnik" />
+    <div class="field">
+      <label for="enemy">Wybierz przeciwnika</label>
+      <p-dropdown
+        formControlName="enemy"
+        placeholder="Wybierz przeciwnika"
+        [showClear]="true"
+        [options]="enemies()"
+        emptyMessage="Brak przeciwników"
+        [loading]="loading()"
+        class="w-full"
+        styleClass="w-full"
+        [virtualScroll]="true"
+        [virtualScrollItemSize]="38"
+        [virtualScrollOptions]="options()"
+        id="enemy">
+        <ng-template pTemplate="selectedItem">
+          @if(enemy && enemy.value){
+          <div class="flex justify-content-between align-items-center">
+            <div class="flex gap-1 align-items-center">
+              <p-avatar [image]="enemy.value.image" />
+              <span>{{ enemy.value.name }}</span>
+            </div>
+            <span class="text-sm">Poziom: {{ enemy.value.level }}</span>
+          </div>
+
+          }
+        </ng-template>
+        <ng-template pTemplate="item" let-enemy>
+          <div class="flex justify-content-between align-items-center">
+            <div class="flex gap-1 align-items-center">
+              <p-avatar [image]="enemy.image" />
+              <span>{{ enemy.name }}</span>
+            </div>
+            <span class="text-sm">Poziom: {{ enemy.level }}</span>
+          </div>
+        </ng-template>
+      </p-dropdown>
+    </div>
+  </div>
+  }@else {
   <jfudali-decisions-form
     [formArray]="decisions"
     formArrayName="decisions"
     class="w-12 md:w-6" />
+  }
 </form>

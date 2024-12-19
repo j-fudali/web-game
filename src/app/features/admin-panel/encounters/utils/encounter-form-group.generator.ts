@@ -1,6 +1,7 @@
 import { FormGroup, FormControl, Validators, FormArray } from '@angular/forms';
 import { healthOrGoldAmountNotNull } from '../pages/add-encounter/validators/healthOrGoldAmountNotNull';
 import { Decision } from '../../../../shared/interfaces/decision';
+import { EnemyDto } from '../../../../shared/api/enemies/model/enemy.dto';
 
 export class EncounterFormGroupGenerator {
   public static getEncounterFormGroup(): FormGroup {
@@ -29,6 +30,27 @@ export class EncounterFormGroupGenerator {
         [Validators.required, Validators.minLength(2)]
       ),
     });
+  }
+  public static toggleEnemyFormControl(
+    group: FormGroup,
+    isEnemyToSet: boolean
+  ) {
+    if (isEnemyToSet) {
+      group.removeControl('decisions');
+      group.addControl(
+        'enemy',
+        new FormControl<EnemyDto | undefined>(undefined, [Validators.required])
+      );
+    } else {
+      group.removeControl('enemy');
+      group.addControl(
+        'decisions',
+        new FormControl([
+          this.getDecisionFormGroup(),
+          this.getDecisionFormGroup(),
+        ])
+      );
+    }
   }
   public static getDecisionFormGroup(decision?: Decision): FormGroup {
     const group = new FormGroup({

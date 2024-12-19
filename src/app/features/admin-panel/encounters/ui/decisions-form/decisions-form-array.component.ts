@@ -17,7 +17,8 @@ import { DividerModule } from 'primeng/divider';
 import { EffectFormGroupComponent } from '../effect-form-group/effect-form-group.component';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { EncounterFormGroupGenerator } from '../../../../utils/encounter-form-group.generator';
+import { EncounterFormGroupGenerator } from '../../utils/encounter-form-group.generator';
+import { SubSectionTitleComponent } from '../../../../../shared/components/sub-section-title/sub-section-title.component';
 
 @Component({
   selector: 'jfudali-decisions-form',
@@ -29,6 +30,7 @@ import { EncounterFormGroupGenerator } from '../../../../utils/encounter-form-gr
     ButtonModule,
     InputTextModule,
     EffectFormGroupComponent,
+    SubSectionTitleComponent,
   ],
   providers: [
     {

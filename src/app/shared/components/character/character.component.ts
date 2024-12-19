@@ -17,12 +17,10 @@ import { Enemy } from '../../interfaces/enemy';
   template: `
     <div
       class="flex gap-2 h-full"
-      [ngClass]="orientation() === 'vertical' ? 'flex-column' : 'flex-row'"
-    >
+      [ngClass]="orientation() === 'vertical' ? 'flex-column' : 'flex-row'">
       <div
         class="overflow-hidden border-round relative "
-        [ngClass]="orientation() === 'vertical' ? 'h-16rem' : 'w-4'"
-      >
+        [ngClass]="orientation() === 'vertical' ? 'h-24rem md:h-16rem' : 'w-4'">
         <img [ngSrc]="character().image" fill priority />
       </div>
       <p-card class="flex-1" [header]="character().name">
@@ -30,8 +28,7 @@ import { Enemy } from '../../interfaces/enemy';
         <ng-content></ng-content>
         <jfudali-statistics-panel
           [statistics]="character().statistics"
-          [showEnergy]="showEnergy()"
-        ></jfudali-statistics-panel>
+          [showEnergy]="showEnergy()"></jfudali-statistics-panel>
       </p-card>
     </div>
   `,

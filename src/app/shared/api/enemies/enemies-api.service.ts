@@ -28,7 +28,7 @@ export class EnemiesApiService {
   getEnemies(page: number) {
     return this.http
       .get<Page<EnemyDto>>(this.BASE_URL, {
-        params: new HttpParams().set('page', page + 1),
+        params: new HttpParams().set('page', page),
       })
       .pipe(
         catchError(err => {

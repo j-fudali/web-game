@@ -8,4 +8,18 @@
     severity="success"
     label="Dodaj"></button>
 </jfudali-section-title>
-<jfudali-encounter-form [form]="form" />
+<div end class="w-full flex justify-content-end align-items-center gap-1">
+  <span class="inline-block">Przeciwnik?</span>
+  <p-toggleButton
+    onLabel="Tak"
+    offLabel="Nie"
+    [(ngModel)]="addEnemy"
+    (ngModelChange)="toggleEnemy()"></p-toggleButton>
+</div>
+<jfudali-encounter-form
+  [form]="form"
+  [addEnemy]="addEnemy"
+  [enemies]="enemies()"
+  (onScroll)="loadEnemies()"
+  [loading]="status() === 'loading'"
+  [options]="options()" />

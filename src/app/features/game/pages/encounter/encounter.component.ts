@@ -83,7 +83,7 @@ export class EncounterComponent implements OnInit {
   }
   simulateFight() {
     this._fightService.fightStart$.next({
-      damage: this.equippedWeapon()?.damage || 0,
+      damage: this.equippedWeapon()?.damage || 1,
       armor: this.equippedArmorSum(),
     });
   }
