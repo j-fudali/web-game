@@ -13,19 +13,53 @@
         @for (item of items; track item) {
         <div
           [routerLink]="['/admin/items', item.tokenId]"
-          class="cursor-pointer col-12 p-2 flex gap-2 align-items-center border-bottom-1 surface-border">
-          <p-avatar [image]="item.image" shape="circle" size="xlarge" />
-          <div class="flex flex-column gap-1">
-            <span class="text-lg">{{ item.name }}</span>
-            <span class="text-xs font-italic"
-              >({{ item.type | jfudaliItemTranslate }} -
-              {{ item.bodySlot | jfudaliBodySlotTranslate }})</span
-            >
-            <span class="text-sm"
-              >{{ texts.ITEMS_LIST_ITEM_VALUE }}:
-              {{ item.damage || item.armor }}</span
-            >
+          class="cursor-pointer col-12 p-2 flex flex-wrap justify-content-between gap-2 align-items-center border-bottom-1 surface-border">
+          <div class="flex align-self-center gap-2">
+            <p-avatar [image]="item.image" shape="circle" size="xlarge" />
+            <div class="flex flex-column justify-content-center gap-1">
+              <span class="md:text-lg">{{ item.name }}</span>
+              <span class="text-xs font-italic"
+                >({{ item.type | jfudaliItemTranslate }} -
+                {{ item.bodySlot | jfudaliBodySlotTranslate }})</span
+              >
+              <span class="text-sm"
+                >{{ texts.ITEMS_LIST_ITEM_VALUE }}:
+                {{ item.damage || item.armor }}</span
+              >
+            </div>
           </div>
+          <button
+            class="w-full md:w-auto"
+            pButton
+            severity="success"
+            size="small"
+            [label]="texts.ITEMS_LIST_ADD_TO_PACK"
+            (click)="
+              $event.stopImmediatePropagation(); op.toggle($event)
+            "></button>
+          <p-overlayPanel #op>
+            <div class="flex flex-column gap-1">
+              <span class="inline-block w-full text-lg">{{
+                texts.ITEMS_LIST_ADD_TO_PACK_TITLE
+              }}</span>
+              <div class="field">
+                <label for="quantity">{{
+                  texts.ITEMS_LIST_ADD_TO_PACK_QUANTITY
+                }}</label>
+                <p-inputNumber
+                  [(ngModel)]="addToPackQuantity"
+                  class="w-full"
+                  styleClass="w-full" />
+              </div>
+              <button
+                pButton
+                severity="success"
+                size="small"
+                [loading]="status() === 'add-to-pack-loading'"
+                [label]="texts.ITEMS_LIST_ADD_TO_PACK_SUBMIT"
+                (click)="addToPack(item.tokenId)"></button>
+            </div>
+          </p-overlayPanel>
         </div>
         }
       </div>

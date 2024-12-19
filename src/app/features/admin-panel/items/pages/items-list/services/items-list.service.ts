@@ -3,6 +3,7 @@ import { ThirdwebService } from '../../../../../../shared/thirdweb/thirdweb.serv
 import {
   catchError,
   combineLatest,
+  EMPTY,
   filter,
   map,
   merge,
@@ -24,7 +25,44 @@ export class ItemsListService {
   private walletService = inject(WalletService);
   private account$ = toObservable(this.walletService.state.account);
   getItems$ = new Subject<number>();
+  addToPack$ = new Subject<{ tokenId: bigint; quantity: bigint }>();
 
+  private onAddToPack$ = combineLatest([
+    this.addToPack$,
+    this.account$.pipe(filter(acc => !!acc)),
+  ]).pipe(
+    switchMap(([{ tokenId, quantity }, acc]) =>
+      this.thirdwebService.claimItem(acc, tokenId, quantity).pipe(
+        map(() => ({ acc, tokenId, quantity })),
+        catchError(err => {
+          console.log(err);
+          return EMPTY;
+        })
+      )
+    ),
+    switchMap(({ acc, tokenId, quantity }) =>
+      this.thirdwebService.addToPack(acc, tokenId, quantity).pipe(
+        map(() => ({ acc, quantity })),
+        catchError(err => {
+          console.log(err);
+          return EMPTY;
+        })
+      )
+    ),
+    switchMap(({ acc, quantity }) =>
+      this.thirdwebService.updateLootboxListing(acc, quantity).pipe(
+        catchError(err => {
+          console.log(err);
+          return EMPTY;
+        })
+      )
+    ),
+    catchError(() => of(undefined)),
+    shareReplay(1)
+    //claim itemu
+    //addPackContents - dodaje do paczki
+    //update listingu skrzyni
+  );
   private items$ = this.getItems$.pipe(
     startWith(0),
     switchMap(page =>
@@ -44,6 +82,11 @@ export class ItemsListService {
     this.items$.pipe(
       filter(res => !!res),
       map(() => 'completed' as const)
+    ),
+    this.addToPack$.pipe(map(() => 'add-to-pack-loading' as const)),
+    this.onAddToPack$.pipe(
+      filter(res => !!res),
+      map(() => 'add-to-pack-success' as const)
     )
   );
   items = toSignal(this.items$, { initialValue: [] });

@@ -60,6 +60,10 @@ export class AppComponent implements OnInit {
       visible: !this.isLoggedIn(),
     },
     {
+      label: 'Sklep ze skrzyniami',
+      routerLink: '/lootboxes',
+    },
+    {
       label: 'Otwórz rynek',
       routerLink: '/marketplace',
     },

@@ -1,4 +1,3 @@
-import { AddPackContentsParams } from './../../../../node_modules/thirdweb/src/extensions/pack/__generated__/IPack/write/addPackContents';
 import { PAGE_SIZE } from './../constants/config.const';
 import { Injectable, inject } from '@angular/core';
 import {
@@ -19,9 +18,8 @@ import {
 import {
   buyFromListing,
   createListing,
-  getAllListings,
   getAllValidListings,
-  getListing,
+  updateListing,
 } from 'thirdweb/extensions/marketplace';
 import {
   claimTo,
@@ -35,7 +33,6 @@ import {
   updateMetadata,
 } from 'thirdweb/extensions/erc1155';
 import {
-  createNewPack,
   getPackContents,
   openPack,
   PACK_TOKEN_TYPE,
@@ -89,7 +86,7 @@ export class ThirdwebService {
         address: account.address,
       })
     ).pipe(
-      map(nfts => nfts.filter(nft => nft.id === this.const.LOOTBOX_TOKEN_ID)),
+      map(nfts => nfts.filter(nft => nft.id === this.const.LOOTBOX_PACK_ID)),
       catchError(err => {
         this.logger.showErrorMessage(this.texts.GET_OWNED_LOOTBOXES_ERROR);
         return throwError(() => err);
@@ -103,7 +100,7 @@ export class ThirdwebService {
           account,
           transaction: buyFromListing({
             contract: this.contracts.LOOTBOX_SHOP,
-            listingId: this.const.LOOTBOX_TOKEN_ID,
+            listingId: this.const.LOOTBOX_PACK_ID,
             quantity: 1n,
             recipient: account.address,
           }),
@@ -127,17 +124,31 @@ export class ThirdwebService {
       })
     );
   }
-  addToPack(
-    account: Account,
-    id: bigint,
-    items: { id: bigint; amount: bigint }[]
-  ) {
-    const contents = items.map(i => ({
+  updateLootboxListing(account: Account, quantity: bigint) {
+    return from(
+      sendAndConfirmTransaction({
+        account,
+        transaction: updateListing({
+          contract: this.contracts.LOOTBOX_SHOP,
+          listingId: this.const.LOOTBOX_LISTING_ID,
+          quantity,
+          pricePerToken: '0',
+        }),
+      })
+    ).pipe(
+      catchError(err => {
+        this.logger.showErrorMessage(this.texts.UPDATE_LOOTBOX_LISTING_ERROR);
+        return throwError(() => err);
+      })
+    );
+  }
+  addToPack(account: Account, tokenId: bigint, totalAmount: bigint) {
+    const content = {
       assetContract: this.contracts.ITEMS.address,
       tokenType: PACK_TOKEN_TYPE.ERC1155,
-      tokenId: i.id,
-      totalAmount: i.amount,
-    }));
+      tokenId,
+      totalAmount,
+    };
     return from(
       sendAndConfirmTransaction({
         account,
@@ -145,12 +156,35 @@ export class ThirdwebService {
           contract: this.contracts.PACK_CONTRACT,
           method:
             'function addPackContents(uint256 _packId, (address assetContract, uint8 tokenType, uint256 tokenId, uint256 totalAmount)[] _contents, uint256[] _numOfRewardUnits, address _recipient) payable returns (uint256 packTotalSupply, uint256 newSupplyAdded)',
-          params: [id, contents, [1n], account.address],
+          params: [
+            this.const.LOOTBOX_PACK_ID,
+            [content],
+            [1n],
+            account.address,
+          ],
         }),
       })
     ).pipe(
       catchError(err => {
         this.logger.showErrorMessage(this.texts.ADD_TO_PACK_ERROR);
+        return throwError(() => err);
+      })
+    );
+  }
+  claimItem(account: Account, tokenId: bigint, quantity: bigint) {
+    return from(
+      sendAndConfirmTransaction({
+        transaction: claimTo({
+          contract: this.contracts.ITEMS,
+          to: account.address,
+          tokenId,
+          quantity,
+        }),
+        account,
+      })
+    ).pipe(
+      catchError(err => {
+        this.logger.showErrorMessage(this.texts.CLAIM_ITEM_ERROR);
         return throwError(() => err);
       })
     );
@@ -477,6 +511,7 @@ export class ThirdwebService {
       )
     );
   }
+
   private getUpdateItemTransaction(
     account: Account,
     id: bigint,

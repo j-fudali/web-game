@@ -6,4 +6,8 @@ export class Texts {
     'Maks. rozmiar pliku wynosi 50MB';
   public static ITEMS_LIST_ITEM_VALUE = 'Wartość';
   public static ITEMS_LIST_EMPTY_MESSAGE = 'Brak przedmiotów';
+  public static ITEMS_LIST_ADD_TO_PACK = 'Dodaj do skrzyń';
+  public static ITEMS_LIST_ADD_TO_PACK_TITLE = 'Podaj ilość';
+  public static ITEMS_LIST_ADD_TO_PACK_QUANTITY = 'Ilość';
+  public static ITEMS_LIST_ADD_TO_PACK_SUBMIT = 'Potwierdź';
 }

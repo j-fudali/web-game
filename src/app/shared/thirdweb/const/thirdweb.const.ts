@@ -10,6 +10,6 @@ export class ThirdwebConstants {
     secretKey: environment.secretKey,
   });
   public static METAMASK = createWallet('io.metamask');
-  public static LOOTBOX_TOKEN_ID = 2n;
+  public static LOOTBOX_PACK_ID = 2n;
   public static LOOTBOX_LISTING_ID = 2n;
 }
