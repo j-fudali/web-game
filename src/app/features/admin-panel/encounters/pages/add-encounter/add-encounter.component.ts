@@ -52,7 +52,6 @@ export class AddEncounterComponent implements OnInit {
       const enemyId = (
         (this.form.get('enemy') as FormControl).value as EnemyDto
       ).id;
-      console.log(enemyId);
       this.addEncouterService.createEncounter$.next({
         ...this.form.value,
         enemyId,

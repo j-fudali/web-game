@@ -98,7 +98,6 @@ export class EncounterDetailsComponent implements OnInit {
     this.form.disable();
   }
   submit() {
-    console.log(this.form.value);
     this.encounterDetailsService.updateEncounter$.next({
       id: this.id(),
       data: this.form.value,

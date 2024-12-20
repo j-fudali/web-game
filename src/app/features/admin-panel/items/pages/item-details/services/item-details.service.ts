@@ -28,39 +28,24 @@ export class ItemDetailsService {
   getItem$ = new Subject<number>();
   updateItem$ = new Subject<{
     id: bigint;
-    updateItem: UpdateItem & { amountToClaim: number };
+    updateItem: UpdateItem;
   }>();
   private onGetItem$ = this.getItem$.pipe(
     switchMap(id =>
-      combineLatest([
-        this.thirdwebService
-          .getItemById(id)
-          .pipe(map(nft => ItemMapper.convertNftToItem(nft))),
-        this.thirdwebService.getClaimConditionMaxClaimableSupply(id),
-      ]).pipe(catchError(() => of(undefined)))
+      this.thirdwebService.getItemById(id).pipe(
+        map(nft => ItemMapper.convertNftToItem(nft)),
+        catchError(() => of(undefined))
+      )
     ),
     shareReplay(1)
   );
-  private amountToClaim$ = this.onGetItem$.pipe(
-    map(data => (data ? data[1] : undefined))
-  );
+
   private OnUpdateItem$ = combineLatest([
     this.updateItem$,
     this.account$.pipe(filter(acc => !!acc)),
-    this.amountToClaim$.pipe(
-      filter(res => !!res),
-      map(conditions => conditions as ClaimCondition[])
-    ),
   ]).pipe(
-    switchMap(([{ id, updateItem }, account, amountToClaim]) =>
-      combineLatest([
-        this.thirdwebService.updateItem(account, id, updateItem),
-        this.thirdwebService.updateClaimCondition(
-          account,
-          amountToClaim[0],
-          updateItem.amountToClaim
-        ),
-      ]).pipe(
+    switchMap(([{ id, updateItem }, account]) =>
+      this.thirdwebService.updateItem(account, id, updateItem).pipe(
         catchError(err => {
           this.error$.next(err);
           return of(undefined);
@@ -82,17 +67,7 @@ export class ItemDetailsService {
     this.error$.pipe(map(() => 'error' as const))
   );
   item = toSignal(
-    this.onGetItem$.pipe(map(data => (data ? data[0] : undefined))),
-    {
-      initialValue: undefined,
-    }
-  );
-  amountToClaim = toSignal(
-    this.amountToClaim$.pipe(
-      map(conditions =>
-        conditions ? conditions[0].maxClaimableSupply : undefined
-      )
-    ),
+    this.onGetItem$.pipe(map(data => (data ? data : undefined))),
     {
       initialValue: undefined,
     }

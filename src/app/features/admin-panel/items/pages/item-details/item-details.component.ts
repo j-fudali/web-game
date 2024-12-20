@@ -28,7 +28,6 @@ export class ItemDetailsComponent implements OnInit {
   private itemDetailsService = inject(ItemDetailsService);
   id = input.required<number>();
   item = this.itemDetailsService.item;
-  amountToClaim = this.itemDetailsService.amountToClaim;
   status = this.itemDetailsService.status;
   form = ItemsFormGroupGenerator.getItemFormGroup();
   imageSrc: string | undefined;
@@ -49,8 +48,7 @@ export class ItemDetailsComponent implements OnInit {
       () => {
         if (!this.isSet) {
           const item = this.item();
-          const amountToClaim = this.amountToClaim();
-          if (item && amountToClaim) {
+          if (item) {
             this.form.patchValue(item);
             if (item.type === ItemType.Armor) {
               this.attachArmor();
@@ -58,7 +56,6 @@ export class ItemDetailsComponent implements OnInit {
               this.attachDamage();
             }
             this.form.disable();
-            this.form.get('amountToClaim')?.setValue(amountToClaim);
             this.imageSrc = item.image;
             this.isSet = true;
           }

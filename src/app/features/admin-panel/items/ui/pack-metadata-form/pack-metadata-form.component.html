@@ -1,0 +1,36 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-column">
+  <div class="field">
+    <p-fileUpload
+      #imagePicker
+      accept="image/*"
+      [showUploadButton]="false"
+      [chooseLabel]="texts.CHOOSE_LABEL"
+      [cancelLabel]="texts.CANCEL_LABEL"
+      [invalidFileSizeMessageSummary]="texts.FILE_SIZE_ERROR_SUMMARY"
+      [invalidFileSizeMessageDetail]="texts.FILE_SIZE_ERROR_DETAILS"
+      (onSelect)="selectImage($event)"
+      (onClear)="clear()"
+      (onRemove)="clear()" />
+  </div>
+  <div class="field">
+    <label for="name">{{ texts.NAME }}</label>
+    <input class="w-full" type="text" pInputText formControlName="name" />
+  </div>
+  <div class="field">
+    <label for="name">{{ texts.DESCRIPTION }}</label>
+    <textarea
+      class="w-full"
+      pInputTextarea
+      rows="10"
+      formControlName="description"></textarea>
+  </div>
+  <div class="field">
+    <label for="name">{{ texts.PRICE }}</label>
+    <p-inputNumber class="w-full" styleClass="w-full" formControlName="price" />
+  </div>
+  <button
+    pButton
+    severity="success"
+    [label]="texts.ITEMS_LIST_ADD_TO_PACK_SUBMIT"
+    type="submit"></button>
+</form>

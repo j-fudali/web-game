@@ -15,10 +15,6 @@ export class ItemsFormGroupGenerator {
         nonNullable: true,
         validators: [Validators.required],
       }),
-      amountToClaim: new FormControl(1, {
-        nonNullable: true,
-        validators: [Validators.required, Validators.min(1)],
-      }),
       classType: new FormControl(ClassType.Any, {
         nonNullable: true,
         validators: [Validators.required],
@@ -57,5 +53,12 @@ export class ItemsFormGroupGenerator {
       'damage',
       new FormControl(1, [Validators.required, Validators.min(1)])
     );
+  }
+  public static getPackMetadataFormGroup() {
+    return new FormGroup({
+      name: new FormControl('', Validators.required),
+      description: new FormControl('', Validators.required),
+      price: new FormControl(0, Validators.required),
+    });
   }
 }

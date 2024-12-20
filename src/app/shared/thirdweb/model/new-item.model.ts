@@ -8,7 +8,6 @@ export interface NewItem {
   image: File;
   classType: ClassType;
   type: ItemType;
-  amountToClaim: number;
   damage?: number;
   armor?: number;
   bodySlot?: BodySlot;

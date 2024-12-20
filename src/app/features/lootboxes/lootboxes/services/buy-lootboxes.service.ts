@@ -20,14 +20,14 @@ export class BuyLootboxesService {
   private thirdwebService = inject(ThirdwebService);
   private walletService = inject(WalletService);
   private account$ = toObservable(this.walletService.state.account);
-  buyLootbox$ = new Subject<{ price: bigint }>();
+  buyLootbox$ = new Subject<{ listingId: bigint; price: bigint }>();
 
   private onBuyLootbox$ = combineLatest([
     this.buyLootbox$,
     this.account$.pipe(filter(acc => !!acc)),
   ]).pipe(
-    switchMap(([{ price }, acc]) =>
-      this.thirdwebService.buyPack(acc, price).pipe(
+    switchMap(([{ listingId, price }, acc]) =>
+      this.thirdwebService.buyPack(acc, listingId, price).pipe(
         catchError(err => {
           console.log(err);
           return of(undefined);

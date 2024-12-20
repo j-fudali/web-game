@@ -58,6 +58,8 @@ export class BuyLootboxesComponent {
     const lootbox = this.lootbox();
     if (lootbox)
       this._buyLootboxesService.buyLootbox$.next({
+        //TODO
+        listingId: 1n,
         price: lootbox.currencyValuePerToken.value,
       });
   }
