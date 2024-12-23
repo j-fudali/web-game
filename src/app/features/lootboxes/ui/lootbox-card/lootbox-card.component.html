@@ -1,29 +1,22 @@
-<p-card [header]="item()?.name">
-  <ng-template pTemplate="header">
-    <div class="relative">
-      <div class="absolute top-0 left-0 p-2 z-3">
-        <p-tag>Dostępne: {{ availablePacks() }}</p-tag>
-      </div>
-      <div class="img-container relative h-16rem w-full overflow-hidden">
-        <img class="absolute w-full h-full" [src]="image()" alt="" />
-      </div>
+<div
+  class="flex flex-column gap-1 border-1 border-surface border-round surface-100 p-2">
+  <div class="relative">
+    <div class="absolute top-0 left-0 p-2 z-3">
+      <p-tag>Dostępne: {{ availablePacks() }}</p-tag>
     </div>
-  </ng-template>
-  {{ item()?.description }}
-  <ng-template pTemplate="footer">
-    <div>
-      <button
-        class="w-full"
-        [disabled]="availablePacks() === '0'"
-        [loading]="status() === 'buy-loading'"
-        (click)="onButtonClick.emit()"
-        pButton
-        [label]="buttonLabel()"></button>
-      @if (status() === 'buy-completed') {
-      <span class="inline-block w-full text-green-400"
-        >Udało się kupić skrzynię</span
-      >
-      }
+    <div class="img-container relative h-12rem w-full overflow-hidden">
+      <img class="absolute w-full h-full" [src]="item()?.image" alt="" />
     </div>
-  </ng-template>
-</p-card>
+  </div>
+  <p>
+    {{ item()?.description }}
+  </p>
+  <div>
+    <button
+      class="w-full"
+      [disabled]="availablePacks() === '0' || isActive() === false"
+      (click)="onButtonClick.emit()"
+      pButton
+      [label]="buttonLabel()"></button>
+  </div>
+</div>

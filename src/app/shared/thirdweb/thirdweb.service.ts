@@ -4,7 +4,6 @@ import {
   encode,
   parseEventLogs,
   prepareContractCall,
-  PreparedTransaction,
   readContract,
   sendAndConfirmTransaction,
   sendTransaction,
@@ -19,7 +18,9 @@ import {
 import {
   buyFromListing,
   createListing,
+  getAllListings,
   getAllValidListings,
+  totalListings,
 } from 'thirdweb/extensions/marketplace';
 import {
   claimTo,
@@ -31,6 +32,7 @@ import {
   setClaimConditions,
   tokensLazyMintedEvent,
   updateMetadata,
+  nextTokenId,
 } from 'thirdweb/extensions/erc1155';
 import {
   createNewPack,
@@ -42,7 +44,6 @@ import {
 import {
   catchError,
   combineLatest,
-  forkJoin,
   from,
   map,
   Observable,
@@ -62,7 +63,7 @@ import { Contracts } from './const/contracts.const';
 import { Texts } from './texts/texts.const';
 import { UpdateItem } from './model/update-item.model';
 import { ThirdwebConstants } from './const/thirdweb.const';
-import { NFTMetadata } from 'thirdweb/dist/types/utils/nft/parseNft';
+import { NFT, NFTMetadata } from 'thirdweb/dist/types/utils/nft/parseNft';
 import { TransactionReceipt } from 'thirdweb/dist/types/transaction/types';
 
 @Injectable({
@@ -73,6 +74,7 @@ export class ThirdwebService {
   private texts = Texts;
   private contracts = Contracts;
   private const = ThirdwebConstants;
+
   getTotalAmountOfItems() {
     return from(
       readContract({
@@ -93,20 +95,23 @@ export class ThirdwebService {
         }),
       })
     ).pipe(
-      map(data => {
+      switchMap(data => {
         const event = parseEventLogs({
           logs: data.logs,
           events: [packOpenedEvent()],
         });
-        return event[0].args.rewardUnitsDistributed;
+        const reward = event[0].args.rewardUnitsDistributed[0];
+        return this.getItemById(reward.tokenId);
       })
     );
   }
-  getOwnedPacks(account: Account) {
+  getOwnedPacks(account: Account, page: number) {
     return from(
       getOwnedNFTs({
         contract: this.contracts.PACK_CONTRACT,
         address: account.address,
+        start: page * PAGE_SIZE,
+        count: PAGE_SIZE,
       })
     ).pipe(
       catchError(err => {
@@ -134,10 +139,19 @@ export class ThirdwebService {
       })
     );
   }
-  getPacks() {
+  getTotalPacksListings() {
     return from(
-      getAllValidListings({
+      totalListings({
         contract: this.contracts.LOOTBOX_SHOP,
+      })
+    );
+  }
+  getPacks(page: number) {
+    return from(
+      getAllListings({
+        contract: this.contracts.LOOTBOX_SHOP,
+        start: page * PAGE_SIZE,
+        count: BigInt(PAGE_SIZE),
       })
     ).pipe(
       catchError(err => {
@@ -188,18 +202,6 @@ export class ThirdwebService {
         return throwError(() => err);
       })
     );
-  }
-  private getClaimContract(
-    account: Account,
-    tokenId: bigint,
-    quantity: bigint
-  ) {
-    return claimTo({
-      contract: this.contracts.ITEMS,
-      to: account.address,
-      tokenId,
-      quantity,
-    });
   }
   addNewPack(
     account: Account,
@@ -271,11 +273,13 @@ export class ThirdwebService {
     }
     return this.getUpdateItemTransaction(account, id, item);
   }
-  getItemById(id: number) {
+  getItemById(id: bigint): Observable<NFT>;
+  getItemById(id: number): Observable<NFT>;
+  getItemById(id: number | bigint): Observable<NFT> {
     return from(
       getNFT({
         contract: this.contracts.ITEMS,
-        tokenId: BigInt(id),
+        tokenId: typeof id === 'bigint' ? id : BigInt(id),
       })
     ).pipe(
       catchError(err => {
@@ -483,6 +487,18 @@ export class ThirdwebService {
         return throwError(() => err);
       })
     );
+  }
+  private getClaimContract(
+    account: Account,
+    tokenId: bigint,
+    quantity: bigint
+  ) {
+    return claimTo({
+      contract: this.contracts.ITEMS,
+      to: account.address,
+      tokenId,
+      quantity,
+    });
   }
   private approve(account: Account, item: MarketplaceItem) {
     return from(

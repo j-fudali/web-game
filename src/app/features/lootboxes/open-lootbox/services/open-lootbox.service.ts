@@ -10,52 +10,73 @@ import {
   merge,
   of,
   shareReplay,
+  startWith,
   Subject,
   switchMap,
   tap,
 } from 'rxjs';
+import { DialogService } from 'primeng/dynamicdialog';
+import { RewardComponent } from '../ui/reward/reward.component';
+import { Texts } from '../../texts/texts.const';
 
 @Injectable()
 export class OpenLootboxService {
-  private _thridweService = inject(ThirdwebService);
+  private dialogService = inject(DialogService);
+  private _thirdwebService = inject(ThirdwebService);
   private walletService = inject(WalletService);
   private account$ = toObservable(this.walletService.state.account);
 
-  openLootbox$ = new Subject<void>();
+  openLootbox$ = new Subject<bigint>();
+  getOwnedLootboxes$ = new Subject<number>();
 
   private onOpenLootbox$ = combineLatest([
     this.openLootbox$,
     this.account$.pipe(filter(acc => !!acc)),
   ]).pipe(
-    switchMap(([_, acc]) =>
-      this._thridweService.openPack(acc, this.userLootboxes()!.id)
+    switchMap(([packId, acc]) =>
+      this._thirdwebService.openPack(acc, packId).pipe(
+        tap(nft =>
+          this.dialogService.open(RewardComponent, {
+            data: {
+              nft,
+            },
+            closable: true,
+            width: '30vw',
+            breakpoints: {
+              '1499px': '30vw',
+              '1199px': '50vw',
+              '799px': '80vw',
+            },
+            header: Texts.OPEN_LOOTBOX_REWARD,
+          })
+        ),
+        catchError(() => of(undefined))
+      )
     ),
     shareReplay(1)
   );
-  private userLootboxes$ = this.account$.pipe(
-    filter(acc => !!acc),
-    switchMap(acc =>
-      this._thridweService
-        .getOwnedPacks(acc)
+  private userLootboxes$ = combineLatest([
+    this.getOwnedLootboxes$.pipe(startWith(0)),
+    this.account$.pipe(filter(acc => !!acc)),
+  ]).pipe(
+    switchMap(([page, acc]) =>
+      this._thirdwebService
+        .getOwnedPacks(acc, page)
         .pipe(catchError(() => of(undefined)))
     ),
     shareReplay(1)
   );
-  userLootboxes = toSignal(
+  private status$ = merge(
     this.userLootboxes$.pipe(
-      map(lootboxes => (lootboxes ? lootboxes[0] : undefined))
+      filter(res => !!res),
+      map(() => 'completed')
     ),
-    { initialValue: undefined }
+    this.openLootbox$.pipe(map(() => 'open-pack-loading')),
+    this.onOpenLootbox$.pipe(map(() => 'open-pack-success'))
   );
-  status = toSignal(
-    merge(
-      this.userLootboxes$.pipe(
-        filter(res => !!res),
-        map(() => 'completed')
-      ),
-      this.openLootbox$.pipe(map(() => 'loadings')),
-      this.onOpenLootbox$.pipe(map(() => 'success'))
-    ),
-    { initialValue: 'loading' }
-  );
+  userLootboxes = toSignal(this.userLootboxes$, {
+    initialValue: undefined,
+  });
+  reward = toSignal(this.onOpenLootbox$, { initialValue: undefined });
+  status = toSignal(this.status$, { initialValue: 'loading' });
 }

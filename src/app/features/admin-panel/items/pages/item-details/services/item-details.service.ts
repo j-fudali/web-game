@@ -10,13 +10,10 @@ import {
   shareReplay,
   Subject,
   switchMap,
-  tap,
 } from 'rxjs';
 import { ItemMapper } from '../../../../../../shared/utils/item-mapper';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { Item } from '../../../../../../shared/interfaces/item';
 import { WalletService } from '../../../../../../shared/services/wallet.service';
-import { ClaimCondition } from 'thirdweb/dist/types/utils/extensions/drops/types';
 import { UpdateItem } from '../../../../../../shared/thirdweb/model/update-item.model';
 
 @Injectable()

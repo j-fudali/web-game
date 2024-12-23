@@ -17,14 +17,29 @@
   <span class="text-xl"
     >Akutalnie brak skrzyń do zakupu. Spróbuj ponownie później</span
   >
-  }@else {
-  <jfudali-lootbox-card
-    [item]="userLootboxes()?.metadata"
-    [status]="status()"
-    [availablePacks]="availablePacks()"
-    [image]="image()"
-    (onButtonClick)="openLootbox()"
-    buttonLabel="Otwórz" />
+  }@else { @if(status() === 'open-pack-loading'){
+  <p-progressBar
+    mode="indeterminate"
+    class="w-full"
+    [style]="{ height: '6px' }" />
+  }
+  <p-dataView [value]="userLootboxes()" layout="grid" class="w-full md:w-8">
+    <ng-template pTemplate="grid" let-lootboxes>
+      <div
+        class="grid grid-nogutter overflow-y-auto"
+        [style]="{ height: '70vh' }">
+        @for (lootbox of lootboxes; track lootbox) {
+        <div class="col-12 md:col-6 p-2">
+          <jfudali-lootbox-card
+            [item]="lootbox.metadata"
+            [availablePacks]="lootbox.quantityOwned"
+            (onButtonClick)="openLootbox(lootbox.id)"
+            buttonLabel="Otwórz" />
+        </div>
+        }
+      </div>
+    </ng-template>
+  </p-dataView>
 
   } }
 </div>
