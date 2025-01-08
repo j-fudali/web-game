@@ -5,6 +5,7 @@ import { SectionTitleComponent } from '../../../../../shared/components/section-
 import { DataViewModule, DataViewPageEvent } from 'primeng/dataview';
 import { RouterLink } from '@angular/router';
 import { AvatarModule } from 'primeng/avatar';
+import { TEXTS } from '../../texts/texts.const';
 
 @Component({
   selector: 'jfudali-enemies-list',
@@ -23,10 +24,9 @@ import { AvatarModule } from 'primeng/avatar';
 export class EnemiesListComponent {
   private enemiesListService = inject(EnemiesListService);
   enemies = this.enemiesListService.enemies;
-  status = this.enemiesListService.status;
   pageSize = this.enemiesListService.pageSize;
   totalElements = this.enemiesListService.totalElements;
-
+  texts = TEXTS;
   changePage(event: DataViewPageEvent) {
     this.enemiesListService.getEnemies$.next(event.first / event.rows);
   }

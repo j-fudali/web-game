@@ -1,0 +1,20 @@
+<div class="flex flex-column gap-1">
+  <p>{{ effect.text }}</p>
+  <div class="flex justify-content-center gap-1">
+    @if(effect.goldAmount){
+    <jfudali-statistic-effect type="gold" [value]="effect.goldAmount" />
+    } @if(effect.healthAmount){
+    <jfudali-statistic-effect type="health" [value]="effect.healthAmount" />
+    }
+  </div>
+  <button
+    pButton
+    [label]="texts.EFFECT_DISPLAY_NEXT_ENCOUNTER"
+    severity="info"
+    (click)="nextEncounter()"></button>
+  <button
+    pButton
+    [label]="texts.EFFECT_DISPLAY_BACK_TO_PANEL"
+    severity="secondary"
+    (click)="backToPanel()"></button>
+</div>

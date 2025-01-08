@@ -1,0 +1,24 @@
+<p-card header="Ekwipunek" pDroppable (onDrop)="drop()">
+  @if(avaliableItems().length > 0){
+  <p-carousel
+    [orientation]="orientation()"
+    [value]="avaliableItems()"
+    verticalViewPortHeight="16rem"
+    [numVisible]="orientation() === 'vertical' ? 1 : 2"
+    [numScroll]="1"
+    [circular]="false">
+    <ng-template let-item pTemplate="item">
+      <jfudali-item
+        class="h-16rem lg:h-full m-2"
+        [item]="item"
+        pDraggable
+        (contextmenu)="onContextMenu($event, item)"
+        (onDragStart)="onDragStart(item)"
+        (onDragEnd)="onDragEnd()" />
+    </ng-template>
+  </p-carousel>
+  } @else{
+  <h3 class="text-center">{{ texts.EQUIPMENT_NO_ITEMS }}</h3>
+  }
+</p-card>
+<p-contextMenu #cm [model]="actions" (onHide)="onHide()" />

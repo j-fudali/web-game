@@ -1,6 +1,5 @@
 import { Route } from '@angular/router';
-import { MarketplaceComponent } from './pages/marketplace/marketplace.component';
-import { BuyLootboxesComponent } from '../lootboxes/lootboxes/buy-lootboxes.component';
+import { MarketplaceComponent } from './marketplace.component';
 
 export default [
   {

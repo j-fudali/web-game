@@ -1,0 +1,28 @@
+<div class="h-full flex flex-column md:flex-row md:align-items-stretch gap-4">
+  @if (fight(); as fight ){
+  <jfudali-rounds
+    class="h-screen md:h-auto md:flex-1"
+    (onSkip)="skip.emit($event)"
+    (dealDamagePlayerCharacter)="dealDamagePlayerCharacter.emit($event)"
+    (onLoadEncounter)="loadEncounter.emit()"
+    [fight]="fight"
+    [(enemy)]="enemy"
+    [playerCharacterWeapon]="playerCharacterEquippedWeapon()"
+    [playerCharacterName]="playerCharacterName()"
+    (onFightEnd)="fightEnd()" />
+  }@else {
+  <div
+    class="py-8 md:py-0 md:flex-1 flex flex-column justify-content-between gap-2 md:gap-0">
+    <jfudali-encounter-details [title]="title()" [description]="description()">
+      <h4>{{ texts.FIGHT_ENEMY_DESCRIPTION }}</h4>
+      <p>{{ enemy().description }}</p>
+    </jfudali-encounter-details>
+    <button pButton label="Walcz" (click)="simulateFight.emit()"></button>
+  </div>
+
+  }
+  <jfudali-enemy
+    class="md:align-self-center w-full md:w-4"
+    [enemy]="enemy()"
+    orientation="vertical" />
+</div>

@@ -1,0 +1,65 @@
+<div class="h-full w-full flex justify-content-center align-items-center">
+  <p-card class="w-full md:w-6" header="Stwórz konto">
+    <form [formGroup]="signUpForm" (ngSubmit)="onSubmit()">
+      <div class="field">
+        <label for="email">E-mail</label>
+        <input
+          pInputText
+          id="email"
+          type="email"
+          class="w-full"
+          formControlName="email" />
+        @if(email.invalid && (email.dirty && email.touched)){
+        @if(email.hasError('required')){
+        <small class="p-error" severity="error">Pole jest wymagane</small>
+        }@else {
+
+        <small class="p-error" severity="error">E-mail jest niepoprawny</small>
+        } }
+      </div>
+      <div class="field">
+        <label for="password">Hasło</label>
+        <input
+          pInputText
+          id="password"
+          type="password"
+          class="w-full"
+          formControlName="password" />
+        @if(password.invalid && (password.dirty && password.touched)){
+        @if(password.hasError('required')){
+        <small class="p-error" severity="error">Pole jest wymagane</small>
+        }@else {
+
+        <small class="p-error flex align-items-center gap-1" severity="error"
+          >Hasło nie spełnia wymagań
+          <span
+            tooltipPosition="right"
+            pTooltip="Hasło musi posiadać między 8 a 20 znaków w tym: 1 dużą i 1 małą literę, 1 cyfrę i 1 znak specjalny"
+            class="pi pi-info-circle"></span
+        ></small>
+        } }
+      </div>
+      <div class="field">
+        <label for="rePassword">Powtórz hasło</label>
+        <input
+          pInputText
+          id="rePassword"
+          type="password"
+          class="w-full"
+          formControlName="rePassword" />
+        @if((signUpForm.invalid || rePassword.invalid) && (rePassword.dirty ||
+        rePassword.touched)){ @if(signUpForm.hasError('notSame')){
+        <small class="p-error block" severity="error"
+          >Hasła muszą być takie same</small
+        >
+        } @if(rePassword.hasError('required')) {
+        <small class="p-error block" severity="error">Pole jest wymagane</small>
+        } }
+      </div>
+      <p-button
+        type="submit"
+        label="Utwórz konto"
+        severity="success"></p-button>
+    </form>
+  </p-card>
+</div>

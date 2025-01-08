@@ -1,24 +1,20 @@
-import { CommonModule } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnInit,
-  inject,
-} from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { ItemsService } from '../../shared/services/items.service';
+import { Component, inject, OnInit } from '@angular/core';
+import { ActivatedRoute, RouterOutlet } from '@angular/router';
+import { PlayerCharacterService } from './services/player-character.service';
 
 @Component({
   selector: 'jfudali-game',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [RouterOutlet],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GameComponent implements OnInit {
-  private _itemsService = inject(ItemsService);
+  private route = inject(ActivatedRoute);
+  private _playerCharacterService = inject(PlayerCharacterService);
   ngOnInit(): void {
-    this._itemsService.getOwnedItems$.next();
+    this._playerCharacterService.init(
+      this.route.snapshot.data['playerCharacter']
+    );
   }
 }

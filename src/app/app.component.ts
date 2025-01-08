@@ -1,12 +1,14 @@
 import {
   Component,
+  DestroyRef,
   HostListener,
   OnInit,
+  Signal,
   computed,
   inject,
 } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { PrimeNGConfig } from 'primeng/api';
+import { MenuItem, PrimeNGConfig } from 'primeng/api';
 import { AuthService } from './shared/services/auth.service';
 import { FooterComponent } from './core/layout/footer/footer.component';
 import { HeaderComponent } from './core/layout/header/header.component';
@@ -14,8 +16,12 @@ import { ToastModule } from 'primeng/toast';
 import { SidebarModule } from 'primeng/sidebar';
 import { MenuModule } from 'primeng/menu';
 import { ButtonModule } from 'primeng/button';
-import { PlayerCharacterService } from './shared/services/player-character.service';
-import { WalletService } from './shared/services/wallet.service';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { ThirdwebService } from './shared/thirdweb/thirdweb.service';
+import { EMPTY, switchMap, tap } from 'rxjs';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { LoaderService } from './shared/features/loader/loader.service';
+import { PlayerCharacterService } from './features/game/services/player-character.service';
 @Component({
   selector: 'jfudali-root',
   standalone: true,
@@ -27,28 +33,31 @@ import { WalletService } from './shared/services/wallet.service';
     SidebarModule,
     ButtonModule,
     MenuModule,
+    ProgressSpinnerModule,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {
   @HostListener('window:resize', ['$event'])
-  onResize(event: Event) {
+  onResize() {
     if (window.innerWidth > 992) {
       this.sidebarVisible = false;
     }
   }
-  private _playerCharacterService = inject(PlayerCharacterService);
+  private destroyRef = inject(DestroyRef);
+  private loaderService = inject(LoaderService);
+  private _thirdwebService = inject(ThirdwebService);
   private _authService = inject(AuthService);
   private primengConfig = inject(PrimeNGConfig);
-  private _walletService = inject(WalletService);
-  isLoggedIn = this._authService.state.isLogged;
-  error = this._authService.state.error;
-  status = this._authService.state.status;
-  walletDataState = this._walletService.state;
-  connect$ = this._walletService.connect$;
+  showLoader = toSignal(this.loaderService.getVisible$(), {
+    initialValue: false,
+  });
   sidebarVisible = false;
-  navigationsList = computed(() => [
+  isLoggedIn = toSignal(this._authService.getIsLoggedIn$(), {
+    initialValue: this._authService.getIsLoggedIn(),
+  });
+  navigationsList: Signal<MenuItem[]> = computed(() => [
     {
       label: 'Zaloguj się',
       routerLink: '/login',
@@ -78,14 +87,28 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.primengConfig.ripple = true;
+    this._thirdwebService
+      .getIsDisconnected$()
+      .pipe(
+        switchMap(val => (!val ? this._thirdwebService.autoConnect() : EMPTY)),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe();
+  }
+  connect(): void {
+    this._thirdwebService.connect().pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe;
   }
   signOut() {
-    if (this._playerCharacterService.state.status() === 'resting')
-      this._playerCharacterService.stopRest$.next();
-    this._authService.signOut$.next();
+    this._authService.signOut();
   }
   disconnectWallet() {
-    this._walletService.disconnect$.next();
-    this.signOut();
+    this._thirdwebService
+      .disconnect()
+      .pipe(
+        tap(() => this.signOut()),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe();
   }
 }

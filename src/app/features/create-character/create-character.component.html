@@ -1,0 +1,58 @@
+<div class="py-8 md:py-5 px-3 md:px-0 flex flex-column align-items-center">
+  <p-card>
+    <ng-template pTemplate="header">
+      <div
+        (click)="imageUpload.click()"
+        class="avatar flex justify-content-center align-items-center h-20rem surface-100 hover:surface-200 transition-duration-200 transition-ease-out">
+        @if(previewImage){
+        <img [src]="previewImage" class="w-full h-full" />
+        } @else {
+        <h4 class="m-2">Dodaj awatar</h4>
+        }
+      </div>
+      <input
+        (change)="upload($event)"
+        #imageUpload
+        type="file"
+        class="hidden"
+        accept="image/*" />
+    </ng-template>
+    <form [formGroup]="characterCreationForm">
+      <div class="field">
+        <label for="name">Nazwa postaci</label>
+        <input
+          class="w-full"
+          placeholder="Podaj nazwę..."
+          type="text"
+          id="name"
+          name="name"
+          pInputText
+          formControlName="name" />
+      </div>
+      <div class="field">
+        <p-dropdown
+          placeholder="Wybierz klasę"
+          [options]="characterClasses()"
+          optionLabel="name"
+          formControlName="characterClass"></p-dropdown>
+      </div>
+      <jfudali-statistics-panel
+        [statistics]="statistics()"
+        [showEnergy]="true" />
+    </form>
+    @if(startingWeapon(); as startingWeapon){
+    <jfudali-item class="mt-2 h-15rem" [item]="startingWeapon"></jfudali-item>
+    }
+    <ng-template pTemplate="footer">
+      <div class="flex justify-content-center">
+        <button
+          pButton
+          [disabled]="characterCreationForm.invalid || !image"
+          (click)="submit()"
+          severity="success"
+          label="Stwórz"
+          type="button"></button>
+      </div>
+    </ng-template>
+  </p-card>
+</div>

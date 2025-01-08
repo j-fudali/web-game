@@ -1,3 +1,4 @@
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Component, inject } from '@angular/core';
 import { OpenLootboxService } from './services/open-lootbox.service';
 import { CommonModule } from '@angular/common';
@@ -7,6 +8,7 @@ import { RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { DataViewModule } from 'primeng/dataview';
+import { TEXTS } from '../texts/texts.const';
 
 @Component({
   selector: 'jfudali-open-lootbox',
@@ -26,9 +28,11 @@ import { DataViewModule } from 'primeng/dataview';
 })
 export class OpenLootboxComponent {
   private _openLootboxService = inject(OpenLootboxService);
-  userLootboxes = this._openLootboxService.userLootboxes;
-  status = this._openLootboxService.status;
-  reward = this._openLootboxService.reward;
+  readonly texts = TEXTS;
+  userLootboxes = toSignal(this._openLootboxService.getUserLootboxes$(), {
+    initialValue: [],
+  });
+  reward = toSignal(this._openLootboxService.getReward$());
   openLootbox(packId: bigint) {
     this._openLootboxService.openLootbox$.next(packId);
   }

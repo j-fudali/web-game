@@ -5,6 +5,7 @@ import {
   filter,
   map,
   merge,
+  Observable,
   of,
   shareReplay,
   Subject,
@@ -14,13 +15,13 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { UpdateEncounterDto } from '../../../../../../shared/api/encounters/model/update-encounter.dto';
 import { Router } from '@angular/router';
+import { EncounterDto } from 'app/shared/api/encounters';
 
 @Injectable()
 export class EncounterDetailsService {
   private router = inject(Router);
   private encountersApiService = inject(EncounterApiService);
   private error$ = new Subject<Error>();
-  getEncounter$ = new Subject<string>();
   updateEncounter$ = new Subject<{ id: string; data: UpdateEncounterDto }>();
   deleteEncounter$ = new Subject<string>();
 
@@ -46,23 +47,8 @@ export class EncounterDetailsService {
     ),
     shareReplay(1)
   );
-  private onGetEncounter$ = this.getEncounter$.pipe(
-    switchMap(id =>
-      this.encountersApiService.getEncounter(id).pipe(
-        catchError(err => {
-          this.error$.next(err);
-          return of(undefined);
-        })
-      )
-    ),
-    shareReplay(1)
-  );
+
   private status$ = merge(
-    this.getEncounter$.pipe(map(() => 'loading' as const)),
-    this.onGetEncounter$.pipe(
-      filter(res => res !== undefined),
-      map(() => 'completed' as const)
-    ),
     this.updateEncounter$.pipe(map(() => 'update-loading')),
     this.onUpdateEncounter$.pipe(
       filter(res => res !== undefined),
@@ -74,7 +60,10 @@ export class EncounterDetailsService {
       map(() => 'delete-success')
     )
   );
-  encounter = toSignal(this.onGetEncounter$, { initialValue: undefined });
   status = toSignal(this.status$, { initialValue: null });
   error = toSignal(this.error$, { initialValue: null });
+
+  getEncounterById$(id: string): Observable<EncounterDto> {
+    return this.encountersApiService.getEncounter(id);
+  }
 }

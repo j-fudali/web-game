@@ -1,0 +1,80 @@
+<p-card styleClass="h-full" header="Założone przedmioty">
+  <div pDroppable (onDrop)="drop()" class="grid grid-nogutter w-full">
+    <div class="relative col-6 p-2">
+      <div
+        class="flex justify-content-center align-items-center shadow-3 surface-50 h-8rem">
+        <span>{{ texts.ITEMS_SLOTS_HEAD }}</span>
+      </div>
+      @if(headItem()){
+      <jfudali-item
+        class="z-2 absolute top-0 -left- w-full h-full"
+        pDraggable
+        (contextmenu)="onContextMenu($event, headItem())"
+        (onDragStart)="onDragStart(headItem()!)"
+        (onDragEnd)="onDragEnd()"
+        [item]="headItem()!" />
+      }
+    </div>
+    <div class="relative col-6 p-2">
+      <div
+        class="flex justify-content-center align-items-center shadow-3 surface-50 h-8rem">
+        <span>{{ texts.ITEMS_SLOTS_CHEST }}</span>
+      </div>
+      @if(chestItem()){
+      <jfudali-item
+        class="z-2 absolute top-0 -left- w-full h-8rem"
+        pDraggable
+        (contextmenu)="onContextMenu($event, chestItem())"
+        (onDragStart)="onDragStart(chestItem()!)"
+        (onDragEnd)="onDragEnd()"
+        [item]="chestItem()!" />
+      }
+    </div>
+    <div class="relative col-6 p-2">
+      <div
+        class="flex justify-content-center align-items-center shadow-3 surface-50 h-8rem">
+        <span>{{ texts.ITEMS_SLOTS_ARMS }}</span>
+      </div>
+      @if(armsItem()){
+      <jfudali-item
+        class="z-2 absolute top-0 -left- w-full h-full"
+        pDraggable
+        (contextmenu)="onContextMenu($event, armsItem())"
+        (onDragStart)="onDragStart(armsItem()!)"
+        (onDragEnd)="onDragEnd()"
+        [item]="armsItem()!" />
+      }
+    </div>
+    <div class="relative col-6 p-2">
+      <div
+        class="flex justify-content-center align-items-center shadow-3 surface-50 h-8rem">
+        <span>{{ texts.ITEMS_SLOTS_LEGS }}</span>
+      </div>
+      @if(legsItem()){
+      <jfudali-item
+        class="z-2 absolute top-0 -left- w-full h-full"
+        pDraggable
+        (contextmenu)="onContextMenu($event, legsItem())"
+        (onDragStart)="onDragStart(legsItem()!)"
+        (onDragEnd)="onDragEnd()"
+        [item]="legsItem()!" />
+      }
+    </div>
+    <div class="relative col-8 col-offset-2 -offset-0 p-2">
+      <div
+        class="flex justify-content-center align-items-center shadow-3 surface-50 h-8rem">
+        <span>{{ texts.ITEMS_SLOTS_WEAPON }}</span>
+      </div>
+      @if(weapon()){
+      <jfudali-item
+        class="z-2 absolute top-0 -left- w-full h-full"
+        pDraggable
+        (contextmenu)="onContextMenu($event, weapon())"
+        (onDragStart)="onDragStart(weapon()!)"
+        (onDragEnd)="onDragEnd()"
+        [item]="weapon()!" />
+      }
+    </div>
+  </div>
+</p-card>
+<p-contextMenu #cm [model]="actions" (onHide)="onHide()" />

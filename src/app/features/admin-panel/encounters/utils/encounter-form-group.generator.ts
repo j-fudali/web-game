@@ -1,8 +1,7 @@
 import { FormGroup, FormControl, Validators, FormArray } from '@angular/forms';
 import { healthOrGoldAmountNotNull } from '../pages/add-encounter/validators/healthOrGoldAmountNotNull';
-import { Decision } from '../../../../shared/interfaces/decision';
-import { EnemyDto } from '../../../../shared/api/enemies/model/enemy.dto';
 import { uniqueDecision } from './unique-decision.validator';
+import { DecisionDto } from 'app/shared/api/encounters';
 
 export class EncounterFormGroupGenerator {
   public static getEncounterFormGroup(): FormGroup {
@@ -30,10 +29,10 @@ export class EncounterFormGroupGenerator {
     isEnemyToSet: boolean
   ) {
     if (isEnemyToSet) {
-      if (group.contains('decision')) group.removeControl('decisions');
+      if (group.contains('decisions')) group.removeControl('decisions');
       group.addControl('enemyId', new FormControl(null, [Validators.required]));
     } else {
-      if (group.contains('enemyId')) group.removeControl('enemy');
+      if (group.contains('enemyId')) group.removeControl('enemyId');
       group.addControl(
         'decisions',
         new FormArray(
@@ -43,7 +42,7 @@ export class EncounterFormGroupGenerator {
       );
     }
   }
-  public static getDecisionFormGroup(decision?: Decision): FormGroup {
+  public static getDecisionFormGroup(decision?: DecisionDto): FormGroup {
     const group = new FormGroup(
       {
         text: new FormControl('', {

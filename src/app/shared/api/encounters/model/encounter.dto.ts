@@ -1,14 +1,14 @@
-import { Decision } from '../../../interfaces/decision';
-import { Enemy } from '../../../interfaces/enemy';
+import { DecisionDto } from './decision.dto';
 import { PublicUser } from '../../../interfaces/public-user';
+import { EnemyDto } from '../../enemies/model/enemy.dto';
 
 export interface EncounterDto {
   id: string;
   title: string;
   description: string;
   difficulty: number;
-  decisions?: Decision[];
-  enemy?: Enemy;
+  decisions?: DecisionDto[];
+  enemy?: EnemyDto;
   modifiedBy: PublicUser;
   lastModified: Date;
 }

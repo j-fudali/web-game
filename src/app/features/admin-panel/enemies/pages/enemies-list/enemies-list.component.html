@@ -5,13 +5,12 @@
     [rows]="pageSize()"
     [paginator]="true"
     [value]="enemies()"
-    [loading]="status() === 'loading'"
     [totalRecords]="totalElements()"
     (onPage)="changePage($event)">
     <ng-template pTemplate="list" let-enemies>
       <div
-        [style]="{ height: '70vh' }"
-        class="grid grid-nogutter overflow-y-auto">
+        [ngStyle]="{ height: enemies.length > 0 ? '55vh' : '0' }"
+        class="grid grid-nogutter align-content-start overflow-y-auto">
         @for (enemy of enemies; track enemy) {
 
         <div
@@ -31,6 +30,13 @@
           </div>
         </div>
         }
+      </div>
+    </ng-template>
+    <ng-template pTemplate="empty">
+      <div [style]="{ height: '50vh' }">
+        <span class="inline-block w-full text-center">{{
+          texts.ENEMIES_LIST_EMPTY
+        }}</span>
       </div>
     </ng-template>
   </p-dataView>

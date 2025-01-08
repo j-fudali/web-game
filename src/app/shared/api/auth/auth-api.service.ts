@@ -1,12 +1,13 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { catchError, of, throwError } from 'rxjs';
+import { catchError, throwError } from 'rxjs';
 import { TokenResponse } from './model/token-response';
-import { environment } from '../../../../environments/environment.development';
 import { LoginCredentials } from './model/login-credentials';
 import { SERVER_ERROR } from '../../utils/common-errors-messages';
 import { LoggerService } from '../../services/logger.service';
 import { SignUpCredentials } from '../../interfaces/sign-up-credentials';
+import { APP_CONFIG } from '@jfudali/shared/config';
+import { TEXTS } from '../texts/texts.const';
 
 @Injectable({
   providedIn: 'root',
@@ -14,14 +15,9 @@ import { SignUpCredentials } from '../../interfaces/sign-up-credentials';
 export class AuthApiService {
   private http = inject(HttpClient);
   private logger = inject(LoggerService);
-  private BASE_URL = environment.url + '/auth';
-  private readonly BAD_CREDENTIALS = 'Nie poprawne dane logowania';
-  private readonly DUPLICATE_ERROR = (err: HttpErrorResponse) =>
-    `${
-      (err.error.message as string).startsWith('E-mail')
-        ? 'E-mail'
-        : 'Portfel kryptwalutowy'
-    } jest już w użyciu`;
+  private appConfig = inject(APP_CONFIG);
+  private BASE_URL: string = this.appConfig.url + '/auth';
+
   login(loginCredentials: LoginCredentials) {
     const url = this.BASE_URL + '/login';
     return this.http.post<TokenResponse>(url, loginCredentials).pipe(
@@ -43,9 +39,9 @@ export class AuthApiService {
   private getErrorMessage(error: HttpErrorResponse) {
     switch (error.status) {
       case 401:
-        return this.BAD_CREDENTIALS;
+        return TEXTS.AUTH_BAD_CREDENTIALS;
       case 409:
-        return this.DUPLICATE_ERROR(error);
+        return TEXTS.AUTH_DUPLICATE_ERROR(error);
       default:
         return SERVER_ERROR;
     }

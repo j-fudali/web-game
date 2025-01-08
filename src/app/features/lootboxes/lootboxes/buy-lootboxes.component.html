@@ -6,53 +6,40 @@
     [routerLink]="['my-lootboxes']"
     label="Moje skrzynie"></button>
 </jfudali-section-title>
-<div class="p-2 flex flex-column gap-1 align-items-center">
-  @if(status() === 'loading'){
-  <p-progressBar
-    class="w-full"
-    mode="indeterminate"
-    [style]="{ height: '6px' }" />
-
-  }@else { @if(status() === 'completed' && lootboxes() === undefined){
-  <span class="text-xl"
-    >Akutalnie brak skrzyń do otwarcia. Spróbuj ponownie później</span
-  >
-  }@else { @if( status() === 'buy-loading'){
-  <p-progressBar
-    class="w-full"
-    mode="indeterminate"
-    [style]="{ height: '6px' }" />
-  }
-  <p-dataView
-    class="w-full md:w-8"
-    [value]="lootboxes()"
-    [paginator]="true"
-    [rows]="PAGE_SIZE"
-    layout="grid"
-    [totalRecords]="totalRecords()"
-    (onPage)="changePage($event)">
-    <ng-template pTemplate="grid" let-lootboxes>
-      <div
-        class="grid grid-nogutter overflow-y-auto"
-        [style]="{ height: '70vh' }">
-        @for (lootbox of lootboxes; track lootbox) {
-        <div class="p-2 col-12 md:col-6">
-          <jfudali-lootbox-card
-            [status]="lootbox.status"
-            [item]="lootbox.asset.metadata"
-            [availablePacks]="lootbox.quantity.toString()"
-            (onButtonClick)="buyLootbox(lootbox)"
-            [buttonLabel]="
-              'Kup: ' +
-              lootbox.currencyValuePerToken.displayValue +
-              ' ' +
-              lootbox.currencyValuePerToken.symbol
-            " />
-        </div>
-        }
+<p-dataView
+  class="mx-auto block w-full md:w-8"
+  [value]="lootboxes()"
+  [paginator]="true"
+  [rows]="PAGE_SIZE"
+  layout="grid"
+  [totalRecords]="totalRecords()"
+  (onPage)="changePage($event)">
+  <ng-template pTemplate="grid" let-lootboxes>
+    <div
+      class="grid grid-nogutter overflow-y-auto"
+      [ngStyle]="{ height: lootboxes.length > 0 ? '60vh' : '0' }">
+      @for (lootbox of lootboxes; track lootbox) {
+      <div class="p-2 col-12 md:col-6">
+        <jfudali-lootbox-card
+          [status]="lootbox.status"
+          [item]="lootbox.asset.metadata"
+          [availablePacks]="lootbox.quantity.toString()"
+          (onButtonClick)="buyLootbox(lootbox)"
+          [buttonLabel]="
+            'Kup: ' +
+            lootbox.currencyValuePerToken.displayValue +
+            ' ' +
+            lootbox.currencyValuePerToken.symbol
+          " />
       </div>
-    </ng-template>
-  </p-dataView>
-
-  }}
-</div>
+      }
+    </div>
+  </ng-template>
+  <ng-template pTemplate="empty">
+    <div [style]="{ height: '55vh' }">
+      <span class="inline-block w-full text-center">{{
+        texts.PACKS_LIST_EMPTY
+      }}</span>
+    </div>
+  </ng-template>
+</p-dataView>

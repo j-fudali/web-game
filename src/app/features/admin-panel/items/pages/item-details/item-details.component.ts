@@ -15,6 +15,7 @@ import { map, tap } from 'rxjs';
 import { ItemType } from '../../../../../shared/enums/item-type.enum';
 import { ItemDetailsService } from './services/item-details.service';
 import { ButtonModule } from 'primeng/button';
+import { UpdateItem } from 'app/shared/thirdweb/model/update-item.model';
 
 @Component({
   selector: 'jfudali-item-details',
@@ -89,9 +90,10 @@ export class ItemDetailsComponent implements OnInit {
     if (this.form.valid) {
       const item = this.item();
       if (item) {
-        const updateItem = {
+        const updateItem: UpdateItem = {
           ...item,
           ...this.form.value,
+          oldImage: item.image,
         };
         if (this.image) updateItem.newImage = this.image;
         this.itemDetailsService.updateItem$.next({

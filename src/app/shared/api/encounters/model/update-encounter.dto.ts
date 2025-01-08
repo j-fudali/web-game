@@ -1,9 +1,9 @@
-import { NewDecisionDto } from './new-decision.dto';
+import { DecisionDto } from './decision.dto';
 
 export interface UpdateEncounterDto {
   title?: string;
   description?: string;
   difficulity?: number;
-  decisions?: NewDecisionDto[];
+  decisions?: DecisionDto[];
   enemyId?: string;
 }

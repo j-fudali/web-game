@@ -7,7 +7,10 @@ export interface EnemyWeapon {
   damage: number;
 }
 
-export type Enemy = Omit<EnemyDto, 'maxHealth' | 'maxPowerPoints'> & {
+export type Enemy = Omit<
+  EnemyDto,
+  'level' | 'maxHealth' | 'maxPowerPoints' | 'lastModified' | 'modifiedBy'
+> & {
   statistics: Statistics;
 };
 export type EnemyOnEncounterDraw = Omit<

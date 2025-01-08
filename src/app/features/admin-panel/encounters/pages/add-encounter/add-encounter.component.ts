@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, OnInit, Signal } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DropdownModule } from 'primeng/dropdown';
 import { SectionTitleComponent } from '../../../../../shared/components/section-title/section-title.component';
@@ -12,9 +12,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { EncounterFormComponent } from '../../features/encounter-form/encounter-form.component';
 import { EncounterFormGroupGenerator } from '../../utils/encounter-form-group.generator';
 import { ToggleButtonModule } from 'primeng/togglebutton';
-import { ScrollerOptions } from 'primeng/api';
-import { ScrollerScrollIndexChangeEvent } from 'primeng/scroller';
-import { EnemyDto } from '../../../../../shared/api/enemies/model/enemy.dto';
+import { EnemyEncounterDto } from 'app/shared/interfaces/encounter';
 @Component({
   selector: 'jfudali-add-encounter',
   standalone: true,
@@ -49,13 +47,7 @@ export class AddEncounterComponent implements OnInit {
   }
   submit() {
     if (this.form.valid) {
-      const enemyId = (
-        (this.form.get('enemy') as FormControl).value as EnemyDto
-      ).id;
-      this.addEncouterService.createEncounter$.next({
-        ...this.form.value,
-        enemyId,
-      });
+      this.addEncouterService.createEncounter$.next(this.form.getRawValue());
       this.form.reset();
     }
   }

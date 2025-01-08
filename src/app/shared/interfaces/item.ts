@@ -14,3 +14,8 @@ export interface ItemProperties {
 export interface Item extends ItemProperties {
   tokenId: bigint;
 }
+export interface Trait {
+  trait_type: 'classType' | 'damage' | 'armor' | 'type' | 'bodySlot';
+  value: unknown;
+}
+export type Attributes = Omit<Item, 'name' | 'image'>;

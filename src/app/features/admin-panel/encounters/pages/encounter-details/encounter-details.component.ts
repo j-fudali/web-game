@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import {
-  ChangeDetectorRef,
   Component,
   computed,
+  DestroyRef,
   effect,
   inject,
   input,
@@ -15,14 +15,15 @@ import { EncounterFormGroupGenerator } from '../../utils/encounter-form-group.ge
 import { FormArray } from '@angular/forms';
 import {
   DecisionEncounter,
-  Encounter,
-  EnemyEncounter,
+  EnemyEncounterDto,
 } from '../../../../../shared/interfaces/encounter';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmPopupModule } from 'primeng/confirmpopup';
 import { ConfirmationService } from 'primeng/api';
 import { EncounterDto } from '../../../../../shared/api/encounters/model/encounter.dto';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { EnemiesDto } from 'app/shared/api/enemies/model/enemies.dto';
 
 @Component({
   selector: 'jfudali-encounter-details',
@@ -40,36 +41,29 @@ import { EncounterDto } from '../../../../../shared/api/encounters/model/encount
   providers: [EncounterDetailsService],
 })
 export class EncounterDetailsComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
   private confirmationService = inject(ConfirmationService);
   private encounterDetailsService = inject(EncounterDetailsService);
   status = this.encounterDetailsService.status;
   form = EncounterFormGroupGenerator.getEncounterFormGroup();
   id = input.required<string>();
-  encounter = this.encounterDetailsService.encounter;
+  encounter: EncounterDto;
+  defaultEnemy: EnemiesDto;
   editMode = false;
-  isEnemyEncounter = computed(() => {
-    const encounter = this.encounter();
-    return encounter ? encounter.enemy !== null : undefined;
-  });
-  isSet = false;
   get decisions() {
     return this.form.get('decisions') as FormArray;
   }
 
-  constructor() {
-    effect(() => {
-      const encounter = this.encounter();
-      if (encounter) {
-        if (!this.isSet) {
-          this.setInitialValues(encounter);
-          this.isSet = true;
-        }
-      }
-    });
-  }
-
   ngOnInit(): void {
-    this.encounterDetailsService.getEncounter$.next(this.id());
+    this.encounterDetailsService
+      .getEncounterById$(this.id())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(encounter => {
+        this.encounter = encounter;
+        if (encounter.enemy)
+          this.defaultEnemy = { id: this.id(), ...encounter.enemy };
+        this.setInitialValues(encounter);
+      });
   }
   executeAction() {
     if (this.editMode) {
@@ -93,8 +87,7 @@ export class EncounterDetailsComponent implements OnInit {
   }
   cancel() {
     this.editMode = false;
-    const encounter = this.encounter();
-    if (encounter) this.setInitialValues(encounter);
+    this.setInitialValues(this.encounter);
     this.form.disable();
   }
   submit() {
@@ -108,8 +101,8 @@ export class EncounterDetailsComponent implements OnInit {
 
   private setInitialValues(encounter: EncounterDto) {
     this.form.patchValue(encounter);
-    if (this.isEnemyEncounter()) {
-      this.setInitialFormValuesWithEnemy(encounter as EnemyEncounter);
+    if (this.encounter.enemy) {
+      this.setInitialFormValuesWithEnemy(encounter as EnemyEncounterDto);
     } else {
       this.setInitialFormValuesWithDecisions(encounter as DecisionEncounter);
     }
@@ -127,7 +120,7 @@ export class EncounterDetailsComponent implements OnInit {
       });
     }
   }
-  private setInitialFormValuesWithEnemy(encounter: EnemyEncounter) {
+  private setInitialFormValuesWithEnemy(encounter: EnemyEncounterDto) {
     EncounterFormGroupGenerator.toggleEnemyFormControl(this.form, true);
     this.form.get('enemyId')?.setValue(encounter.enemy.id);
   }

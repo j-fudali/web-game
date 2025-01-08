@@ -1,0 +1,7 @@
+<div
+  class="relative h-8rem w-8rem"
+  pBadge
+  [value]="value() > 0 ? '+' + value().toString() : value().toString()"
+  [severity]="value() >= 0 ? 'success' : 'danger'">
+  <img [src]="image()" class="absolute top-0 left-0 h-full w-full" />
+</div>

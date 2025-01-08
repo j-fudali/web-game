@@ -1,4 +1,5 @@
-export class Texts {
-  public static readonly OPEN_LOOTBOX_REWARD = 'Nagroda';
-  public static readonly OPEN_PACK_REWARD_DESCRIPTION = 'Opis przedmiotu';
-}
+export const TEXTS = {
+  OPEN_LOOTBOX_REWARD: 'Nagroda',
+  OPEN_PACK_REWARD_DESCRIPTION: 'Opis przedmiotu',
+  PACKS_LIST_EMPTY: 'Brak skrzyń',
+};

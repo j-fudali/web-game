@@ -1,13 +1,19 @@
 <header
-    class="flex justify-content-between align-items-center surface-50 transition-ease-out transition-duration-100 px-2">
-    <a routerLink="/" class="relative w-5rem h-5rem">
-        <img ngSrc=" ../../assets/logo.png" fill priority />
-    </a>
-    <div class="flex gap-2 align-items-center">
-        <jfudali-connect-button  (onDisconnectWallet)="onDisconnectWallet.emit()"
-            (onMetamaskConnect)="onConnectMetamask.emit()" [walletData]="walletData()" />
-        <p-menubar class="hidden lg:block" [model]="navigationsList()"></p-menubar>
-        <p-button class="block lg:hidden" rounded text size="small" (click)="sidebarVisible.set(true)"
-            icon="pi pi-bars" />
-    </div>
+  class="flex justify-content-between align-items-center surface-50 transition-ease-out transition-duration-100 px-2">
+  <a routerLink="/" class="relative w-5rem h-5rem">
+    <img ngSrc=" ../../assets/logo.png" fill priority />
+  </a>
+  <div class="flex gap-2 align-items-center">
+    <jfudali-connect-button
+      (onDisconnectWallet)="onDisconnectWallet.emit()"
+      (onMetamaskConnect)="onConnectMetamask.emit()" />
+    <p-menubar class="hidden lg:block" [model]="navigationsList()"></p-menubar>
+    <p-button
+      class="block lg:hidden"
+      rounded
+      text
+      size="small"
+      (click)="sidebarVisible.set(true)"
+      icon="pi pi-bars" />
+  </div>
 </header>

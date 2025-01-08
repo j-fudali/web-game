@@ -1,22 +1,23 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { environment } from '../../../environments/environment';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { CharacterClass } from '../interfaces/character-class';
-import { take, tap } from 'rxjs';
 import { CharacterClassesApiService } from '../api/character-classes/character-classes-api.service';
+import { CharacterClassDto } from '../api/character-classes/model/character-class.dto';
+import { map, Observable, shareReplay } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CharacterClassesService {
   private _characterClasssesApiService = inject(CharacterClassesApiService);
-  private characterClasses$ =
-    this._characterClasssesApiService.getCharacterClasses();
-  characterClasses = toSignal<CharacterClass[], CharacterClass[]>(
-    this.characterClasses$,
-    {
-      initialValue: [],
-    }
-  );
+  private characterClasses$: Observable<CharacterClassDto[]>;
+  constructor() {
+    this.initCharacterClasses();
+  }
+  getCharacterClasses$(): Observable<CharacterClassDto[]> {
+    return this.characterClasses$;
+  }
+  private initCharacterClasses(): void {
+    this.characterClasses$ = this._characterClasssesApiService
+      .getCharacterClasses()
+      .pipe(shareReplay(1));
+  }
 }

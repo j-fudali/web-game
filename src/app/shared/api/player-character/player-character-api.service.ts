@@ -4,13 +4,16 @@ import {
   HttpParams,
 } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { PlayerCharacter } from '../../interfaces/player-character';
+import {
+  PlayerCharacterApiResponse,
+  PlayerCharacterDto,
+} from './model/player-character.dto';
 import { environment } from '../../../../environments/environment.development';
 import { LoggerService } from '../../services/logger.service';
-import { catchError, of, throwError } from 'rxjs';
+import { catchError, EMPTY, of, shareReplay, tap, throwError } from 'rxjs';
 import { CreateCharacter } from '../../../features/game/interfaces/create-character';
-import { AuthService } from '../../services/auth.service';
-import { RestData } from '../../interfaces/rest-data';
+import { RestDataDto } from './model/rest-data.dto';
+import { TEXTS } from '../texts/texts.const';
 
 @Injectable({
   providedIn: 'root',
@@ -19,11 +22,7 @@ export class PlayerCharacterApiService {
   private BASE_URL = environment.url + '/player-character';
   private http = inject(HttpClient);
   private logger = inject(LoggerService);
-  private ALREADY_HAS_CHARACTER_ERROR = 'Posiadasz już postać';
-  private CANNOT_CREATE_CHARACTER_ERROR = 'Posiadasz już postać';
-  private CHARACTER_LOAD_ERROR = 'Błąd pobierania postaci';
-  private REST_ERROR = 'Błąd włączania trybu odpoczynku';
-  private STOP_REST_ERROR = 'Błąd wyłączania trybu odpoczynku';
+
   createCharacter({
     name,
     image,
@@ -35,44 +34,60 @@ export class PlayerCharacterApiService {
     formdata.set('image', image);
     formdata.set('characterClassId', characterClassId);
     formdata.set('equippedItems[]', equippedItems[0]);
-    return this.http.post<PlayerCharacter>(this.BASE_URL, formdata).pipe(
+    return this.http.post<PlayerCharacterDto>(this.BASE_URL, formdata).pipe(
+      tap(() =>
+        this.logger.showSuccessMessage(
+          TEXTS.PLAYER_CHARACTER_CREATE_CHARACTER_SUCCESS
+        )
+      ),
       catchError(err => {
         if (err.status == 409) {
-          this.logger.showErrorMessage(this.ALREADY_HAS_CHARACTER_ERROR);
+          this.logger.showErrorMessage(
+            TEXTS.PLAYER_CHARACTER_ALREADY_HAS_CHARACTER_ERROR
+          );
         } else {
-          this.logger.showErrorMessage(this.CANNOT_CREATE_CHARACTER_ERROR);
+          this.logger.showErrorMessage(
+            TEXTS.PLAYER_CHARACTER_CANNOT_CREATE_CHARACTER_ERROR
+          );
         }
-        return of(undefined);
+        return EMPTY;
       })
     );
   }
   getPlayerCharacter() {
-    return this.http.get<PlayerCharacter>(this.BASE_URL).pipe(
+    return this.http.get<PlayerCharacterApiResponse>(this.BASE_URL).pipe(
       catchError((err: HttpErrorResponse) => {
         if (err.status != 404) {
-          this.logger.showErrorMessage(this.CHARACTER_LOAD_ERROR);
+          this.logger.showErrorMessage(
+            TEXTS.PLAYER_CHARACTER_CHARACTER_LOAD_ERROR
+          );
         }
         return throwError(() => err);
       })
     );
   }
   rest() {
-    return this.http.post<RestData>(this.BASE_URL + '/rest', {}).pipe(
-      catchError((err: HttpErrorResponse) => {
-        this.logger.showErrorMessage(this.REST_ERROR);
-        return of(undefined);
+    return this.http.post<RestDataDto>(this.BASE_URL + '/rest', {}).pipe(
+      catchError(() => {
+        this.logger.showErrorMessage(TEXTS.PLAYER_CHARACTER_REST_ERROR);
+        return EMPTY;
       })
     );
   }
   stopRest(endTime: Date) {
     return this.http
-      .delete(this.BASE_URL + '/rest/stop', {
+      .delete<void>(this.BASE_URL + '/rest/stop', {
         params: new HttpParams().set('endTime', endTime.toISOString()),
       })
       .pipe(
-        catchError((err: HttpErrorResponse) => {
-          this.logger.showErrorMessage(this.STOP_REST_ERROR);
-          return of(undefined);
+        tap(() =>
+          this.logger.showSuccessMessage(
+            TEXTS.PLAYER_CHARACTER_STOP_REST_SUCCESS
+          )
+        ),
+        catchError(() => {
+          this.logger.showErrorMessage(TEXTS.PLAYER_CHARACTER_STOP_REST_ERROR);
+          return EMPTY;
         })
       );
   }
