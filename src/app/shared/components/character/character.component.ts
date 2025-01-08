@@ -1,8 +1,8 @@
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { CardModule } from 'primeng/card';
-import { StatisticsPanelComponent } from '../../../features/game/components/statistics-panel/statistics-panel.component';
-import { PlayerCharacter } from '../../interfaces/player-character';
+import { StatisticsPanelComponent } from '../../../features/game/ui/statistics-panel/statistics-panel.component';
+import { PlayerCharacterDto } from '../../api/player-character/model/player-character.dto';
 import { Enemy } from '../../interfaces/enemy';
 
 @Component({
@@ -24,7 +24,6 @@ import { Enemy } from '../../interfaces/enemy';
         <img [ngSrc]="character().image" fill priority />
       </div>
       <p-card class="flex-1" [header]="character().name">
-        <h3 class="m-0">Poziom: {{ character().level }}</h3>
         <ng-content></ng-content>
         <jfudali-statistics-panel
           [statistics]="character().statistics"
@@ -36,7 +35,7 @@ import { Enemy } from '../../interfaces/enemy';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CharacterComponent {
-  character = input.required<PlayerCharacter | Enemy>();
+  character = input.required<PlayerCharacterDto | Enemy>();
   orientation = input<'vertical' | 'horizontal'>('horizontal');
   showEnergy = input<boolean>(true);
 }

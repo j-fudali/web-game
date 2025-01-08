@@ -1,16 +1,14 @@
-<div class="h-screen flex flex-column verflow-y-auto">
+<div class="flex-1 flex flex-column">
   <jfudali-header
     [(sidebarVisible)]="sidebarVisible"
     [navigationsList]="navigationsList()"
-    [walletData]="walletDataState"
     (onDisconnectWallet)="disconnectWallet()"
-    (onConnectMetamask)="connect$.next()"
-    (onSignOut)="signOut()"
-    class="z-5 sticky top-0"></jfudali-header>
-  <div class="flex-1">
+    (onConnectMetamask)="connect()"
+    (onSignOut)="signOut()"></jfudali-header>
+  <div class="flex-1 overflow-y-auto p-2">
     <router-outlet></router-outlet>
   </div>
-  <jfudali-footer class=""></jfudali-footer>
+  <jfudali-footer></jfudali-footer>
 </div>
 <p-sidebar #sidebar [(visible)]="sidebarVisible" position="right">
   <p-menu
@@ -19,3 +17,9 @@
     (click)="sidebar.close($event)" />
 </p-sidebar>
 <p-toast position="bottom-center"></p-toast>
+@if (showLoader()) {
+<div
+  class="loader h-screen z-4 fixed w-full flex justify-content-center align-items-center">
+  <p-progressSpinner />
+</div>
+}

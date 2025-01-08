@@ -1,14 +1,5 @@
-import { Enemy } from './../../../../../shared/interfaces/enemy';
 import { EnemyFormGroupGenerator } from './../../utils/enemy-form-group.generator';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  computed,
-  input,
-  effect,
-  OnInit,
-} from '@angular/core';
+import { Component, inject, input, effect, OnInit } from '@angular/core';
 import { SectionTitleComponent } from '../../../../../shared/components/section-title/section-title.component';
 import { EnemyFormComponent } from '../../ui/enemy-form/enemy-form.component';
 import { ButtonModule } from 'primeng/button';
@@ -96,6 +87,7 @@ export class EnemyDetailsComponent implements OnInit {
   }
   submit() {
     if (this.form.valid) {
+      this.editMode = false;
       this.enemyDetailsService.updateEnemy$.next({
         id: this.id(),
         data: {
@@ -106,5 +98,4 @@ export class EnemyDetailsComponent implements OnInit {
       });
     }
   }
-  private setInitialFormValues(enemy: Enemy) {}
 }

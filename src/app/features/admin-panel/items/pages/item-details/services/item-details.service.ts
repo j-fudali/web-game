@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { ThirdwebService } from '../../../../../../shared/thirdweb/thirdweb.service';
 import {
   catchError,
-  combineLatest,
+  EMPTY,
   filter,
   map,
   merge,
@@ -12,15 +12,12 @@ import {
   switchMap,
 } from 'rxjs';
 import { ItemMapper } from '../../../../../../shared/utils/item-mapper';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { WalletService } from '../../../../../../shared/services/wallet.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { UpdateItem } from '../../../../../../shared/thirdweb/model/update-item.model';
 
 @Injectable()
 export class ItemDetailsService {
   private thirdwebService = inject(ThirdwebService);
-  private walletService = inject(WalletService);
-  private account$ = toObservable(this.walletService.state.account);
   private error$ = new Subject<Error>();
   getItem$ = new Subject<number>();
   updateItem$ = new Subject<{
@@ -37,17 +34,9 @@ export class ItemDetailsService {
     shareReplay(1)
   );
 
-  private OnUpdateItem$ = combineLatest([
-    this.updateItem$,
-    this.account$.pipe(filter(acc => !!acc)),
-  ]).pipe(
-    switchMap(([{ id, updateItem }, account]) =>
-      this.thirdwebService.updateItem(account, id, updateItem).pipe(
-        catchError(err => {
-          this.error$.next(err);
-          return of(undefined);
-        })
-      )
+  private OnUpdateItem$ = this.updateItem$.pipe(
+    switchMap(({ id, updateItem }) =>
+      this.thirdwebService.updateItem(id, updateItem)
     )
   );
   private status$ = merge(

@@ -8,20 +8,31 @@ import { errorHandlingInterceptor } from './shared/interceptors/error-handling.i
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
 import { DATE_PIPE_DEFAULT_OPTIONS } from '@angular/common';
+import { APP_CONFIG } from './shared/config';
+import { environment } from '../environments/environment';
+import { loaderInterceptor } from './shared/features/loader/loader.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes, withComponentInputBinding()),
     provideAnimations(),
     provideHttpClient(
-      withInterceptors([authInterceptor, errorHandlingInterceptor])
+      withInterceptors([
+        loaderInterceptor,
+        authInterceptor,
+        errorHandlingInterceptor,
+      ])
     ),
-    MessageService,
-    DialogService,
-    ConfirmationService,
+    {
+      provide: APP_CONFIG,
+      useValue: environment,
+    },
     {
       provide: DATE_PIPE_DEFAULT_OPTIONS,
       useValue: { dateFormat: 'dd.MM.yyyy hh:mm' },
     },
+    MessageService,
+    DialogService,
+    ConfirmationService,
   ],
 };

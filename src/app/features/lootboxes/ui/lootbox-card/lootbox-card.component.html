@@ -1,16 +1,19 @@
 <div
-  class="flex flex-column gap-1 border-1 border-surface border-round surface-100 p-2">
+  class="flex flex-column gap-2 border-1 border-surface border-round surface-100 p-2">
   <div class="relative">
     <div class="absolute top-0 left-0 p-2 z-3">
       <p-tag>Dostępne: {{ availablePacks() }}</p-tag>
     </div>
-    <div class="img-container relative h-12rem w-full overflow-hidden">
-      <img class="absolute w-full h-full" [src]="item()?.image" alt="" />
+    @if(image() != ''){
+    <div class="relative h-12rem w-full overflow-hidden">
+      <img [ngSrc]="image()" fill priority />
     </div>
+    }
   </div>
-  <p>
+  <span class="text-lg">{{ item()?.name }}</span>
+  <span>
     {{ item()?.description }}
-  </p>
+  </span>
   <div>
     <button
       class="w-full"

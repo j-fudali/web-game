@@ -1,0 +1,18 @@
+@if (!isDisconnected()) {
+<jfudali-wallet-data-chip
+  (click)="op.toggle($event)"
+  [walletData]="walletData()"
+  [accountAddress]="accountAddress()" />
+<p-overlayPanel #op>
+  <p-menu [model]="walletActions"></p-menu>
+</p-overlayPanel>
+} @else {
+<button
+  pButton
+  severity="secondary"
+  size="small"
+  icon="pi pi-link"
+  [loading]="loading"
+  [label]="texts.CONNECT_BUTTON_CONNECT"
+  (click)="connect()"></button>
+}

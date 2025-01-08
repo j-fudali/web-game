@@ -15,6 +15,7 @@ import {
 } from 'rxjs';
 import { EnemiesApiService } from '../../../../../../shared/api/enemies/enemies-api.service';
 import { EnemyDto } from '../../../../../../shared/api/enemies/model/enemy.dto';
+import { EnemiesDto } from 'app/shared/api/enemies/model/enemies.dto';
 
 @Injectable()
 export class EncounterFormService {
@@ -40,7 +41,7 @@ export class EncounterFormService {
   enemies = toSignal(
     this.enemies$.pipe(
       map(res => res?.content),
-      scan((acc, val) => (!!val ? [...acc, ...val] : acc), [] as EnemyDto[])
+      scan((acc, val) => (!!val ? [...acc, ...val] : acc), [] as EnemiesDto[])
     ),
     {
       initialValue: [],

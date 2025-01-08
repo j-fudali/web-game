@@ -29,4 +29,9 @@
     }
   </div>
 </jfudali-section-title>
-<jfudali-encounter-form [form]="form" [addEnemy]="isEnemyEncounter()" />
+@if (encounter && encounter.enemy) {
+<jfudali-encounter-form
+  [defaultEnemy]="defaultEnemy"
+  [form]="form"
+  [addEnemy]="!!encounter.enemy" />
+}

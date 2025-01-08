@@ -7,7 +7,8 @@ export class Texts {
   public static readonly NAME: string = 'Nazwa';
   public static readonly DESCRIPTION: string = 'Opis';
   public static readonly PRICE: string = 'Cena';
-  public static readonly ITEMS_LIST_ITEM_VALUE = 'Wartość';
+  public static readonly ITEMS_LIST_ITEM_DAMAGE = 'Obrażenia';
+  public static readonly ITEMS_LIST_ITEM_ARMOR = 'Pancerz';
   public static readonly ITEMS_LIST_EMPTY_MESSAGE = 'Brak przedmiotów';
   public static readonly ITEMS_LIST_ADD_TO_PACK = 'Dodaj do skrzyń';
   public static readonly ITEMS_LIST_ADD_TO_PACK_TITLE = 'Podaj ilość';

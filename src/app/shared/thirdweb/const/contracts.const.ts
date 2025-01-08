@@ -1,31 +1,36 @@
 import { getContract } from 'thirdweb';
 import { environment } from '../../../../environments/environment';
-import { ThirdwebConstants } from './thirdweb.const';
+import { THIRDWEB_CONSTANTS } from './thirdweb.const';
 
-export class Contracts {
-  public static GEARCOIN = getContract({
-    client: ThirdwebConstants.CLIENT,
-    chain: ThirdwebConstants.CHAIN,
+export const CONTRACTS = {
+  GEARCOIN: getContract({
+    client: THIRDWEB_CONSTANTS.CLIENT,
+    chain: THIRDWEB_CONSTANTS.CHAIN,
     address: environment.gearcoin,
-  });
-  public static ITEMS = getContract({
-    client: ThirdwebConstants.CLIENT,
-    chain: ThirdwebConstants.CHAIN,
+  }),
+  STARTING_ITEMS: getContract({
+    client: THIRDWEB_CONSTANTS.CLIENT,
+    chain: THIRDWEB_CONSTANTS.CHAIN,
+    address: environment.startingItems,
+  }),
+  ITEMS: getContract({
+    client: THIRDWEB_CONSTANTS.CLIENT,
+    chain: THIRDWEB_CONSTANTS.CHAIN,
     address: environment.itemsAddress,
-  });
-  public static PACK_CONTRACT = getContract({
-    client: ThirdwebConstants.CLIENT,
-    chain: ThirdwebConstants.CHAIN,
+  }),
+  PACK_CONTRACT: getContract({
+    client: THIRDWEB_CONSTANTS.CLIENT,
+    chain: THIRDWEB_CONSTANTS.CHAIN,
     address: environment.packContract,
-  });
-  public static MARKETPLACE_CONTRACT = getContract({
-    client: ThirdwebConstants.CLIENT,
-    chain: ThirdwebConstants.CHAIN,
+  }),
+  MARKETPLACE_CONTRACT: getContract({
+    client: THIRDWEB_CONSTANTS.CLIENT,
+    chain: THIRDWEB_CONSTANTS.CHAIN,
     address: environment.marketplace,
-  });
-  public static LOOTBOX_SHOP = getContract({
-    client: ThirdwebConstants.CLIENT,
-    chain: ThirdwebConstants.CHAIN,
+  }),
+  LOOTBOX_SHOP: getContract({
+    client: THIRDWEB_CONSTANTS.CLIENT,
+    chain: THIRDWEB_CONSTANTS.CHAIN,
     address: environment.lootboxShop,
-  });
-}
+  }),
+};

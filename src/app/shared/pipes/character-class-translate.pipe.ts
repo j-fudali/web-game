@@ -1,3 +1,4 @@
+import { CharacterClassDto } from './../api/character-classes/model/character-class.dto';
 import { Pipe, type PipeTransform } from '@angular/core';
 
 @Pipe({
@@ -5,9 +6,16 @@ import { Pipe, type PipeTransform } from '@angular/core';
   standalone: true,
 })
 export class CharacterClassTranslatePipe implements PipeTransform {
-
-  transform(value: unknown, ...args: unknown[]): unknown {
-    return value;
+  transform(value: CharacterClassDto): string {
+    switch (value.name) {
+      case 'warrior':
+        return 'Wojownik';
+      case 'wizard':
+        return 'Mag';
+      case 'rouge':
+        return 'Łotr';
+      default:
+        return '';
+    }
   }
-
 }

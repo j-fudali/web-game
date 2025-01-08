@@ -5,6 +5,7 @@ import { EncountersListService } from './services/encounters-list.service';
 import { RouterLink } from '@angular/router';
 import { DividerModule } from 'primeng/divider';
 import { SectionTitleComponent } from '../../../../../shared/components/section-title/section-title.component';
+import { TEXTS } from '../../texts/texts.const';
 
 @Component({
   selector: 'jfudali-encounters-list',
@@ -26,8 +27,7 @@ export class EncountersListComponent {
   page = this.encountersListService.page;
   pageSize = this.encountersListService.pageSize;
   totalElements = this.encountersListService.totalElements;
-  status = this.encountersListService.status;
-
+  texts = TEXTS;
   changePage(event: DataViewPageEvent) {
     this.encountersListService.getEncounteres$.next(event.first / event.rows);
   }

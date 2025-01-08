@@ -1,0 +1,75 @@
+<div class="h-full flex flex-column gap-2 md:gap-0">
+  <div class="flex-1 flex flex-column gap-2 justify-content-center">
+    @if(currentIndex() < rounds().length){ @for(round of rounds(); track
+    $index){ @if (currentIndex()==$index) {
+    <div
+      class="border-round p-3"
+      @roundAnim
+      [ngClass]="
+        round.enemyHitPointsValue > round.playerHitPointsValue
+          ? 'bg-pink-900'
+          : round.enemyHitPointsValue == round.playerHitPointsValue
+          ? 'bg-gray-400'
+          : 'bg-blue-400'
+      ">
+      <h4 class="text-center">Runda: {{ $index + 1 }}</h4>
+      <div
+        class="flex"
+        [ngClass]="
+          round.enemyHitPointsValue == round.playerHitPointsValue
+            ? 'justify-content-center'
+            : 'justify-content-between'
+        ">
+        @if(round.enemyHitPointsValue != round.playerHitPointsValue){
+        <div
+          class="w-4rem h-4rem"
+          [ngClass]="
+            round.enemyHitPointsValue > round.playerHitPointsValue
+              ? 'flex-order-0'
+              : 'flex-order-2'
+          "></div>
+        <div
+          class="overflow-hidden border-round w-4rem h-4rem relative"
+          [ngClass]="
+            round.enemyHitPointsValue > round.playerHitPointsValue
+              ? 'flex-order-2'
+              : 'flex-order-0'
+          ">
+          @if (round.enemyHitPointsValue > round.playerHitPointsValue) {
+          @if(enemyWeapon(); as enemyWeapon){
+          <img fill [ngSrc]="enemyWeapon.image" />
+          } }@else { @if(playerCharacterWeapon(); as pcWeapon){
+          <img fill [ngSrc]="pcWeapon.image" />
+          } }
+        </div>
+
+        }
+        <div class="flex-order-1 flex flex-column align-items-center">
+          <span>{{ texts.ROUNDS_DAMAGE }}</span
+          ><b>{{ round.dealtDamage }}</b>
+        </div>
+      </div>
+    </div>
+    } } }@else {
+    <p-card class="z-2" [header]="texts.ROUNDS_RESULTS" @showResult>
+      <ng-template pTemplate>
+        <h3 class="text-center">{{ texts.ROUNDS_WINNER }}: {{ winner() }}</h3>
+      </ng-template>
+    </p-card>
+    }
+  </div>
+  @if(currentIndex() < rounds().length -1 ){
+  <button pButton [label]="texts.ROUNDS_SKIP" (click)="skip()"></button>
+  } @else {
+  <button
+    class="mb-2"
+    pButton
+    [label]="texts.ROUNDS_NEXT"
+    severity="info"
+    (click)="onLoadEncounter.emit()"></button>
+  <button
+    pButton
+    routerLink="/game"
+    [label]="texts.EFFECT_DISPLAY_BACK_TO_PANEL"></button>
+  }
+</div>

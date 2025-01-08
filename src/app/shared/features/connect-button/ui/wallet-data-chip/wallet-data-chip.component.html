@@ -1,0 +1,15 @@
+<p-chip>
+  <div class="p-2 flex align-items-center">
+    <p-avatar [image]="metamaskIcon" />
+    <div class="flex flex-column text-right">
+      @if (accountAddress(); as accountAddress) {
+      <span class="text-sm">{{ accountAddress | jfudaliWalletAddress }}</span>
+
+      } @if(walletData(); as walletData){
+      <span class="font-light text-xs">{{
+        walletData | jfudaliWalletBalance
+      }}</span>
+      }
+    </div>
+  </div>
+</p-chip>

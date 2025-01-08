@@ -3,6 +3,7 @@ import { EnemiesApiService } from '../../../../../../shared/api/enemies/enemies-
 import {
   catchError,
   filter,
+  finalize,
   map,
   merge,
   of,
@@ -10,34 +11,30 @@ import {
   startWith,
   Subject,
   switchMap,
+  tap,
 } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { LoaderService } from 'app/shared/features/loader/loader.service';
 
 @Injectable()
 export class EnemiesListService {
+  private loaderService = inject(LoaderService);
   private enemiesApiService = inject(EnemiesApiService);
   private error$ = new Subject<Error>();
   getEnemies$ = new Subject<number>();
   private enemiesResponse$ = this.getEnemies$.pipe(
     startWith(0),
+    tap(() => this.loaderService.show()),
     switchMap(page =>
       this.enemiesApiService.getEnemies(page).pipe(
         catchError(err => {
           this.error$.next(err);
           return of(undefined);
-        })
+        }),
+        finalize(() => this.loaderService.hide())
       )
     ),
     shareReplay(1)
-  );
-  private status$ = merge(
-    this.enemiesResponse$
-      .pipe(
-        filter(res => res !== undefined),
-        map(() => 'completed' as const)
-      )
-      .pipe(startWith('loading' as const)),
-    this.error$.pipe(map(() => 'error' as const))
   );
   enemies = toSignal(
     this.enemiesResponse$.pipe(
@@ -66,7 +63,4 @@ export class EnemiesListService {
       map(res => res?.totalElements)
     )
   );
-  status = toSignal(this.status$, {
-    initialValue: 'loading',
-  });
 }

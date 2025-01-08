@@ -7,21 +7,24 @@ import {
 } from './shared/guards/auth.guard';
 import { isAdminGuard } from './shared/guards/is-admin.guard';
 import { isPlayerGuard } from './shared/guards/is-player.guard';
+import { getPlayerCharacterResolver } from './shared/resolvers/get-player-character.resolver';
+import { hasCharacterGuard } from './shared/guards/has-character.guard';
+import { notHasCharacterGuard } from './shared/guards/not-has-character.guard';
+import { EquipmentService } from './features/game/services/equipment.service';
+import { PlayerCharacterService } from './features/game/services/player-character.service';
 
 export const routes: Routes = [
   {
     path: 'home',
     loadComponent: () =>
-      import('./features/home/pages/start/start.component').then(
-        c => c.StartComponent
-      ),
+      import('./features/start/start.component').then(c => c.StartComponent),
     canActivate: [alreadyLoggedIn],
     canDeactivate: [forceWalletConnected],
   },
   {
     path: 'sign-up',
     loadComponent: () =>
-      import('./core/auth/pages/sign-up/sign-up.component').then(
+      import('./features/sign-up/sign-up.component').then(
         c => c.SignUpComponent
       ),
     canActivate: [alreadyLoggedIn, walletConnected],
@@ -29,15 +32,28 @@ export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () =>
-      import('./core/auth/pages/login/login.component').then(
-        c => c.LoginComponent
-      ),
+      import('./features/login/login.component').then(c => c.LoginComponent),
     canActivate: [alreadyLoggedIn, walletConnected],
+  },
+  {
+    path: 'create-character',
+    loadChildren: () =>
+      import('./features/create-character/create-character-shell.routes'),
+    canActivate: [
+      authGuard,
+      walletConnected,
+      isPlayerGuard,
+      notHasCharacterGuard,
+    ],
   },
   {
     path: 'game',
     loadChildren: () => import('./features/game/game-shell.routes'),
-    canActivate: [authGuard, walletConnected, isPlayerGuard],
+    canActivate: [authGuard, walletConnected, isPlayerGuard, hasCharacterGuard],
+    providers: [EquipmentService, PlayerCharacterService],
+    resolve: {
+      playerCharacter: getPlayerCharacterResolver,
+    },
   },
   {
     path: 'marketplace',

@@ -26,10 +26,6 @@ export class EncountersListService {
     shareReplay(1)
   );
 
-  private status$ = merge(
-    this.getEncounteres$.pipe(map(() => 'loading' as const)),
-    this.encounters$.pipe(map(() => 'completed'))
-  );
   encounters = toSignal(this.encounters$.pipe(map(res => res.content)), {
     initialValue: [],
   });
@@ -48,7 +44,4 @@ export class EncountersListService {
       initialValue: undefined,
     }
   );
-  status = toSignal(this.status$, {
-    initialValue: 'loading',
-  });
 }

@@ -1,0 +1,51 @@
+<div
+  class="grid grid-nogutter gap-2 justify-content-center align-items-stretch">
+  <div class="col-12 md:col-8 flex gap-2">
+    <button
+      [disabled]="isResting()"
+      routerLink="play"
+      pButton
+      [label]="texts.GAME_PANEL_PLAY"
+      class="w-6"></button>
+    @if(isResting()){
+    <button
+      pButton
+      [label]="texts.GAME_PANEL_REST_END"
+      class="w-6"
+      severity="success"
+      (click)="stopRest()"></button>
+    } @else{
+    <button
+      [disabled]="disabledRest()"
+      pButton
+      [label]="texts.GAME_PANEL_REST"
+      class="w-6"
+      severity="warning"
+      (click)="rest()"></button>
+    }
+  </div>
+  @if (playerCharacter(); as pc) {
+  <jfudali-player-character class="col-12 md:col-8" [playerCharacter]="pc" />
+
+  } @if (equippedItems(); as equippedItems) { @if(avaliableItems(); as
+  avaliableItems){
+  <jfudali-items-slots
+    #slots
+    class="col-12 md:col-8 lg:col-4"
+    (replaceOnDrop)="replaceItem($event)"
+    (equipOnDrop)="equip()"
+    (onCmUnequip)="equipment.drop()"
+    [(draggedItem)]="draggedItem"
+    [avaliableItems]="avaliableItems"
+    [equippedItems]="equippedItems" />
+  <jfudali-equipment
+    #equipment
+    class="col-12 md:col-8 lg:col-4"
+    (unequipOnDrop)="unequip()"
+    (onCmEquipItem)="slots.drop()"
+    [(draggedItem)]="draggedItem"
+    [avaliableItems]="avaliableItems"
+    [equippedItems]="equippedItems"
+    [orientation]="equipmentOrientation" />
+  } }
+</div>

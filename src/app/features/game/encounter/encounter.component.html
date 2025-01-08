@@ -1,0 +1,39 @@
+<div
+  class="md:my-6 flex flex-column lg:flex-row gap-4 md:align-items-center lg:align-items-stretch">
+  @if (playerCharacter(); as pc) {
+  <jfudali-player-character
+    class="flex-order-2 lg:flex-order-1 md:w-9 lg:w-3"
+    orientation="vertical"
+    [playerCharacter]="pc" />
+  } @if(randomEncounter(); as encounter){
+  <div
+    class="relative flex flex-column gap-2 flex-order-1 lg:flex-order-2 lg:flex-1 md:w-9 lg:w-auto">
+    @if(encounter.decisions){
+    <div class="flex-1 flex gap-4 flex-column align-items-stretch">
+      <jfudali-encounter-details
+        [title]="encounter.title"
+        [description]="encounter.description" />
+      <jfudali-encounter-decisions
+        class="flex-1"
+        [disabled]="selectedDecision ? true : false"
+        (selectedDecision)="selectDecision(encounter.id, $event)"
+        [decisions]="encounter.decisions" />
+    </div>
+    } @else { @if(encounter.enemy){ @if (playerCharacter(); as pc) {
+    <jfudali-fight
+      class="h-full"
+      (onFightEnd)="showLevelUpDialog($event)"
+      (skip)="skip($event)"
+      (dealDamagePlayerCharacter)="dealDamagetoPlayerCharacter($event)"
+      (loadEncounter)="finishFight()"
+      (simulateFight)="startFight()"
+      [title]="encounter.title"
+      [description]="encounter.description"
+      [fight]="fight()"
+      [randomEncounterEnemy]="encounter.enemy"
+      [playerCharacterEquippedWeapon]="equippedWeapon()"
+      [playerCharacterName]="pc.name" />
+    } } }
+  </div>
+  }
+</div>

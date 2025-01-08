@@ -26,6 +26,8 @@ import { AvatarModule } from 'primeng/avatar';
 import { ScrollerOptions } from 'primeng/api';
 import { EncounterFormService } from './services/encounter-form.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { EnemyDto } from 'app/shared/api/enemies';
+import { EnemiesDto } from 'app/shared/api/enemies/model/enemies.dto';
 
 @Component({
   selector: 'jfudali-encounter-form',
@@ -51,8 +53,13 @@ export class EncounterFormComponent {
   private encounterFormService = inject(EncounterFormService);
   last = this.encounterFormService.last;
   page = this.encounterFormService.page;
-  enemies = this.encounterFormService.enemies;
   status = this.encounterFormService.status;
+  defaultEnemy = input<EnemiesDto>();
+  enemies = computed(() =>
+    this.defaultEnemy()
+      ? [this.defaultEnemy(), ...this.encounterFormService.enemies()]
+      : this.encounterFormService.enemies()
+  );
   form = input.required<FormGroup>();
   addEnemy = input.required<boolean | undefined>();
   options: Signal<ScrollerOptions> = computed(() => ({

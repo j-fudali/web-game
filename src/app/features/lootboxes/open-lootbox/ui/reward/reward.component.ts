@@ -4,7 +4,7 @@ import { DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { ItemMapper } from '../../../../../shared/utils/item-mapper';
 import { NFT } from 'thirdweb';
 import { SubSectionTitleComponent } from '../../../../../shared/components/sub-section-title/sub-section-title.component';
-import { Texts } from '../../../texts/texts.const';
+import { TEXTS } from '../../../texts/texts.const';
 
 @Component({
   selector: 'jfudali-reward',
@@ -17,5 +17,5 @@ export class RewardComponent {
   private dialogConfig = inject(DynamicDialogConfig);
   nft = this.dialogConfig.data.nft as NFT;
   item = ItemMapper.convertNftToItem(this.nft);
-  texts = Texts;
+  texts = TEXTS;
 }

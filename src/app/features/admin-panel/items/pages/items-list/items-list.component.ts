@@ -1,9 +1,9 @@
 import { Item } from './../../../../../shared/interfaces/item';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { SectionTitleComponent } from '../../../../../shared/components/section-title/section-title.component';
 import { DataViewModule, DataViewPageEvent } from 'primeng/dataview';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ItemsListService } from './services/items-list.service';
 import { PAGE_SIZE } from '../../../../../shared/constants/config.const';
 import { AvatarModule } from 'primeng/avatar';
@@ -17,6 +17,8 @@ import { FormsModule } from '@angular/forms';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SubSectionTitleComponent } from '../../../../../shared/components/sub-section-title/sub-section-title.component';
 import { TagModule } from 'primeng/tag';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { tap } from 'rxjs';
 @Component({
   selector: 'jfudali-items-list',
   standalone: true,
@@ -42,12 +44,13 @@ import { TagModule } from 'primeng/tag';
   styleUrl: './items-list.component.scss',
 })
 export class ItemsListComponent {
+  private destroyRef = inject(DestroyRef);
+  private router = inject(Router);
   private itemsListService = inject(ItemsListService);
   texts = Texts;
   rows = PAGE_SIZE;
   items = this.itemsListService.items;
   totalAmount = this.itemsListService.totalAmount;
-  status = this.itemsListService.status;
   addToPackQuantity = 1;
   private _itemsSelectedWithQuantity = signal<
     { item: Item; quantity: number }[]
@@ -73,11 +76,17 @@ export class ItemsListComponent {
     );
   }
   createPack() {
-    this.itemsListService.createPack$.next(
-      this.itemsSelectedWithQuantity().map(i => ({
-        tokenId: i.item.tokenId,
-        totalRewards: i.quantity,
-      }))
-    );
+    this.itemsListService
+      .createPack$(
+        this.itemsSelectedWithQuantity().map(i => ({
+          tokenId: i.item.tokenId,
+          totalRewards: i.quantity,
+        }))
+      )
+      .pipe(
+        tap(() => this.router.navigate(['/lootboxes'])),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe();
   }
 }

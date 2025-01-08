@@ -1,9 +1,5 @@
 import { NFT } from 'thirdweb';
-import {
-  Trait,
-  Attributes,
-} from '../../features/game/services/starting-items.service';
-import { Item } from '../interfaces/item';
+import { Attributes, Item, Trait } from '../interfaces/item';
 import { IpfsConverter } from './ipfs-converter';
 import { OwnedItem } from '../interfaces/owned-item';
 

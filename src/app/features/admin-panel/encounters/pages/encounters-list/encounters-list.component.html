@@ -5,12 +5,11 @@
     [rows]="pageSize()"
     [paginator]="true"
     [value]="encounters()"
-    [loading]="status() === 'loading'"
     [totalRecords]="totalElements()"
     (onPage)="changePage($event)">
     <ng-template pTemplate="list" let-encounters>
       <div
-        [style]="{ height: '70vh' }"
+        [ngStyle]="{ height: encounters.length > 0 ? '55vh' : '0' }"
         class="grid grid-nogutter align-content-start align-items-start overflow-y-auto">
         @for (encounter of encounters; track encounter) {
         <div
@@ -31,6 +30,13 @@
           </div>
         </div>
         }
+      </div>
+    </ng-template>
+    <ng-template pTemplate="empty">
+      <div [style]="{ height: '50vh' }">
+        <span class="inline-block w-full text-center">{{
+          texts.ENOCUNTERS_LIST_EMPTY
+        }}</span>
       </div>
     </ng-template>
   </p-dataView>
