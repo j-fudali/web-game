@@ -4,7 +4,10 @@ import { ThirdwebService } from 'app/shared/thirdweb/thirdweb.service';
 import { ItemMapper } from 'app/shared/utils/item-mapper';
 import { map, Observable, switchMap } from 'rxjs';
 import { CharacterClassDto } from 'app/shared/api/character-classes';
-import { PlayerCharacterApiService } from 'app/shared/api/player-character';
+import {
+  PlayerCharacterApiService,
+  PlayerCharacterDto,
+} from 'app/shared/api/player-character';
 import { CreateCharacter } from 'app/features/game/interfaces/create-character';
 import { Item } from 'app/shared/interfaces/item';
 
@@ -22,7 +25,9 @@ export class CreateCharacterService {
   getCharacterClasses$() {
     return this._characterService.getCharacterClasses$();
   }
-  createCharacter$(newCharacter: CreateCharacter): Observable<unknown> {
+  createCharacter$(
+    newCharacter: CreateCharacter
+  ): Observable<PlayerCharacterDto> {
     return this._thirdwebService
       .claimStartingWeapon(BigInt(newCharacter.equippedItems[0]))
       .pipe(

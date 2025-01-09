@@ -9,15 +9,13 @@
 <p-dataView
   class="mx-auto block w-full md:w-8"
   [value]="lootboxes()"
-  [paginator]="true"
-  [rows]="PAGE_SIZE"
+  [lazy]="true"
   layout="grid"
-  [totalRecords]="totalRecords()"
   (onPage)="changePage($event)">
   <ng-template pTemplate="grid" let-lootboxes>
     <div
       class="grid grid-nogutter overflow-y-auto"
-      [ngStyle]="{ height: lootboxes.length > 0 ? '60vh' : '0' }">
+      [ngStyle]="{ height: lootboxes.length > 0 ? '70vh' : '0' }">
       @for (lootbox of lootboxes; track lootbox) {
       <div class="p-2 col-12 md:col-6">
         <jfudali-lootbox-card

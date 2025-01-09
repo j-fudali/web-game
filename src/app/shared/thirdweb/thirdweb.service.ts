@@ -1,6 +1,7 @@
 import { PAGE_SIZE } from './../constants/config.const';
 import { Injectable, NgZone, inject } from '@angular/core';
 import {
+  ContractOptions,
   encode,
   parseEventLogs,
   prepareContractCall,
@@ -204,13 +205,11 @@ export class ThirdwebService {
       })
     );
   }
-  getPacks(page: number) {
+  getPacks() {
     this.loaderService.show();
     return from(
       getAllValidListings({
         contract: this.contracts.LOOTBOX_SHOP,
-        start: page * PAGE_SIZE,
-        count: BigInt(PAGE_SIZE),
       })
     ).pipe(
       catchError(() => {
@@ -221,45 +220,39 @@ export class ThirdwebService {
     );
   }
   claimItems(items: { tokenId: bigint; totalRewards: number }[]) {
+    const account = this.account$.getValue();
     let request: Observable<TransactionReceipt>;
     if (items.length > 1) {
-      const contracts = (account: Account) =>
-        items.map(i =>
-          this.getClaimContract(account, i.tokenId, BigInt(i.totalRewards))
-        );
-      const encodedContracts = (account: Account) =>
-        contracts(account).map(c => from(encode(c)));
-      request = this.getAccount$().pipe(
-        switchMap(account =>
-          combineLatest(encodedContracts(account)).pipe(
-            map(cs => ({ cs, account }))
-          )
-        ),
-        switchMap(({ cs, account }) =>
+      const contracts = items.map(i =>
+        this.getClaimContract(account, i.tokenId, BigInt(i.totalRewards))
+      );
+      const encodedContracts = contracts.map(contract =>
+        from(encode(contract))
+      );
+      request = combineLatest(encodedContracts).pipe(
+        switchMap(contracts =>
           sendAndConfirmTransaction({
             account,
             transaction: prepareContractCall({
               contract: this.contracts.ITEMS,
               method:
                 'function multicall(bytes[] data) returns (bytes[] results)',
-              params: [cs],
+              params: [contracts],
             }),
           })
         )
       );
     } else {
       const { tokenId, totalRewards } = items[0];
-      request = this.getAccount$().pipe(
-        switchMap(account =>
-          sendAndConfirmTransaction({
-            transaction: this.getClaimContract(
-              account,
-              tokenId,
-              BigInt(totalRewards)
-            ),
+      request = from(
+        sendAndConfirmTransaction({
+          transaction: this.getClaimContract(
             account,
-          })
-        )
+            tokenId,
+            BigInt(totalRewards)
+          ),
+          account,
+        })
       );
     }
     this.loaderService.show();
@@ -320,19 +313,33 @@ export class ThirdwebService {
   createPackListing(tokenId: bigint, quantity: bigint, price: number) {
     const account = this.account$.getValue();
     this.loaderService.show();
-    return from(
-      sendAndConfirmTransaction({
-        account,
-        transaction: createListing({
-          contract: this.contracts.LOOTBOX_SHOP,
-          assetContractAddress: this.contracts.PACK_CONTRACT.address,
-          tokenId,
-          quantity,
-          pricePerToken: price.toString(),
-          currencyContractAddress: this.contracts.GEARCOIN.address,
-        }),
-      })
+    return this.areContractApprovedForListing(
+      account,
+      this.contracts.PACK_CONTRACT,
+      this.contracts.LOOTBOX_SHOP.address
     ).pipe(
+      switchMap(isApproved =>
+        isApproved
+          ? of(null)
+          : this.approveContractForListing(
+              account,
+              this.contracts.PACK_CONTRACT,
+              this.contracts.LOOTBOX_SHOP.address
+            )
+      ),
+      switchMap(() =>
+        sendAndConfirmTransaction({
+          account,
+          transaction: createListing({
+            contract: this.contracts.LOOTBOX_SHOP,
+            assetContractAddress: this.contracts.PACK_CONTRACT.address,
+            tokenId,
+            quantity,
+            pricePerToken: price.toString(),
+            currencyContractAddress: this.contracts.GEARCOIN.address,
+          }),
+        })
+      ),
       tap(() =>
         this.logger.showSuccessMessage(this.texts.CREATE_PACK_LISTING_SUCCESS)
       ),
@@ -471,9 +478,19 @@ export class ThirdwebService {
   createListing({ item, price }: SellData) {
     const account = this.account$.getValue();
     this.loaderService.show();
-    return this.areItemsApprovedForListing(account).pipe(
+    return this.areContractApprovedForListing(
+      account,
+      this.contracts.ITEMS,
+      this.contracts.MARKETPLACE_CONTRACT.address
+    ).pipe(
       switchMap(isApproved =>
-        isApproved ? of(null) : this.approveItemsForListing(account)
+        isApproved
+          ? of(null)
+          : this.approveContractForListing(
+              account,
+              this.contracts.ITEMS,
+              this.contracts.MARKETPLACE_CONTRACT.address
+            )
       ),
       switchMap(() =>
         sendAndConfirmTransaction({
@@ -556,6 +573,7 @@ export class ThirdwebService {
   }
   claimGearcoin(quantity: number) {
     const account = this.account$.getValue();
+    this.loaderService.show();
     return from(
       sendAndConfirmTransaction({
         transaction: claimToERC20({
@@ -568,10 +586,10 @@ export class ThirdwebService {
     ).pipe(
       tap(() => this.refreshAccount()),
       catchError(err => {
-        console.log(err);
         this.logger.showErrorMessage(this.texts.CLAIM_GEARION_ERROR);
         return EMPTY;
-      })
+      }),
+      finalize(() => this.loaderService.hide())
     );
   }
   connect() {
@@ -768,22 +786,30 @@ export class ThirdwebService {
       properties.push({ trait_type: 'bodySlot', value: item.bodySlot });
     return properties;
   }
-  private areItemsApprovedForListing(account: Account) {
+  private areContractApprovedForListing(
+    account: Account,
+    contract: Readonly<ContractOptions<[]>>,
+    operator: string
+  ) {
     return from(
       isApprovedForAll({
-        contract: this.contracts.ITEMS,
+        contract,
         owner: account.address,
-        operator: this.contracts.MARKETPLACE_CONTRACT.address,
+        operator,
       })
     );
   }
-  private approveItemsForListing(account: Account) {
+  private approveContractForListing(
+    account: Account,
+    contract: Readonly<ContractOptions<[]>>,
+    operator: string
+  ) {
     return from(
       sendAndConfirmTransaction({
         account,
         transaction: setApprovalForAll({
-          contract: this.contracts.ITEMS,
-          operator: this.contracts.MARKETPLACE_CONTRACT.address,
+          contract,
+          operator,
           approved: true,
         }),
       })

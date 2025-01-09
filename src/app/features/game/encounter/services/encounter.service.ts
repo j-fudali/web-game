@@ -92,6 +92,7 @@ export class EncounterService {
     return this._encountersApiService
       .selectDecision(encounterId, decision)
       .pipe(
+        tap(console.log),
         switchMap(data => this.resolveEffect(data.effect).pipe(map(() => data)))
       );
   }
@@ -105,17 +106,17 @@ export class EncounterService {
     this.loadEncounter$.next();
   }
   private resolveEffect(effect: EffectDto): Observable<unknown> {
-    if (effect.goldAmount) {
-      if (effect.goldAmount === 0) return of(null);
-      if (effect.goldAmount > 0) {
-        return this._thirdwebService.claimGearcoin(effect.goldAmount);
-      }
-    }
     if (effect.healthAmount) {
       if (effect.healthAmount >= 0) {
         this._playerCharacterService.restoreHealth(effect.healthAmount);
       } else {
         this._playerCharacterService.dealDamage(effect.healthAmount * -1);
+      }
+    }
+    if (effect.goldAmount) {
+      if (effect.goldAmount === 0) return of(null);
+      if (effect.goldAmount > 0) {
+        return this._thirdwebService.claimGearcoin(effect.goldAmount);
       }
     }
     return of(null);
