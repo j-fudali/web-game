@@ -255,13 +255,11 @@ export class ThirdwebService {
         })
       );
     }
-    this.loaderService.show();
     return request.pipe(
       catchError(() => {
         this.logger.showErrorMessage(this.texts.CLAIM_ITEM_ERROR);
         return EMPTY;
-      }),
-      finalize(() => this.loaderService.hide())
+      })
     );
   }
   addNewPack(
@@ -277,7 +275,6 @@ export class ThirdwebService {
           quantityPerReward: 1,
         } as ERC1155Reward)
     );
-    this.loaderService.show();
     return from(
       sendAndConfirmTransaction({
         account,
@@ -306,13 +303,11 @@ export class ThirdwebService {
       catchError(() => {
         this.logger.showErrorMessage(this.texts.ADD_NEW_PACK_ERROR);
         return EMPTY;
-      }),
-      finalize(() => this.loaderService.hide())
+      })
     );
   }
   createPackListing(tokenId: bigint, quantity: bigint, price: number) {
     const account = this.account$.getValue();
-    this.loaderService.show();
     return this.areContractApprovedForListing(
       account,
       this.contracts.PACK_CONTRACT,
@@ -346,8 +341,7 @@ export class ThirdwebService {
       catchError(() => {
         this.logger.showErrorMessage(this.texts.CREATE_PACK_LISTING_ERROR);
         return EMPTY;
-      }),
-      finalize(() => this.loaderService.hide())
+      })
     );
   }
   updateItem(id: bigint, item: UpdateItem) {

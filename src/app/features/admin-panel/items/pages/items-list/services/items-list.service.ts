@@ -4,6 +4,7 @@ import {
   catchError,
   combineLatest,
   filter,
+  finalize,
   map,
   Observable,
   of,
@@ -11,6 +12,7 @@ import {
   startWith,
   Subject,
   switchMap,
+  tap,
 } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ItemMapper } from '../../../../../../shared/utils/item-mapper';
@@ -18,11 +20,13 @@ import { NFT } from 'thirdweb';
 import { NFTMetadata } from 'thirdweb/dist/types/utils/nft/parseNft';
 import { DialogService } from 'primeng/dynamicdialog';
 import { PackMetadataFormComponent } from '../../../ui/pack-metadata-form/pack-metadata-form.component';
+import { LoaderService } from 'app/shared/features/loader/loader.service';
 
 @Injectable()
 export class ItemsListService {
   private thirdwebService = inject(ThirdwebService);
   private dialogService = inject(DialogService);
+  private loaderService = inject(LoaderService);
   getItems$ = new Subject<number>();
 
   private items$ = this.getItems$.pipe(
@@ -58,6 +62,7 @@ export class ItemsListService {
       map(packData => ({
         data: { packData: packData, items },
       })),
+      tap(() => this.loaderService.show()),
       switchMap(({ data }) =>
         this.thirdwebService.claimItems(data.items).pipe(map(() => ({ data })))
       ),
@@ -74,7 +79,8 @@ export class ItemsListService {
           createdPack.quantity,
           price
         )
-      )
+      ),
+      finalize(() => this.loaderService.hide())
     );
   }
   private getPackMetadata(): Observable<NFTMetadata & { price: number }> {
