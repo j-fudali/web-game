@@ -162,8 +162,6 @@ export class ThirdwebService {
           getOwnedNFTs({
             contract: this.contracts.PACK_CONTRACT,
             address: account.address,
-            start: page * PAGE_SIZE,
-            count: PAGE_SIZE,
           })
         ).pipe(
           catchError(() => {
@@ -393,11 +391,9 @@ export class ThirdwebService {
     );
   }
   createItem(item: NewItem) {
-    return combineLatest([
-      this.uploadImage(item.image),
-      this.getAccount$(),
-    ]).pipe(
-      switchMap(([image, account]) =>
+    const account = this.account$.getValue();
+    return this.uploadImage(item.image).pipe(
+      switchMap(image =>
         from(
           sendAndConfirmTransaction({
             account,

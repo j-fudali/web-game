@@ -60,9 +60,12 @@
             <div class="flex flex-column justify-content-center gap-1">
               <span class="md:text-lg">{{ item.name }}</span>
               <span class="text-xs font-italic"
-                >({{ item.type | jfudaliItemTranslate }} -
-                {{ item.bodySlot | jfudaliBodySlotTranslate }})</span
-              >
+                >(<span>{{ item.type | jfudaliItemTranslate }}</span>
+                @if(item.type === 'armor'){
+                <span>-</span>
+                <span>{{ item.bodySlot | jfudaliBodySlotTranslate }}</span>
+                })
+              </span>
               <span class="text-sm"
                 >{{
                   item.damage
